@@ -5,7 +5,7 @@ pydantic==2.6.4
 python-dotenv==1.0.1
 sentence-transformers==2.6.1
 qdrant-client==1.7.0
-python-ics==0.7.2
+ics==0.7.2
 markdown==3.6
 pydantic-settings==2.2.1
 transformers==4.39.3
