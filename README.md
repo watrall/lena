@@ -1,6 +1,6 @@
 # LENA (Learning Engagement and Navigation Assistant)
 
-[![CI](https://github.com/OWNER/lena/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/lena/actions/workflows/ci.yml)
+[![CI][ci-badge]][ci-workflow]
 
 _Pilot Mode — No login. Sample data only._
 
@@ -11,7 +11,9 @@ LENA (Learning Engagement and Navigation Assistant) is a retrieval-augmented cha
 
 ## Run in 60 seconds
 
-Placeholder – quickstart coming soon.
+1. `docker compose up --build` – starts FastAPI, Qdrant, and the Next.js web UI.
+2. `curl -X POST http://localhost:8000/ingest/run` – loads sample markdown and calendar data into Qdrant.
+3. Visit `http://localhost:3000` – ask “When is Assignment 1 due?” and check the cited answer.
 
 ## Repository layout
 
@@ -25,3 +27,6 @@ Placeholder – quickstart coming soon.
 ## License
 
 This project is licensed under the MIT License. See `LICENSE` for details.
+
+[ci-badge]: https://github.com/OWNER/lena/actions/workflows/ci.yml/badge.svg
+[ci-workflow]: https://github.com/OWNER/lena/actions/workflows/ci.yml
