@@ -1,10 +1,14 @@
 import os
 import shutil
+import sys
 from pathlib import Path
 
 import pytest
 
 TEST_ROOT = Path(__file__).resolve().parents[1]
+if str(TEST_ROOT) not in sys.path:
+    sys.path.insert(0, str(TEST_ROOT))
+
 TEST_STORAGE_DIR = TEST_ROOT / ".pytest-storage"
 TEST_STORAGE_DIR.mkdir(exist_ok=True)
 
