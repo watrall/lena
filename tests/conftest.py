@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from pytest import MonkeyPatch
 
 TEST_ROOT = Path(__file__).resolve().parents[1]
 if str(TEST_ROOT) not in sys.path:
@@ -24,7 +25,7 @@ from backend.app.settings import settings  # noqa: E402
 
 
 @pytest.fixture(scope="session", autouse=True)
-def ingest_sample_corpus(tmp_path_factory, monkeypatch):
+def ingest_sample_corpus(tmp_path_factory):
     """Load the sample data set into an in-memory Qdrant instance once per test run."""
     data_src = TEST_ROOT / "data"
     temp_dir = tmp_path_factory.mktemp("data")
@@ -41,14 +42,15 @@ def ingest_sample_corpus(tmp_path_factory, monkeypatch):
         def get_sentence_embedding_dimension(self) -> int:
             return self._dim
 
-    monkeypatch.setattr("backend.app.models.embeddings.SentenceTransformer", DummyEmbedder)
+    monkey = MonkeyPatch()
+    monkey.setattr("backend.app.models.embeddings.SentenceTransformer", DummyEmbedder)
     embeddings.get_embedder.cache_clear()
 
     # Use an isolated storage directory for test interactions.
     if TEST_STORAGE_DIR.exists():
         shutil.rmtree(TEST_STORAGE_DIR)
     TEST_STORAGE_DIR.mkdir(exist_ok=True)
-    monkeypatch.setattr(settings, "storage_dir", TEST_STORAGE_DIR)
+    monkey.setattr(settings, "storage_dir", TEST_STORAGE_DIR)
 
     # Ensure a clean collection for every test session.
     client = get_qdrant_client()
@@ -59,4 +61,5 @@ def ingest_sample_corpus(tmp_path_factory, monkeypatch):
 
     result = run_ingest(data_dir=temp_dir)
     assert result.ok
-    return result
+    yield result
+    monkey.undo()
