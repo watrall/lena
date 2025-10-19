@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import numpy as np
 from pytest import MonkeyPatch
 
 TEST_ROOT = Path(__file__).resolve().parents[1]
@@ -37,7 +38,7 @@ def ingest_sample_corpus(tmp_path_factory):
 
         def encode(self, text: str):
             seed = abs(hash(text)) % (10**6)
-            return [((seed + i * 31) % 997) / 997 for i in range(self._dim)]
+            return np.array([((seed + i * 31) % 997) / 997 for i in range(self._dim)], dtype=float)
 
         def get_sentence_embedding_dimension(self) -> int:
             return self._dim
