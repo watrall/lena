@@ -10,6 +10,8 @@ from ..settings import settings
 @lru_cache(maxsize=1)
 def get_qdrant_client() -> QdrantClient:
     """Return a cached Qdrant client."""
+    if settings.qdrant_location:
+        return QdrantClient(location=settings.qdrant_location)
     return QdrantClient(host=settings.qdrant_host, port=settings.qdrant_port)
 
 

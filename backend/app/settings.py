@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -11,6 +12,7 @@ class Settings(BaseSettings):
     qdrant_host: str = "qdrant"
     qdrant_port: int = 6333
     qdrant_collection: str = "lena_pilot"
+    qdrant_location: Optional[str] = None
     data_dir: Path = Field(default=PROJECT_ROOT / "data")
     llm_mode: str = Field(default="hf", regex="^(hf|off)$")
     hf_model: str = "HuggingFaceH4/zephyr-7b-beta"
