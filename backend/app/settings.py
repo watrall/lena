@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     qdrant_port: int = 6333
     qdrant_collection: str = "lena_pilot"
     data_dir: Path = Field(default=PROJECT_ROOT / "data")
+    llm_mode: str = Field(default="hf", regex="^(hf|off)$")
+    hf_model: str = "HuggingFaceH4/zephyr-7b-beta"
+    hf_max_new_tokens: int = 256
+    retrieval_top_k: int = 6
 
     class Config:
         env_file = ".env"
