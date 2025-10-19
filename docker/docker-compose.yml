@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  api:
+    image: python:3.11-slim
+    working_dir: /app
+    environment:
+      BACKEND_PORT: "${BACKEND_PORT:-8000}"
+      PYTHONUNBUFFERED: "1"
+    command: >
+      sh -c "pip install -r requirements.txt &&
+             uvicorn app.main:app --host 0.0.0.0 --port ${BACKEND_PORT:-8000}"
+    volumes:
+      - ../backend:/app
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"

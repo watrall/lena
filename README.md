@@ -1,6 +1,6 @@
 # LENA (Learning Engagement and Navigation Assistant)
 
-![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/OWNER/lena/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/lena/actions/workflows/ci.yml)
 
 _Pilot Mode — No login. Sample data only._
 
