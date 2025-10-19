@@ -11,9 +11,16 @@ LENA (Learning Engagement and Navigation Assistant) is a retrieval-augmented cha
 
 ## Run in 60 seconds
 
-1. `docker compose up --build` – starts FastAPI, Qdrant, and the Next.js web UI.
-2. `curl -X POST http://localhost:8000/ingest/run` – loads sample markdown and calendar data into Qdrant.
-3. Visit `http://localhost:3000` – ask “When is Assignment 1 due?” and check the cited answer.
+1. Clone the repo and ensure Docker Desktop is running.
+2. `docker compose up --build` – starts FastAPI, Qdrant, and the Next.js web UI.
+3. `curl -X POST http://localhost:8000/ingest/run` – loads sample markdown and calendar data into Qdrant.
+4. Visit `http://localhost:3000` – ask “When is Assignment 1 due?” and verify the cited answer.
+
+## Deployment
+
+- **Local pilot** – use the Docker Compose stack (`docker/docker-compose.yml`) for development. Storage lives under `storage/` so feedback survives restarts.
+- **Netlify + DigitalOcean** – follow `deploy/DEPLOY_NOTES.md` to host the frontend on Netlify and the FastAPI + Qdrant stack on a DigitalOcean Droplet.
+- **CORS & Security** – see `docs/SECURITY-NOTES.md` for pilot guardrails, CORS middleware example, and next steps before production.
 
 ## Repository layout
 
@@ -27,6 +34,12 @@ LENA (Learning Engagement and Navigation Assistant) is a retrieval-augmented cha
 ## License
 
 This project is licensed under the MIT License. See `LICENSE` for details.
+
+---
+
+- Architecture deep dive: `docs/OVERVIEW.md`
+- Demo flow and script: `docs/DEMO-SCRIPT.md`
+- Changelog: `CHANGELOG.md`
 
 [ci-badge]: https://github.com/OWNER/lena/actions/workflows/ci.yml/badge.svg
 [ci-workflow]: https://github.com/OWNER/lena/actions/workflows/ci.yml
