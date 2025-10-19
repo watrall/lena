@@ -41,5 +41,5 @@ This project is licensed under the MIT License. See `LICENSE` for details.
 - Demo flow and script: `docs/DEMO-SCRIPT.md`
 - Changelog: `CHANGELOG.md`
 
-[ci-badge]: https://github.com/OWNER/lena/actions/workflows/ci.yml/badge.svg
-[ci-workflow]: https://github.com/OWNER/lena/actions/workflows/ci.yml
+[ci-badge]: https://github.com/watrall/lena/actions/workflows/ci.yml/badge.svg
+[ci-workflow]: https://github.com/watrall/lena/actions/workflows/ci.yml
