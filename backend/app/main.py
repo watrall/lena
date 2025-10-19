@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from datetime import datetime
 from uuid import uuid4
 
 from fastapi import APIRouter, FastAPI, HTTPException
@@ -6,10 +9,13 @@ from pydantic import BaseModel, Field
 from .models.generate import generate_answer
 from .rag.ingest import IngestResult, run_ingest
 from .rag.retrieve import RetrievedChunk, retrieve
+from .services import analytics, review, storage
 from .settings import settings
 
 app = FastAPI(title="LENA Backend", version="0.1.0")
 router = APIRouter()
+
+storage.ensure_storage()
 
 
 @app.get("/healthz")
@@ -36,6 +42,53 @@ class AskResponse(BaseModel):
     escalation_suggested: bool
 
 
+class FeedbackRequest(BaseModel):
+    question_id: str
+    helpful: bool
+    comment: str | None = None
+    question: str | None = None
+    answer: str | None = None
+    citations: list[Citation] | None = None
+    confidence: float | None = None
+
+
+class FeedbackResponse(BaseModel):
+    ok: bool
+    review_enqueued: bool = False
+
+
+class FAQEntry(BaseModel):
+    question: str
+    answer: str
+    source_path: str | None = None
+    updated_at: str | None = None
+
+
+class ReviewItem(BaseModel):
+    id: str
+    question_id: str
+    question: str | None = None
+    answer: str | None = None
+    citations: list[Citation] | None = None
+    comment: str | None = None
+    helpful: bool | None = None
+    submitted_at: str
+
+
+class PromoteRequest(BaseModel):
+    queue_id: str
+    answer: str | None = None
+    source_path: str | None = None
+
+
+class InsightsResponse(BaseModel):
+    total_questions: int
+    average_confidence: float
+    helpful_rate: float
+    total_feedback: int
+    last_updated: str
+
+
 @router.post("/ingest/run", response_model=IngestResult)
 def ingest_run() -> IngestResult:
     try:
@@ -52,13 +105,89 @@ def ask_question(payload: AskRequest) -> AskResponse:
     confidence = compute_confidence(chunks)
     escalation = confidence < 0.55
 
+    question_id = uuid4().hex
+    analytics.log_event(
+        {
+            "type": "ask",
+            "question_id": question_id,
+            "question": payload.question,
+            "confidence": confidence,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+        }
+    )
+
     return AskResponse(
-        question_id=uuid4().hex,
+        question_id=question_id,
         answer=answer,
         citations=citations,
         confidence=confidence,
         escalation_suggested=escalation,
     )
+
+
+@router.post("/feedback", response_model=FeedbackResponse)
+def submit_feedback(payload: FeedbackRequest) -> FeedbackResponse:
+    analytics.log_event(
+        {
+            "type": "feedback",
+            "question_id": payload.question_id,
+            "helpful": payload.helpful,
+            "confidence": payload.confidence,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+        }
+    )
+
+    review_enqueued = False
+    if not payload.helpful:
+        review.append_review_item(
+            {
+                "question_id": payload.question_id,
+                "question": payload.question,
+                "answer": payload.answer,
+                "citations": [c.model_dump() for c in payload.citations or []],
+                "comment": payload.comment,
+                "helpful": payload.helpful,
+            }
+        )
+        review_enqueued = True
+
+    return FeedbackResponse(ok=True, review_enqueued=review_enqueued)
+
+
+@router.get("/faq", response_model=list[FAQEntry])
+def get_faq() -> list[FAQEntry]:
+    return [FAQEntry(**entry) for entry in review.load_faq()]
+
+
+@router.get("/admin/review", response_model=list[ReviewItem])
+def get_review_queue() -> list[ReviewItem]:
+    return [ReviewItem(**entry) for entry in review.list_review_queue()]
+
+
+@router.post("/admin/promote", response_model=FAQEntry)
+def promote_to_faq(payload: PromoteRequest) -> FAQEntry:
+    removed = review.remove_review_item(payload.queue_id)
+    if removed is None:
+        raise HTTPException(status_code=404, detail="Review item not found")
+
+    faq_entries = review.load_faq()
+    question_text = removed.get("question") or "Untitled FAQ"
+    answer_text = payload.answer or removed.get("answer") or "No answer provided yet."
+    faq_entry = {
+        "question": question_text,
+        "answer": answer_text,
+        "source_path": payload.source_path or removed.get("source_path"),
+        "updated_at": datetime.utcnow().isoformat() + "Z",
+    }
+    faq_entries.append(faq_entry)
+    review.save_faq(faq_entries)
+    return FAQEntry(**faq_entry)
+
+
+@router.get("/insights", response_model=InsightsResponse)
+def get_insights() -> InsightsResponse:
+    summary = analytics.summarize()
+    return InsightsResponse(**summary)
 
 
 def build_citations(chunks: list[RetrievedChunk]) -> list[Citation]:

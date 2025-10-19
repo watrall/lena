@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import type { AskResponse } from '../lib/api';
-import { askQuestion } from '../lib/api';
+import { askQuestion, submitFeedback } from '../lib/api';
 
 type Message =
   | {
@@ -19,6 +19,7 @@ type Message =
       timestamp: Date;
       answer: AskResponse;
       showSources: boolean;
+      question: string;
       feedback?: 'helpful' | 'not_helpful';
     };
 
@@ -31,6 +32,7 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feedbackPending, setFeedbackPending] = useState<string | null>(null);
 
   const lastAnswer = useMemo(
     () => messages.findLast((message) => message.role === 'assistant'),
@@ -62,6 +64,7 @@ export default function Chat() {
         timestamp: new Date(),
         answer: response,
         showSources: true,
+        question: trimmed,
       };
       setMessages((prev) => [...prev, assistant]);
     } catch (err) {
@@ -81,15 +84,40 @@ export default function Chat() {
     );
   };
 
-  const handleFeedback = (id: string, feedback: 'helpful' | 'not_helpful') => {
-    setMessages((prev) =>
-      prev.map((message) =>
-        message.role === 'assistant' && message.id === id
-          ? { ...message, feedback }
-          : message,
-      ),
+  const handleFeedback = async (id: string, feedback: 'helpful' | 'not_helpful') => {
+    const target = messages.find((message) => message.role === 'assistant' && message.id === id);
+    if (!target || target.role !== 'assistant') return;
+
+    const optimistic = messages.map((message) =>
+      message.role === 'assistant' && message.id === id
+        ? { ...message, feedback }
+        : message,
     );
-    // TODO: Wire to /feedback endpoint in later milestone.
+    setMessages(optimistic);
+    setFeedbackPending(id);
+    setError(null);
+
+    try {
+      await submitFeedback({
+        question_id: id,
+        helpful: feedback === 'helpful',
+        question: target.question,
+        answer: target.text,
+        citations: target.answer.citations,
+        confidence: target.answer.confidence,
+      });
+    } catch (err) {
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.role === 'assistant' && message.id === id
+            ? { ...message, feedback: undefined }
+            : message,
+        ),
+      );
+      setError(err instanceof Error ? err.message : 'Unable to send feedback');
+    } finally {
+      setFeedbackPending(null);
+    }
   };
 
   return (
@@ -134,6 +162,7 @@ export default function Chat() {
                     className="bubble-button"
                     onClick={() => handleFeedback(message.id, 'helpful')}
                     type="button"
+                    disabled={feedbackPending === message.id}
                   >
                     👍 Helpful
                   </button>
@@ -141,6 +170,7 @@ export default function Chat() {
                     className="bubble-button"
                     onClick={() => handleFeedback(message.id, 'not_helpful')}
                     type="button"
+                    disabled={feedbackPending === message.id}
                   >
                     👎 Not helpful
                   </button>

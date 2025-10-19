@@ -19,9 +19,35 @@ body {
   background: linear-gradient(135deg, #2457d6, #6f8ffb);
   color: #fff;
   padding: 0.8rem 1.5rem;
-  font-weight: 600;
-  text-align: center;
   letter-spacing: 0.02em;
+}
+
+.banner-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.banner-tagline {
+  font-weight: 600;
+}
+
+.banner-nav {
+  display: flex;
+  gap: 1.25rem;
+  font-weight: 600;
+}
+
+.banner-nav a {
+  color: #f8fbff;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.banner-nav a:hover {
+  opacity: 0.8;
 }
 
 .app-content {
@@ -114,6 +140,11 @@ body {
   background: #cbd5ff;
 }
 
+.bubble-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .sources {
   background: #eef2ff;
   border-radius: 12px;
@@ -153,10 +184,25 @@ body {
   font-family: inherit;
 }
 
+.composer input {
+  flex: 1;
+  border-radius: 16px;
+  border: 1px solid #d1d5db;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
 .composer textarea:focus {
   outline: none;
   border-color: #2457d6;
   box-shadow: 0 0 0 3px rgba(36, 87, 214, 0.15);
+}
+
+.composer input:focus {
+  outline: none;
+  border-color: #2457d6;
+  box-shadow: 0 0 0 3px rgba(36, 87, 214, 0.12);
 }
 
 .composer button {
@@ -190,6 +236,29 @@ body {
   font-size: 0.8rem;
   color: #2563eb;
   font-weight: 600;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.insight-tile {
+  background: #eef2ff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #1e3a8a;
+  box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.1);
+}
+
+.insight-tile h2 {
+  margin: 0;
+  font-size: 1.8rem;
 }
 
 @media (max-width: 768px) {

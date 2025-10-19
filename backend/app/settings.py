@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     qdrant_collection: str = "lena_pilot"
     qdrant_location: Optional[str] = None
     data_dir: Path = Field(default=PROJECT_ROOT / "data")
+    storage_dir: Path = Field(default=PROJECT_ROOT / "storage")
     llm_mode: str = Field(default="hf", regex="^(hf|off)$")
     hf_model: str = "HuggingFaceH4/zephyr-7b-beta"
     hf_max_new_tokens: int = 256
