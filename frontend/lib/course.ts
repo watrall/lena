@@ -45,7 +45,9 @@ export function setActiveCourse(next: ActiveCourse | null) {
 
 export function subscribeToCourse(listener: CourseListener) {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 if (isBrowser()) {

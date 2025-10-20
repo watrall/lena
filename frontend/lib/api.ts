@@ -41,11 +41,9 @@ export interface InsightsSummary {
   last_updated: string;
 }
 
-type Fetcher = <T>(path: string, init?: RequestInit) => Promise<T>;
-
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000').replace(/\/$/, '');
 
-const request: Fetcher = async (path, init) => {
+const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   const response = await fetch(`${API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
     ...init,
@@ -57,10 +55,10 @@ const request: Fetcher = async (path, init) => {
   }
 
   if (response.status === 204) {
-    return null as T;
+    return undefined as T;
   }
 
-  return response.json();
+  return (await response.json()) as T;
 };
 
 export const getCourses = () => request<CourseSummary[]>('/courses');

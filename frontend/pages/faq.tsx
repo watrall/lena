@@ -1,23 +1,35 @@
+// faq.tsx – placeholder FAQ view that will be expanded with richer course context later.
 import { useEffect, useMemo, useState } from 'react';
 
 import type { FAQEntry } from '../lib/api';
 import { fetchFaq } from '../lib/api';
+import type { ActiveCourse } from '../lib/course';
 
 function matches(entry: FAQEntry, term: string) {
   const haystack = `${entry.question} ${entry.answer}`.toLowerCase();
   return haystack.includes(term.toLowerCase());
 }
 
-export default function FAQPage() {
+type FAQPageProps = {
+  activeCourse: ActiveCourse | null;
+};
+
+export default function FAQPage({ activeCourse }: FAQPageProps) {
   const [faq, setFaq] = useState<FAQEntry[]>([]);
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchFaq()
+    if (!activeCourse) {
+      setFaq([]);
+      setError(null);
+      return;
+    }
+
+    fetchFaq(activeCourse.id)
       .then(setFaq)
       .catch((err) => setError(err instanceof Error ? err.message : 'Unable to load FAQ'));
-  }, []);
+  }, [activeCourse]);
 
   const filtered = useMemo(() => {
     if (!search) return faq;
@@ -44,9 +56,14 @@ export default function FAQPage() {
       </div>
 
       <div className="chat-history">
-        {filtered.length === 0 && (
-          <div className="empty-state">No FAQ entries yet. Ask questions to build the list.</div>
-        )}
+        {filtered.length === 0 &&
+          (activeCourse ? (
+            <div className="empty-state">
+              No FAQ entries yet. Ask questions to build the list.
+            </div>
+          ) : (
+            <div className="empty-state">Choose a course to see its FAQ.</div>
+          ))}
         {filtered.map((entry, index) => (
           <div key={`${entry.question}-${index}`} className="bubble assistant">
             <strong>{entry.question}</strong>

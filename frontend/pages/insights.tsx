@@ -1,17 +1,29 @@
+// insights.tsx – lightweight stub that will evolve into the course insights dashboard.
 import { useEffect, useState } from 'react';
 
-import type { Insights } from '../lib/api';
+import type { InsightsSummary } from '../lib/api';
 import { fetchInsights } from '../lib/api';
+import type { ActiveCourse } from '../lib/course';
 
-export default function InsightsPage() {
-  const [insights, setInsights] = useState<Insights | null>(null);
+type InsightsPageProps = {
+  activeCourse: ActiveCourse | null;
+};
+
+export default function InsightsPage({ activeCourse }: InsightsPageProps) {
+  const [insights, setInsights] = useState<InsightsSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchInsights()
+    if (!activeCourse) {
+      setInsights(null);
+      setError(null);
+      return;
+    }
+
+    fetchInsights(activeCourse.id)
       .then(setInsights)
       .catch((err) => setError(err instanceof Error ? err.message : 'Unable to load insights'));
-  }, []);
+  }, [activeCourse]);
 
   return (
     <div className="chat-card">
@@ -38,10 +50,12 @@ export default function InsightsPage() {
             <h2>{Math.round(insights.helpful_rate * 100)}%</h2>
             <span>Helpful feedback rate</span>
           </div>
-          <div className="insight-tile">
-            <h2>{insights.total_feedback}</h2>
-            <span>Total feedback signals</span>
-          </div>
+          {typeof insights.total_feedback === 'number' && (
+            <div className="insight-tile">
+              <h2>{insights.total_feedback}</h2>
+              <span>Total feedback signals</span>
+            </div>
+          )}
           <div className="bubble-meta">
             Last updated {new Date(insights.last_updated).toLocaleString()}
           </div>
