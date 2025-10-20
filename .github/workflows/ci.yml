@@ -24,7 +24,14 @@ jobs:
 
       - name: Run backend tests
         run: pytest
+  frontend-build:
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -32,10 +39,13 @@ jobs:
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install frontend dependencies
+      - name: Install dependencies
         working-directory: frontend
         run: npm ci
 
+      # Build
       - name: Build frontend
         working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_BASE: http://localhost:8000
         run: npm run build
