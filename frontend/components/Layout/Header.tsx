@@ -1,6 +1,10 @@
-// Header.tsx – shared navigation shell and course picker placeholder for every page.
+// Header.tsx – shared navigation shell and course switcher surfaced on every page.
+'use client';
+
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+
+import type { ActiveCourse } from '../../lib/course';
 
 const links = [
   { href: '/', label: 'Chat' },
@@ -8,17 +12,22 @@ const links = [
   { href: '/insights', label: 'Insights' },
 ];
 
-export default function Header() {
+interface HeaderProps {
+  activeCourse: ActiveCourse | null;
+  onSwitchCourse: () => void;
+}
+
+export default function Header({ activeCourse, onSwitchCourse }: HeaderProps) {
   const { pathname } = useRouter();
 
   return (
     <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-4 py-4 md:px-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-8">
         <div className="flex flex-col gap-1">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
             LENA Pilot
           </span>
-          <nav className="flex items-center gap-3 text-sm font-medium text-slate-600">
+          <nav className="flex items-center gap-2 text-sm font-medium text-slate-600">
             {links.map((link) => {
               const isActive = pathname === link.href;
               return (
@@ -37,11 +46,29 @@ export default function Header() {
             })}
           </nav>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm text-slate-600 shadow-sm">
-          <span className="font-medium text-slate-500">Course</span>
-          <span className="rounded-full bg-white px-3 py-1 text-slate-700 shadow-inner">
-            Select course
-          </span>
+
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-600 shadow-sm md:justify-end">
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Active course
+            </span>
+            <span className="text-sm font-semibold text-slate-800">
+              {activeCourse ? activeCourse.name : 'Select a course to begin'}
+            </span>
+            {activeCourse?.code && (
+              <span className="text-xs text-slate-500">
+                {activeCourse.code}
+                {activeCourse.term ? ` · ${activeCourse.term}` : ''}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onSwitchCourse}
+            className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-200"
+          >
+            {activeCourse ? 'Switch course' : 'Choose course'}
+          </button>
         </div>
       </div>
     </header>

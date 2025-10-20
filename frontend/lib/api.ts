@@ -1,3 +1,11 @@
+// api.ts – typed fetch helpers for LENA endpoints with course-aware parameters.
+export interface CourseSummary {
+  id: string;
+  name: string;
+  code?: string | null;
+  term?: string | null;
+}
+
 export interface Citation {
   title: string;
   section?: string | null;
@@ -24,60 +32,81 @@ export interface FAQEntry {
   updated_at?: string | null;
 }
 
-export interface Insights {
+export interface InsightsSummary {
   total_questions: number;
   average_confidence: number;
   helpful_rate: number;
-  total_feedback: number;
+  escalations: number;
+  total_feedback?: number;
   last_updated: string;
 }
 
-const API_BASE =
-  (typeof window !== 'undefined' && (window as any)?.__LENA_API_BASE__) ||
-  process.env.NEXT_PUBLIC_API_BASE ||
-  'http://localhost:8000';
+type Fetcher = <T>(path: string, init?: RequestInit) => Promise<T>;
 
-async function handle<T>(promise: Promise<Response>): Promise<T> {
-  const response = await promise;
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000').replace(/\/$/, '');
+
+const request: Fetcher = async (path, init) => {
+  const response = await fetch(`${API_BASE}${path}`, {
+    headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+    ...init,
+  });
+
   if (!response.ok) {
     const message = await response.text();
-    throw new Error(message || `API error: ${response.status}`);
+    throw new Error(message || `Request failed with status ${response.status}`);
   }
+
+  if (response.status === 204) {
+    return null as T;
+  }
+
   return response.json();
-}
+};
 
-export function askQuestion(question: string): Promise<AskResponse> {
-  return handle<AskResponse>(
-    fetch(`${API_BASE}/ask`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question }),
-    }),
-  );
-}
+export const getCourses = () => request<CourseSummary[]>('/courses');
 
-export function submitFeedback(payload: {
+export const askQuestion = (payload: { question: string; courseId: string }) =>
+  request<AskResponse>('/ask', {
+    method: 'POST',
+    body: JSON.stringify({ question: payload.question, course_id: payload.courseId }),
+  });
+
+export const submitFeedback = (payload: {
   question_id: string;
   helpful: boolean;
+  courseId: string;
   comment?: string;
-  question?: string;
-  answer?: string;
-  citations?: Citation[];
-  confidence?: number;
-}): Promise<FeedbackResponse> {
-  return handle<FeedbackResponse>(
-    fetch(`${API_BASE}/feedback`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+}) =>
+  request<FeedbackResponse>('/feedback', {
+    method: 'POST',
+    body: JSON.stringify({
+      question_id: payload.question_id,
+      helpful: payload.helpful,
+      course_id: payload.courseId,
+      comment: payload.comment,
     }),
-  );
-}
+  });
 
-export function fetchFaq(): Promise<FAQEntry[]> {
-  return handle<FAQEntry[]>(fetch(`${API_BASE}/faq`));
-}
+export const requestEscalation = (payload: {
+  question_id: string;
+  question: string;
+  student_name: string;
+  student_email: string;
+  courseId: string;
+}) =>
+  request('/escalations/request', {
+    method: 'POST',
+    body: JSON.stringify({
+      question_id: payload.question_id,
+      question: payload.question,
+      student_name: payload.student_name,
+      student_email: payload.student_email,
+      course_id: payload.courseId,
+    }),
+  });
 
-export function fetchInsights(): Promise<Insights> {
-  return handle<Insights>(fetch(`${API_BASE}/insights`));
-}
+export const fetchFaq = (courseId: string) =>
+  request<FAQEntry[]>(`/faq?course_id=${encodeURIComponent(courseId)}`);
+
+export const fetchInsights = (courseId: string) =>
+  request<InsightsSummary>(`/insights?course_id=${encodeURIComponent(courseId)}`);
