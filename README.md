@@ -96,6 +96,29 @@ Ensure Qdrant is reachable (either `docker run qdrant/qdrant` or the docker comp
 
 ---
 
+## 🐳 Docker Images
+
+The LENA pilot publishes both backend and frontend containers for reproducibility and deployment.
+
+| Service | Image | Technology | Description |
+|----------|--------|-------------|--------------|
+| **Backend** | [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-lena--backend-blue?logo=docker)](https://hub.docker.com/repository/docker/watrall/lena-backend) | FastAPI | FastAPI backend for LENA AI—course Q&A, feedback, and analytics to support online learning. |
+| **Frontend** | [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-lena--web-blue?logo=docker)](https://hub.docker.com/repository/docker/watrall/lena-web) | Next.js | Next.js frontend for LENA AI—chat Q&A and learner analytics for online course support. |
+
+### Pull and Run
+
+To pull the latest images directly from Docker Hub:
+
+```bash
+# Backend (FastAPI)
+docker pull docker.io/watrall/lena-backend:latest
+docker run -d -p 8000:8000 docker.io/watrall/lena-backend:latest
+
+# Frontend (Next.js)
+docker pull docker.io/watrall/lena-web:latest
+docker run -d -p 3000:3000 docker.io/watrall/lena-web:latest
+
+
 ## CORS & Production Considerations
 
 - When deploying the frontend separately (Netlify, Vercel, etc.), set `BACKEND_CORS_ORIGINS` or the equivalent FastAPI middleware to include the web origin (e.g. `https://lena-pilot.example.edu`). The Compose stack already runs both services on the same network so no extra config is required locally.
