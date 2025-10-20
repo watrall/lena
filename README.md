@@ -109,5 +109,7 @@ Ensure Qdrant is reachable (either `docker run qdrant/qdrant` or the docker comp
 
 This codebase is released under the MIT License. See `LICENSE` for the fine print.
 
+> Pilot status: ✅ Frontend + infra complete. Ready for instructor onboarding and live cohort trials.
+
 [ci-badge]: https://github.com/watrall/lena/actions/workflows/ci.yml/badge.svg
 [ci-workflow]: https://github.com/watrall/lena/actions/workflows/ci.yml
