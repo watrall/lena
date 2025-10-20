@@ -138,11 +138,6 @@ Set `NEXT_PUBLIC_API_BASE=http://localhost:8000` (or your backend host) before s
 - Security and guardrails: `docs/SECURITY-NOTES.md`
 - Changelog: `CHANGELOG.md`
 
----
-
-This codebase is released under the MIT License. See `LICENSE` for the fine print.
-
-> Pilot status: ✅ Frontend + infra complete. Ready for instructor onboarding and live cohort trials.
 
 ---
 
