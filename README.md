@@ -1,13 +1,17 @@
+LENA (Learner Engagement and Needs Assistant) is a lightweight AI chatbot designed to support students in online courses. It helps learners get quick, accurate answers about assignments, schedules, and university policies—reducing response time and instructor load while improving student confidence and course success.
+
+LENA isn’t meant to replace instructors. It handles common questions and points students toward resources, then automatically escalates anything it can’t answer to the instructor through Mattermost. Every question and interaction is logged, creating a feedback loop that helps instructors spot confusion early, adjust materials, and improve the course.
+
+Students interact through a simple chat interface that works on desktop and mobile. Instructors and course admins can view real-time insights in an analytics dashboard—tracking trends, top questions, and emerging pain points across multiple courses. The pilot version is fully containerized (FastAPI backend + Next.js frontend + Qdrant vector store) and integrates with GitHub Actions for automated testing and builds.
+
 # LENA – Learning Engagement & Navigation Assistant
 
 [![CI][ci-badge]][ci-workflow]
 
-LENA is our course-aware AI teammate. It sits between students and instructors to answer the routine questions, surface helpful context, and flag the messy threads that still need a human touch. The pilot runs in “no login” mode so we can iterate quickly with real classes.
-
-- **Student view** – Ask a question, get a sourced answer (see the [chat walkthrough](docs/screens/chat.png)).  
+- **Student view** – Ask a question, get a sourced answer.  
   - Each response links back to the syllabus, policy doc, or calendar event it pulled from.  
   - When the bot isn’t confident, it invites the student to escalate to the instructor and collects consented contact info.
-- **Instructor view** – Review the course dashboard (peek at [insights](docs/screens/insights.png)).  
+- **Instructor view** – Review the course dashboard.  
   - KPI cards highlight volume, helpfulness, and escalations.  
   - Trend charts and emerging pain points call out what needs syllabus edits or follow-up announcements.
 - **Admin / support staff** – Watch aggregate metrics across pilots, tune ingest jobs, and plug alerts into Mattermost or the LMS as needed.
@@ -29,7 +33,7 @@ backend/     FastAPI app, embeddings, ingestion tasks
 frontend/    Next.js pilot UI (chat, FAQ, insights)
 docker/      Compose file booting qdrant + api + web
 data/        Sample markdown + calendar sources for pilots
-docs/        Architecture notes, demo script, screenshots
+docs/        Architecture notes and support docs
 storage/     Local persisted feedback, cached runs
 ```
 
@@ -110,6 +114,12 @@ Ensure Qdrant is reachable (either `docker run qdrant/qdrant` or the docker comp
 This codebase is released under the MIT License. See `LICENSE` for the fine print.
 
 > Pilot status: ✅ Frontend + infra complete. Ready for instructor onboarding and live cohort trials.
+
+---
+
+## Provenance
+
+This pilot was created inside an institution-wide initiative focused on applying AI responsibly across the curriculum to strengthen student learning and institutional outcomes. It launched within Department of Anthropology online courses, where we paired faculty, instructional designers, and technologists to make sure the guardrails matched pedagogical goals. After the initial run we migrated the codebase from the internal GitLab instance to GitHub to share the work openly and invite collaboration from the broader community.
 
 [ci-badge]: https://github.com/watrall/lena/actions/workflows/ci.yml/badge.svg
 [ci-workflow]: https://github.com/watrall/lena/actions/workflows/ci.yml
