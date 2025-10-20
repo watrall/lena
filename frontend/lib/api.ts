@@ -33,11 +33,22 @@ export interface FAQEntry {
 }
 
 export interface InsightsSummary {
-  total_questions: number;
-  average_confidence: number;
-  helpful_rate: number;
-  escalations: number;
-  total_feedback?: number;
+  totals: {
+    questions: number;
+    helpful_rate: number;
+    average_confidence: number;
+    escalations: number;
+  };
+  top_questions: Array<{ label: string; count: number }>;
+  daily_volume: Array<{ date: string; count: number }>;
+  confidence_trend: Array<{ date: string; confidence: number }>;
+  escalations: Array<{
+    question: string;
+    student: string;
+    submitted_at: string;
+    delivered: boolean;
+  }>;
+  pain_points: Array<{ label: string; change: number }>;
   last_updated: string;
 }
 
