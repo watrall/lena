@@ -48,6 +48,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
   const [studentName, setStudentName] = useState('');
   const [studentEmail, setStudentEmail] = useState('');
   const [toast, setToast] = useState<ToastState>(null);
+  const [escalationError, setEscalationError] = useState<string | null>(null);
 
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -186,6 +187,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
     setEscalationOpenId(messageId);
     setStudentName('');
     setStudentEmail('');
+    setEscalationError(null);
   };
 
   const handleCancelEscalation = (messageId: string) => {
@@ -197,6 +199,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
           : message,
       ),
     );
+    setEscalationError(null);
   };
 
   const submitEscalation = async (messageId: string) => {
@@ -206,17 +209,18 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
     );
     if (!target || target.role !== 'assistant') return;
 
+    setEscalationError(null);
     const trimmedName = studentName.trim();
     const trimmedEmail = studentEmail.trim();
 
     if (!trimmedName || !trimmedEmail) {
-      setToast({ type: 'error', message: 'Add your name and email so the instructor can reply.' });
+      setEscalationError('Add your name and email so the instructor can reply.');
       return;
     }
 
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
     if (!emailValid) {
-      setToast({ type: 'error', message: 'That email looks off. Give it another look.' });
+      setEscalationError('That email looks off. Give it another look.');
       return;
     }
 
@@ -242,9 +246,11 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
       setEscalationOpenId(null);
       setStudentName('');
       setStudentEmail('');
+      setEscalationError(null);
       setToast({ type: 'success', message: 'Thanks. We flagged this for your instructor.' });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Could not reach the instructor queue.';
+      setEscalationError(message);
       setToast({ type: 'error', message });
     } finally {
       setEscalationSubmitting(false);
@@ -311,6 +317,10 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
 
               const { response, showCitations, feedback, escalationStatus } = message;
               const citations: Citation[] = response.citations;
+              const consentId = `escalation-consent-${message.id}`;
+              const errorId = `escalation-error-${message.id}`;
+              const showEscalationError =
+                escalationOpenId === message.id && Boolean(escalationError && escalationError.length > 0);
 
               return (
                 <div key={message.id} className="flex justify-start">
@@ -376,7 +386,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
                     {response.escalation_suggested && escalationStatus !== 'submitted' && (
                       <div className="mt-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-xs text-indigo-700">
                         {escalationOpenId === message.id ? (
-                          <div className="space-y-3">
+                          <div className="space-y-3" role="form" aria-labelledby={consentId}>
                             <p className="font-semibold text-indigo-800">
                               Want an instructor to follow up? Drop your info and we&apos;ll pass it along.
                             </p>
@@ -391,6 +401,8 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
                                   onChange={(event) => setStudentName(event.target.value)}
                                   className="rounded-lg border border-indigo-200 px-3 py-2 text-sm text-slate-800 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                                   placeholder="Jordan Smith"
+                                  aria-describedby={`${consentId}${showEscalationError ? ` ${errorId}` : ''}`}
+                                  aria-invalid={showEscalationError && !studentName.trim()}
                                 />
                               </label>
                               <label className="flex flex-col gap-1 text-left">
@@ -403,22 +415,47 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
                                   onChange={(event) => setStudentEmail(event.target.value)}
                                   className="rounded-lg border border-indigo-200 px-3 py-2 text-sm text-slate-800 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                                   placeholder="you@example.edu"
+                                  aria-describedby={`${consentId}${showEscalationError ? ` ${errorId}` : ''}`}
+                                  aria-invalid={showEscalationError && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(studentEmail)}
+                                  onKeyDown={(event) => {
+                                    if (event.key === 'Enter' && !event.shiftKey) {
+                                      event.preventDefault();
+                                      submitEscalation(message.id);
+                                    }
+                                  }}
                                 />
                               </label>
                             </div>
+                            <p id={consentId} className="text-[11px] text-indigo-500">
+                              Your name and email will be shared with your instructor to follow up on this question.
+                            </p>
+                            {showEscalationError && (
+                              <div
+                                id={errorId}
+                                role="alert"
+                                className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] text-rose-700"
+                              >
+                                {escalationError}
+                              </div>
+                            )}
                             <div className="flex flex-wrap items-center gap-3">
                               <button
                                 type="button"
                                 onClick={() => submitEscalation(message.id)}
                                 disabled={escalationSubmitting}
                                 className="rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition enabled:hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-indigo-300"
+                                aria-label="Submit escalation request"
                               >
                                 {escalationSubmitting ? 'Sending…' : 'Send to instructor'}
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setEscalationOpenId(null)}
+                                onClick={() => {
+                                  setEscalationOpenId(null);
+                                  setEscalationError(null);
+                                }}
                                 className="text-xs font-semibold text-indigo-500 underline-offset-2 hover:underline"
+                                aria-label="Close escalation form"
                               >
                                 Back
                               </button>
@@ -435,6 +472,9 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
                               type="button"
                               onClick={() => handleEscalationRequest(message.id)}
                               className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-600 shadow-sm transition hover:bg-indigo-100"
+                              aria-label="Open escalation form"
+                              aria-expanded={escalationOpenId === message.id}
+                              aria-controls={consentId}
                             >
                               Yes, let&apos;s do it
                             </button>
@@ -507,10 +547,10 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
       {toast && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 transform">
           <div
+            role="status"
+            aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
             className={`rounded-full px-4 py-2 text-sm font-semibold shadow ${
-              toast.type === 'success'
-                ? 'bg-emerald-600 text-white'
-                : 'bg-rose-600 text-white'
+              toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
             }`}
           >
             {toast.message}
