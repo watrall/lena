@@ -9,6 +9,7 @@ LENA, the Learning Engagement and Navigation Assistant, helps students in online
 For instructors and course staff, LENA acts as both a support tool and a source of feedback. It lightens the flow of routine questions and shortens wait times, while also revealing where students get stuck or confused. Those patterns can point to places where the course might be clarified or adjusted, helping to make online learning smoother and more responsive for everyone.
 
 **Note:** This public repository is a cleaned and adapted version of the original *LENA* project, initially developed and hosted on my institution’s internal GitLab instance as part of an AI-enabled learner support pilot.  
+
 This GitHub version is shared for demonstration and discussion purposes in the context of professional applications related to AI-driven education, learner support, and responsible innovation.
 
 LENA (Learning Engagement and Navigation Assistant) is a retrieval-augmented chatbot that helps learners and academic staff navigate course policies, schedules, and support resources with grounded citations, feedback workflows, and lightweight insights suitable for pilot deployments.
