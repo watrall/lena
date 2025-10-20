@@ -1,12 +1,13 @@
-LENA (Learner Engagement and Needs Assistant) is a lightweight AI chatbot designed to support students in online courses. It helps learners get quick, accurate answers about assignments, schedules, and university policies—reducing response time and instructor load while improving student confidence and course success.
+[![CI][ci-badge]][ci-workflow]
+
+# LENA – Learning Engagement & Navigation Assistant
+
+LENA (Learner Engagement and Needs Assistant) is a lightweight AI chatbot pilot designed to support students in online courses. It helps learners get quick, accurate answers about assignments, schedules, and university policies—reducing response time and instructor load while improving student confidence and course success.
 
 LENA isn’t meant to replace instructors. It handles common questions and points students toward resources, then automatically escalates anything it can’t answer to the instructor through Mattermost. Every question and interaction is logged, creating a feedback loop that helps instructors spot confusion early, adjust materials, and improve the course.
 
 Students interact through a simple chat interface that works on desktop and mobile. Instructors and course admins can view real-time insights in an analytics dashboard—tracking trends, top questions, and emerging pain points across multiple courses. The pilot version is fully containerized (FastAPI backend + Next.js frontend + Qdrant vector store) and integrates with GitHub Actions for automated testing and builds.
 
-# LENA – Learning Engagement & Navigation Assistant
-
-[![CI][ci-badge]][ci-workflow]
 
 - **Student view** – Ask a question, get a sourced answer.  
   - Each response links back to the syllabus, policy doc, or calendar event it pulled from.  
