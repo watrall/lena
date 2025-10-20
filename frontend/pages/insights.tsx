@@ -170,7 +170,7 @@ const InsightsPage: NextPage<InsightsPageProps> = ({ activeCourse }) => {
                 </div>
               ) : (
                 <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
-                  No question clusters yet. Encourage students to reach out so we can surface themes.
+                  No top questions yet. Once students begin asking, we&apos;ll spotlight the busiest topics here.
                 </div>
               )}
             </div>
@@ -186,7 +186,7 @@ const InsightsPage: NextPage<InsightsPageProps> = ({ activeCourse }) => {
                 </div>
               ) : (
                 <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
-                  No activity plotted yet. Once questions start flowing, volume trends will show here.
+                  No activity plotted yet. As soon as students interact, we chart the daily rhythm for you.
                 </div>
               )}
             </div>
@@ -204,7 +204,7 @@ const InsightsPage: NextPage<InsightsPageProps> = ({ activeCourse }) => {
                 </div>
               ) : (
                 <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
-                  Confidence data will appear after a few days of usage.
+                  Confidence data appears after the model answers a handful of questions. Check back soon.
                 </div>
               )}
             </div>

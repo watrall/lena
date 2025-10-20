@@ -123,8 +123,8 @@ const FAQPage: NextPage<FAQPageProps> = ({ activeCourse }) => {
           {!courseLocked && !error && !loading && !hasEntries && (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
               {hasSearchTerm
-                ? 'No FAQ entries match that search yet. Try different wording.'
-                : 'No FAQ entries yet. Keep asking questions to populate this view.'}
+                ? 'Nothing matches that search yet. Try a different keyword or ask the chatbot so we can learn.'
+                : 'No FAQ entries yet. As the chat answers more questions, we’ll start capturing the best responses here.'}
             </div>
           )}
 
