@@ -145,5 +145,5 @@ This codebase is released under the MIT License. See `LICENSE` for the fine prin
 
 This pilot was created inside an institution-wide initiative focused on applying AI responsibly across the curriculum to strengthen student learning and institutional outcomes. It launched within Department of Anthropology online courses, where we paired faculty, instructional designers, and technologists to make sure the guardrails matched pedagogical goals. After the initial run we migrated the codebase from the internal GitLab instance to GitHub to share the work openly and invite collaboration from the broader community.
 
-[ci-badge]: https://github.com/watrall/lena/actions/workflows/ci.yml/badge.svg
+[ci-badge]: https://github.com/watrall/lena/actions/workflows/ci.yml/badge.svg?branch=main
 [ci-workflow]: https://github.com/watrall/lena/actions/workflows/ci.yml
