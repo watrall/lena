@@ -118,7 +118,12 @@ docker run -d -p 8000:8000 docker.io/watrall/lena-backend:latest
 docker pull docker.io/watrall/lena-web:latest
 docker run -d -p 3000:3000 docker.io/watrall/lena-web:latest
 
---
+```
+
+Set `NEXT_PUBLIC_API_BASE=http://localhost:8000` (or your backend host) before starting the frontend container so the chat can reach the API.
+
+---
+
 ## CORS & Production Considerations
 
 - When deploying the frontend separately (Netlify, Vercel, etc.), set `BACKEND_CORS_ORIGINS` or the equivalent FastAPI middleware to include the web origin (e.g. `https://lena-pilot.example.edu`). The Compose stack already runs both services on the same network so no extra config is required locally.
