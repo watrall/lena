@@ -38,10 +38,10 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
     environment:
-      NEXT_PUBLIC_API_BASE: "http://api:${BACKEND_PORT:-8000}"
-    command: npm run dev -- --hostname 0.0.0.0 --port ${FRONTEND_PORT:-3000}
+      NODE_ENV: "production"
+      NEXT_PUBLIC_API_BASE: "http://api:8000"
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "3000:3000"
     depends_on:
       api:
         condition: service_healthy
