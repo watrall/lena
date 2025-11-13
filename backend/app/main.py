@@ -19,12 +19,15 @@ storage.ensure_storage()
 
 
 def _resolve_course(course_id: str | None) -> dict[str, str]:
+    available = courses.load_courses()
+    if not available:
+        raise HTTPException(status_code=400, detail="No courses configured. Seed storage/courses.json.")
+    if not course_id:
+        raise HTTPException(status_code=400, detail="course_id is required")
     course = courses.get_course(course_id)
     if course:
         return course
-    if course_id:
-        raise HTTPException(status_code=404, detail="Course not found")
-    raise HTTPException(status_code=400, detail="course_id is required")
+    raise HTTPException(status_code=404, detail="Course not found")
 
 
 @app.get("/healthz")
@@ -284,6 +287,9 @@ def promote_to_faq(payload: PromoteRequest) -> FAQEntry:
     faq_entries = review.load_faq()
     question_text = removed.get("question") or "Untitled FAQ"
     answer_text = payload.answer or removed.get("answer") or "No answer provided yet."
+    queue_course_id = removed.get("course_id")
+    if queue_course_id and queue_course_id != payload.course_id:
+        raise HTTPException(status_code=400, detail="Review item belongs to a different course")
     course = _resolve_course(payload.course_id)
     faq_entry = {
         "question": question_text,

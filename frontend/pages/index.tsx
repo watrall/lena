@@ -364,30 +364,36 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
 
                     <div className="mt-3 flex items-center gap-2">
                       <span className="text-xs font-medium text-slate-500">Did this help?</span>
-                      <button
-                        type="button"
-                        disabled={feedbackPending === message.id || Boolean(feedback)}
-                        onClick={() => handleFeedback(message.id, 'helpful')}
-                        className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                          feedback === 'helpful'
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-white text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        Helpful
-                      </button>
-                      <button
-                        type="button"
-                        disabled={feedbackPending === message.id || Boolean(feedback)}
-                        onClick={() => handleFeedback(message.id, 'not_helpful')}
-                        className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                          feedback === 'not_helpful'
-                            ? 'bg-amber-500 text-white'
-                            : 'bg-white text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        Needs work
-                      </button>
+                      {feedback ? (
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            feedback === 'helpful'
+                              ? 'bg-emerald-500 text-white'
+                              : 'bg-amber-500 text-white'
+                          }`}
+                        >
+                          {feedback === 'helpful' ? 'Thanks for letting us know!' : 'Noted for review.'}
+                        </span>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            disabled={feedbackPending === message.id}
+                            onClick={() => handleFeedback(message.id, 'helpful')}
+                            className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
+                          >
+                            Helpful
+                          </button>
+                          <button
+                            type="button"
+                            disabled={feedbackPending === message.id}
+                            onClick={() => handleFeedback(message.id, 'not_helpful')}
+                            className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
+                          >
+                            Needs work
+                          </button>
+                        </>
+                      )}
                     </div>
 
                     {response.escalation_suggested && escalationStatus !== 'submitted' && (

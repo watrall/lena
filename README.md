@@ -88,6 +88,14 @@ Escalation requests initiated from the chat are stored in `storage/escalations.j
 
 > API note: All dashboard endpoints (`/faq`, `/insights`, `/feedback`, `/admin/*`) require an explicit `course_id`. The `/ask` endpoint will fall back to the first configured course if none is provided, which only happens in CLI demos.
 
+### API requirements
+
+- `POST /ask` – body must include `question` and `course_id`. Responses contain a `question_id` you’ll reuse.
+- `POST /feedback` – requires `question_id`, `course_id`, and the user’s helpfulness choice (plus optional transcript context).
+- `GET /faq` / `GET /insights` – require `course_id` query params; the backend rejects empty IDs.
+- `POST /escalations/request` – include `course_id`, `student_name`, and `student_email` so instructors can follow up.
+- `GET /admin/review` / `POST /admin/promote` – locked to a single course at a time; a promote call fails if the queue entry belongs to a different course.
+
 ### Running without Docker
 
 Frontend:
