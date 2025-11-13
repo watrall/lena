@@ -27,7 +27,7 @@ def _resolve_course(course_id: str | None) -> dict[str, str]:
     course = courses.get_course(course_id)
     if course:
         return course
-    raise HTTPException(status_code=404, detail="Course not found")
+    raise HTTPException(status_code=404, detail="Course not found. Check storage/courses.json.")
 
 
 @app.get("/healthz")
