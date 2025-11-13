@@ -70,6 +70,11 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
   useEffect(() => {
     setMessages([]);
     setInput('');
+    setToast(null);
+    setEscalationOpenId(null);
+    setEscalationError(null);
+    setStudentName('');
+    setStudentEmail('');
   }, [activeCourse?.id]);
 
   const lastAssistantMessage = useMemo(() => {

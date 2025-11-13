@@ -4,7 +4,7 @@
 
 LENA (Learner Engagement and Needs Assistant) is a lightweight AI chatbot pilot designed to support students in online courses. It helps learners get quick, accurate answers about assignments, schedules, and university policies, reducing instructor burden in high-enrollment classes and accelerating response times so students stay on track and succeed.
 
-LENA isn’t meant to replace instructors. It handles common questions and points students toward resources, then automatically escalates anything it can’t answer to the instructor through Mattermost. Every question and interaction is logged, creating a feedback loop that helps instructors spot confusion early, adjust materials, and improve the course.
+LENA isn’t meant to replace instructors. It handles common questions and points students toward resources, then captures any low-confidence answers for instructors to review. Every question and interaction is logged, creating a feedback loop that helps instructors spot confusion early, adjust materials, and improve the course.
 
 Students interact through a simple chat interface that works on desktop and mobile. Instructors and course admins can view real-time insights in an analytics dashboard—tracking trends, top questions, and emerging pain points across multiple courses. The pilot version is fully containerized (FastAPI backend + Next.js frontend + Qdrant vector store) and integrates with GitHub Actions for automated testing and builds.
 
@@ -15,7 +15,7 @@ Students interact through a simple chat interface that works on desktop and mobi
 - **Instructor view** – Review the course dashboard.  
   - KPI cards highlight volume, helpfulness, and escalations.  
   - Trend charts and emerging pain points call out what needs syllabus edits or follow-up announcements.
-- **Admin / support staff** – Watch aggregate metrics across pilots, tune ingest jobs, and plug alerts into Mattermost or the LMS as needed.
+- **Admin / support staff** – Watch aggregate metrics across pilots, tune ingest jobs, and plug alerts into campus systems as needed.
 
 ---
 
@@ -24,7 +24,6 @@ Students interact through a simple chat interface that works on desktop and mobi
 - **Frontend** – Next.js (Pages router) + TypeScript + Tailwind, ships as a standalone Node server.
 - **Backend** – FastAPI service that handles ingestion, retrieval, and the `/ask` workflow.
 - **Vector store** – Qdrant (running inside Docker by default).
-- **Notifications** – Optional Mattermost webhook for escalations/alerts (see env vars below).
 - **CI** – GitHub Actions runs backend tests and a frontend build on every push / PR.
 
 Directory map:
@@ -70,7 +69,6 @@ Create a `.env` file at the repo root using `.env.example` as a guide.
 | `NEXT_PUBLIC_API_BASE` | Base URL the frontend calls (defaults to `http://localhost:8000`). |
 | `LENA_QDRANT_HOST` / `LENA_QDRANT_PORT` | Qdrant connection details if you run the vector store elsewhere. |
 | `LENA_DATA_DIR` / `LENA_STORAGE_DIR` | Override data or storage paths for ingestion/output. |
-| `LENA_MATTERMOST_WEBHOOK` | (Reserved) Placeholder for future webhook integrations; currently unused. |
 | `LENA_LLM_MODE` | `hf` (default) to call a Hugging Face hosted model, or `off` for deterministic demos. |
 
 The backend reads any `LENA_*` variables via Pydantic settings, while the frontend only needs the `NEXT_PUBLIC_*` keys because Next.js exposes them to the browser build.
@@ -87,6 +85,8 @@ The course picker reads from `storage/courses.json`. If the file doesn’t exist
 ```
 
 Escalation requests initiated from the chat are stored in `storage/escalations.jsonl` so instructor follow-ups can be audited or replayed. FAQ entries and review queue items now record the originating `course_id`, keeping per-course dashboards consistent with the student experience.
+
+> API note: All dashboard endpoints (`/faq`, `/insights`, `/feedback`, `/admin/*`) require an explicit `course_id`. The `/ask` endpoint will fall back to the first configured course if none is provided, which only happens in CLI demos.
 
 ### Running without Docker
 

@@ -65,7 +65,7 @@ class FeedbackRequest(BaseModel):
     answer: str | None = None
     citations: list[Citation] | None = None
     confidence: float | None = None
-    course_id: str | None = None
+    course_id: str | None = Field(default=None, description="Course identifier. Required.")
 
 
 class FeedbackResponse(BaseModel):
@@ -103,7 +103,7 @@ class PromoteRequest(BaseModel):
     queue_id: str
     answer: str | None = None
     source_path: str | None = None
-    course_id: str | None = None
+    course_id: str
 
 
 class InsightsTotals(BaseModel):
@@ -155,7 +155,7 @@ class EscalationRequest(BaseModel):
     question: str
     student_name: str
     student_email: EmailStr
-    course_id: str | None = None
+    course_id: str
 
 
 class EscalationResponse(BaseModel):
@@ -209,6 +209,8 @@ def ask_question(payload: AskRequest) -> AskResponse:
 
 @router.post("/feedback", response_model=FeedbackResponse)
 def submit_feedback(payload: FeedbackRequest) -> FeedbackResponse:
+    if not payload.course_id:
+        raise HTTPException(status_code=400, detail="course_id is required")
     course = _resolve_course(payload.course_id)
     course_id = course["id"]
     analytics.log_event(
@@ -266,14 +268,14 @@ def request_escalation(payload: EscalationRequest) -> EscalationResponse:
 
 
 @router.get("/faq", response_model=list[FAQEntry])
-def get_faq(course_id: str | None = Query(default=None)) -> list[FAQEntry]:
+def get_faq(course_id: str = Query(..., description="Course identifier")) -> list[FAQEntry]:
     course = _resolve_course(course_id)
     return [FAQEntry(**entry) for entry in review.load_faq(course_id=course["id"])]
 
 
 @router.get("/admin/review", response_model=list[ReviewItem])
-def get_review_queue() -> list[ReviewItem]:
-    return [ReviewItem(**entry) for entry in review.list_review_queue()]
+def get_review_queue(course_id: str = Query(..., description="Course identifier")) -> list[ReviewItem]:
+    return [ReviewItem(**entry) for entry in review.list_review_queue() if entry.get("course_id") == course_id]
 
 
 @router.post("/admin/promote", response_model=FAQEntry)
@@ -285,7 +287,7 @@ def promote_to_faq(payload: PromoteRequest) -> FAQEntry:
     faq_entries = review.load_faq()
     question_text = removed.get("question") or "Untitled FAQ"
     answer_text = payload.answer or removed.get("answer") or "No answer provided yet."
-    course = _resolve_course(payload.course_id or removed.get("course_id"))
+    course = _resolve_course(payload.course_id)
     faq_entry = {
         "question": question_text,
         "answer": answer_text,
@@ -299,7 +301,7 @@ def promote_to_faq(payload: PromoteRequest) -> FAQEntry:
 
 
 @router.get("/insights", response_model=InsightsResponse)
-def get_insights(course_id: str | None = Query(default=None)) -> InsightsResponse:
+def get_insights(course_id: str = Query(..., description="Course identifier")) -> InsightsResponse:
     course = _resolve_course(course_id)
     summary = analytics.summarize(course_id=course["id"])
     return InsightsResponse(**summary)
