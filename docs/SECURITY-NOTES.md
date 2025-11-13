@@ -7,6 +7,7 @@
 
 ## Data Handling
 - **No PII collection** – Chat transcripts are not persisted; only aggregated interaction metadata (question id, confidence, helpfulness) is logged.
+- **Escalations require consent** – When a learner opts into escalation, their name and email are written to `storage/escalations.jsonl` for instructor follow-up. Treat this file as sensitive and purge it between pilots.
 - **Citations only** – All answers surface the source path so human reviewers can verify accuracy before acting.
 - **Environment variables** – Secrets (e.g., API tokens if swapping LLM providers) should be injected via `.env` or deployment-specific secret managers, never committed to source.
 

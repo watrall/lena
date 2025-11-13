@@ -164,6 +164,10 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
         question_id: messageId,
         helpful: choice === 'helpful',
         courseId: activeCourse.id,
+        question: target.questionText,
+        answer: target.response.answer,
+        citations: target.response.citations,
+        confidence: target.response.confidence,
       });
       setToast({ type: 'success', message: 'Thanks for the feedback.' });
     } catch (err) {

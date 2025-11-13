@@ -1,11 +1,22 @@
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
+from backend.app.services import courses
+from backend.app.services.storage import storage_path
+
+
+def _course_id() -> str:
+    course = courses.get_default_course()
+    assert course is not None
+    return course["id"]
 
 
 def test_ask_endpoint_returns_answer_with_citations(ingest_sample_corpus):
     client = TestClient(app)
-    response = client.post("/ask", json={"question": "When is Assignment 1 due?"})
+    response = client.post(
+        "/ask",
+        json={"question": "When is Assignment 1 due?", "course_id": _course_id()},
+    )
 
     assert response.status_code == 200
     payload = response.json()
@@ -17,10 +28,62 @@ def test_ask_endpoint_returns_answer_with_citations(ingest_sample_corpus):
 
 def test_ask_endpoint_handles_late_policy(ingest_sample_corpus):
     client = TestClient(app)
-    response = client.post("/ask", json={"question": "What is the late policy?"})
+    response = client.post(
+        "/ask",
+        json={"question": "What is the late policy?", "course_id": _course_id()},
+    )
 
     assert response.status_code == 200
     payload = response.json()
 
     assert payload["citations"], "Expected citations for late policy response."
     assert payload["escalation_suggested"] in {True, False}
+
+
+def test_courses_endpoint_returns_seed_data(ingest_sample_corpus):
+    client = TestClient(app)
+    response = client.get("/courses")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list) and data
+    first = data[0]
+    assert {"id", "name"}.issubset(first.keys())
+
+
+def test_escalation_request_is_logged(ingest_sample_corpus):
+    client = TestClient(app)
+    ask_response = client.post(
+        "/ask",
+        json={"question": "Where is office hours posted?", "course_id": _course_id()},
+    )
+    question_id = ask_response.json()["question_id"]
+
+    payload = {
+        "question_id": question_id,
+        "question": "Where is office hours posted?",
+        "student_name": "Test Student",
+        "student_email": "student@example.edu",
+        "course_id": _course_id(),
+    }
+    response = client.post("/escalations/request", json=payload)
+    assert response.status_code == 200
+    assert response.json()["ok"] is True
+
+    records = storage_path("escalations.jsonl").read_text(encoding="utf-8").strip().splitlines()
+    assert any(question_id in line for line in records)
+
+
+def test_insights_endpoint_structure(ingest_sample_corpus):
+    client = TestClient(app)
+    response = client.get(f"/insights?course_id={_course_id()}")
+    assert response.status_code == 200
+    payload = response.json()
+    assert set(payload.keys()) == {
+        "totals",
+        "top_questions",
+        "daily_volume",
+        "confidence_trend",
+        "escalations",
+        "pain_points",
+        "last_updated",
+    }

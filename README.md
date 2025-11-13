@@ -53,6 +53,7 @@ Once the stack is up:
 1. Seed content (optional but handy): `curl -X POST http://localhost:8000/ingest/run`
 2. Open the chat: <http://localhost:3000> and ask “When is Assignment 1 due?”
 3. Review metrics: <http://localhost:3000/insights>
+4. When prompted, pick one of the sample courses—the backend validates the `course_id` on `/ask`, `/feedback`, `/faq`, `/insights`, and `/escalations/request`.
 
 If you change course data or want a clean slate, stop the stack and remove `storage/` before restarting.
 
@@ -73,6 +74,19 @@ Create a `.env` file at the repo root using `.env.example` as a guide.
 | `LENA_LLM_MODE` | `hf` (default) to call a Hugging Face hosted model, or `off` for deterministic demos. |
 
 The backend reads any `LENA_*` variables via Pydantic settings, while the frontend only needs the `NEXT_PUBLIC_*` keys because Next.js exposes them to the browser build.
+
+### Courses & multi-course mode
+
+The course picker reads from `storage/courses.json`. If the file doesn’t exist, the backend seeds two sample anthropology courses so the UI always has something to display. To customize the pilot, drop in your own catalog:
+
+```json
+[
+  { "id": "anth101", "name": "ANTH 101 · Cultural Anthropology", "code": "ANTH 101", "term": "Fall 2024" },
+  { "id": "anth204", "name": "ANTH 204 · Archaeology of Everyday Life", "code": "ANTH 204", "term": "Fall 2024" }
+]
+```
+
+Escalation requests initiated from the chat are stored in `storage/escalations.jsonl` so instructor follow-ups can be audited or replayed. FAQ entries and review queue items now record the originating `course_id`, keeping per-course dashboards consistent with the student experience.
 
 ### Running without Docker
 

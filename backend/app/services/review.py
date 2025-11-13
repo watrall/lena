@@ -7,8 +7,13 @@ from uuid import uuid4
 from .storage import append_jsonl, read_json, read_jsonl, storage_path, write_json, write_jsonl
 
 
-def load_faq() -> List[dict[str, Any]]:
-    return read_json(storage_path("faq.json"), default=[])
+def load_faq(course_id: str | None = None) -> List[dict[str, Any]]:
+    entries = read_json(storage_path("faq.json"), default=[])
+    if not isinstance(entries, list):
+        return []
+    if course_id is None:
+        return entries
+    return [entry for entry in entries if entry.get("course_id") in {None, course_id}]
 
 
 def save_faq(entries: List[dict[str, Any]]) -> None:
@@ -20,7 +25,11 @@ def list_review_queue() -> List[dict[str, Any]]:
 
 
 def append_review_item(item: dict[str, Any]) -> dict[str, Any]:
-    payload = {**item, "id": item.get("id") or uuid4().hex, "submitted_at": datetime.utcnow().isoformat() + "Z"}
+    payload = {
+        **item,
+        "id": item.get("id") or uuid4().hex,
+        "submitted_at": datetime.utcnow().isoformat() + "Z",
+    }
     append_jsonl(storage_path("review_queue.jsonl"), payload)
     return payload
 

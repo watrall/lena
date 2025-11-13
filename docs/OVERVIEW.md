@@ -43,6 +43,14 @@
 - **Hugging Face Pipeline** – CPU text-generation pipeline (`zephyr-7b-beta`) can be toggled off for extractive-only mode while retaining consistent API responses.
 - **Storage Layer** – Plain JSON/JSONL files simplify auditability during the pilot, and can be swapped for Postgres or S3 when scaling.
 
+### Key API Routes
+
+- `GET /courses` – feeds the course picker so every interaction has an explicit `course_id`.
+- `POST /ask` – runs retrieval + generation for a question scoped to the chosen course.
+- `POST /feedback` – records helpfulness along with the originating course and question text.
+- `POST /escalations/request` – stores instructor follow-ups (learner name/email + question) in `storage/escalations.jsonl`.
+- `GET /faq`, `GET /insights` – return course-filtered FAQ entries and the dashboard payload used by the frontend.
+
 ## Swapping Language Models
 
 1. **Update environment variables**

@@ -85,6 +85,10 @@ export const submitFeedback = (payload: {
   helpful: boolean;
   courseId: string;
   comment?: string;
+  question?: string;
+  answer?: string;
+  citations?: Citation[];
+  confidence?: number;
 }) =>
   request<FeedbackResponse>('/feedback', {
     method: 'POST',
@@ -93,6 +97,10 @@ export const submitFeedback = (payload: {
       helpful: payload.helpful,
       course_id: payload.courseId,
       comment: payload.comment,
+      question: payload.question,
+      answer: payload.answer,
+      citations: payload.citations,
+      confidence: payload.confidence,
     }),
   });
 
