@@ -68,11 +68,9 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
   }, [toast]);
 
   useEffect(() => {
-    if (!activeCourse) {
-      setMessages([]);
-      setInput('');
-    }
-  }, [activeCourse]);
+    setMessages([]);
+    setInput('');
+  }, [activeCourse?.id]);
 
   const lastAssistantMessage = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i -= 1) {

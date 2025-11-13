@@ -70,7 +70,7 @@ Create a `.env` file at the repo root using `.env.example` as a guide.
 | `NEXT_PUBLIC_API_BASE` | Base URL the frontend calls (defaults to `http://localhost:8000`). |
 | `LENA_QDRANT_HOST` / `LENA_QDRANT_PORT` | Qdrant connection details if you run the vector store elsewhere. |
 | `LENA_DATA_DIR` / `LENA_STORAGE_DIR` | Override data or storage paths for ingestion/output. |
-| `LENA_MATTERMOST_WEBHOOK` | Optional webhook to post instructor escalations into a Mattermost channel. |
+| `LENA_MATTERMOST_WEBHOOK` | (Reserved) Placeholder for future webhook integrations; currently unused. |
 | `LENA_LLM_MODE` | `hf` (default) to call a Hugging Face hosted model, or `off` for deterministic demos. |
 
 The backend reads any `LENA_*` variables via Pydantic settings, while the frontend only needs the `NEXT_PUBLIC_*` keys because Next.js exposes them to the browser build.
