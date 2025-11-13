@@ -22,12 +22,9 @@ def _resolve_course(course_id: str | None) -> dict[str, str]:
     course = courses.get_course(course_id)
     if course:
         return course
-    default_course = courses.get_default_course()
     if course_id:
         raise HTTPException(status_code=404, detail="Course not found")
-    if default_course:
-        return default_course
-    raise HTTPException(status_code=400, detail="No courses are configured.")
+    raise HTTPException(status_code=400, detail="course_id is required")
 
 
 @app.get("/healthz")
