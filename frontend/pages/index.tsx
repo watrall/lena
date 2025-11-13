@@ -363,7 +363,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
                       <span className="text-xs font-medium text-slate-500">Did this help?</span>
                       <button
                         type="button"
-                        disabled={feedbackPending === message.id}
+                        disabled={feedbackPending === message.id || Boolean(feedback)}
                         onClick={() => handleFeedback(message.id, 'helpful')}
                         className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                           feedback === 'helpful'
@@ -375,7 +375,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
                       </button>
                       <button
                         type="button"
-                        disabled={feedbackPending === message.id}
+                        disabled={feedbackPending === message.id || Boolean(feedback)}
                         onClick={() => handleFeedback(message.id, 'not_helpful')}
                         className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                           feedback === 'not_helpful'

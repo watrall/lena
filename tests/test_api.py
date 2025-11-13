@@ -69,8 +69,10 @@ def test_escalation_request_is_logged(ingest_sample_corpus):
     assert response.status_code == 200
     assert response.json()["ok"] is True
 
-    records = storage_path("escalations.jsonl").read_text(encoding="utf-8").strip().splitlines()
+    path = storage_path("escalations.jsonl")
+    records = path.read_text(encoding="utf-8").strip().splitlines()
     assert any(question_id in line for line in records)
+    path.unlink(missing_ok=True)
 
 
 def test_insights_endpoint_structure(ingest_sample_corpus):

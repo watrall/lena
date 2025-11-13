@@ -52,7 +52,7 @@ Once the stack is up:
 
 1. Seed content (optional but handy): `curl -X POST http://localhost:8000/ingest/run`
 2. Open the chat: <http://localhost:3000> and ask “When is Assignment 1 due?”
-3. Review metrics: <http://localhost:3000/insights>
+3. Review metrics: <http://localhost:3000/insights> (graphs fill in after a few `/ask` + `/feedback` events)
 4. When prompted, pick one of the sample courses—the backend validates the `course_id` on `/ask`, `/feedback`, `/faq`, `/insights`, and `/escalations/request`.
 
 If you change course data or want a clean slate, stop the stack and remove `storage/` before restarting.
@@ -102,7 +102,7 @@ Backend:
 
 ```bash
 cd backend
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt  # Requires Python 3.10+
 uvicorn app.main:app --reload --port 8000
 ```
 

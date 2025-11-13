@@ -23,7 +23,13 @@ Show the banner and navigation links (Chat, FAQ, Insights).
   - Confidence indicator.
   - Source list with file paths (e.g., `assignments.md`, `schedule.ics`).
 - Follow-up with “What is the late policy?” and note the citation from policy documents.
-- If the answer flags an escalation opportunity, open the follow-up form, submit the student details, and call out that it POSTs to `/escalations/request`, writing to `storage/escalations.jsonl` for instructor handoff.
+- If the answer flags an escalation opportunity, open the follow-up form, submit the student details, and call out that it POSTs to `/escalations/request`, writing to `storage/escalations.jsonl` for instructor handoff. You can mirror it via terminal too:
+
+```bash
+curl -X POST http://localhost:8000/escalations/request \
+  -H "Content-Type: application/json" \
+  -d '{"question_id":"<id>","question":"Need clarification on Assignment 2","student_name":"Jordan","student_email":"jordan@example.edu","course_id":"anth101"}'
+```
 
 ## 4. Capture Feedback (30s)
 - Mark the late-policy answer as “Not helpful”.

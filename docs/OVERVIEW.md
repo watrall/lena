@@ -50,6 +50,7 @@
 - `POST /feedback` – records helpfulness along with the originating course and question text.
 - `POST /escalations/request` – stores instructor follow-ups (learner name/email + question) in `storage/escalations.jsonl`.
 - `GET /faq`, `GET /insights` – return course-filtered FAQ entries and the dashboard payload used by the frontend.
+- `GET /admin/review`, `POST /admin/promote` – allow staff to triage low-confidence answers and promote vetted responses into the FAQ.
 
 ## Swapping Language Models
 

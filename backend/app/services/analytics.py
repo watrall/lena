@@ -86,14 +86,15 @@ def summarize(course_id: str | None = None) -> dict:
         {"date": key, "count": daily_volume_map.get(key, 0)}
         for key in last_30_days
     ]
-    confidence_trend = [
-        {
-            "date": key,
-            "confidence": round(sum(values) / len(values), 2) if values else 0.0,
-        }
-        for key in last_30_days
-        if key in confidence_map or daily_volume_map.get(key)
-    ]
+    confidence_trend = []
+    for key in last_30_days:
+        values = confidence_map.get(key, [])
+        confidence_trend.append(
+            {
+                "date": key,
+                "confidence": round(sum(values) / len(values), 2) if values else 0.0,
+            }
+        )
 
     feedback_by_question: dict[str, dict[str, int]] = defaultdict(lambda: {"helpful": 0, "total": 0})
     for event in feedback_events:

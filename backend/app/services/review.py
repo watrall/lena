@@ -13,7 +13,7 @@ def load_faq(course_id: str | None = None) -> List[dict[str, Any]]:
         return []
     if course_id is None:
         return entries
-    return [entry for entry in entries if entry.get("course_id") in {None, course_id}]
+    return [entry for entry in entries if entry.get("course_id") == course_id]
 
 
 def save_faq(entries: List[dict[str, Any]]) -> None:
