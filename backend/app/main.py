@@ -9,7 +9,7 @@ from pydantic import BaseModel, EmailStr, Field
 from .models.generate import generate_answer
 from .rag.ingest import IngestResult, run_ingest
 from .rag.retrieve import RetrievedChunk, retrieve
-from .services import analytics, courses, escalations, review, storage
+from .services import analytics, courses, escalations, questions, review, storage
 from .settings import settings
 
 app = FastAPI(title="LENA Backend", version="0.1.0")
@@ -22,9 +22,13 @@ def _resolve_course(course_id: str | None) -> dict[str, str]:
     available = courses.load_courses()
     if not available:
         raise HTTPException(status_code=400, detail="No courses configured. Seed storage/courses.json.")
-    if not course_id:
+    target_id = course_id
+    if not target_id:
+        default_course = courses.get_default_course()
+        if default_course:
+            return default_course
         raise HTTPException(status_code=400, detail="course_id is required")
-    course = courses.get_course(course_id)
+    course = courses.get_course(target_id)
     if course:
         return course
     raise HTTPException(status_code=404, detail="Course not found. Check storage/courses.json.")
@@ -180,7 +184,7 @@ def ask_question(payload: AskRequest) -> AskResponse:
     course = _resolve_course(payload.course_id)
     course_id = course["id"]
 
-    chunks = retrieve(payload.question, top_k=settings.retrieval_top_k)
+    chunks = retrieve(payload.question, top_k=settings.retrieval_top_k, course_id=course_id)
     answer = generate_answer(payload.question, chunks)
     citations = build_citations(chunks)
     confidence = compute_confidence(chunks)
@@ -194,6 +198,17 @@ def ask_question(payload: AskRequest) -> AskResponse:
             "question": payload.question,
             "confidence": confidence,
             "course_id": course_id,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+        }
+    )
+    questions.record_answer(
+        {
+            "question_id": question_id,
+            "course_id": course_id,
+            "question": payload.question,
+            "answer": answer,
+            "citations": [citation.model_dump() for citation in citations],
+            "confidence": confidence,
             "timestamp": datetime.utcnow().isoformat() + "Z",
         }
     )
@@ -227,12 +242,17 @@ def submit_feedback(payload: FeedbackRequest) -> FeedbackResponse:
 
     review_enqueued = False
     if not payload.helpful:
+        recorded = questions.lookup_answer(payload.question_id)
+        question_text = (recorded or {}).get("question") or payload.question
+        answer_text = (recorded or {}).get("answer") or payload.answer
+        recorded_citations = (recorded or {}).get("citations")
+        citations_payload = recorded_citations or [c.model_dump() for c in payload.citations or []]
         review.append_review_item(
             {
                 "question_id": payload.question_id,
-                "question": payload.question,
-                "answer": payload.answer,
-                "citations": [c.model_dump() for c in payload.citations or []],
+                "question": question_text,
+                "answer": answer_text,
+                "citations": citations_payload,
                 "comment": payload.comment,
                 "helpful": payload.helpful,
                 "course_id": course_id,

@@ -31,6 +31,18 @@ def ingest_sample_corpus(tmp_path_factory):
     data_src = TEST_ROOT / "data"
     temp_dir = tmp_path_factory.mktemp("data")
     shutil.copytree(data_src, temp_dir, dirs_exist_ok=True)
+    course_dir = temp_dir / "anth101"
+    course_dir.mkdir(exist_ok=True)
+    for item in list(temp_dir.iterdir()):
+        if item == course_dir or item.is_dir():
+            continue
+        shutil.move(item, course_dir / item.name)
+    second_course_dir = temp_dir / "anth204"
+    second_course_dir.mkdir(exist_ok=True)
+    (second_course_dir / "announcements.md").write_text(
+        "# Anth204 Announcements\nUnique Anth204 fact lives here.",
+        encoding="utf-8",
+    )
 
     class DummyEmbedder:
         def __init__(self, *_, **__):

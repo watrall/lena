@@ -42,7 +42,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [feedbackPending, setFeedbackPending] = useState<string | null>(null);
+  const [feedbackPendingIds, setFeedbackPendingIds] = useState<Set<string>>(() => new Set());
   const [escalationOpenId, setEscalationOpenId] = useState<string | null>(null);
   const [escalationSubmitting, setEscalationSubmitting] = useState(false);
   const [studentName, setStudentName] = useState('');
@@ -148,13 +148,18 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
   };
 
   const handleFeedback = async (messageId: string, choice: 'helpful' | 'not_helpful') => {
-    if (feedbackPending || !activeCourse) return;
+    if (!activeCourse) return;
     const target = messages.find(
       (message) => message.role === 'assistant' && message.id === messageId,
     );
     if (!target || target.role !== 'assistant') return;
+    if (feedbackPendingIds.has(messageId)) return;
 
-    setFeedbackPending(messageId);
+    setFeedbackPendingIds((current) => {
+      const next = new Set(current);
+      next.add(messageId);
+      return next;
+    });
     setMessages((prev) =>
       prev.map((message) =>
         message.role === 'assistant' && message.id === messageId ? { ...message, feedback: choice } : message,
@@ -182,7 +187,11 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
       );
       setToast({ type: 'error', message });
     } finally {
-      setFeedbackPending(null);
+      setFeedbackPendingIds((current) => {
+        const next = new Set(current);
+        next.delete(messageId);
+        return next;
+      });
     }
   };
 
@@ -378,7 +387,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
                         <>
                           <button
                             type="button"
-                            disabled={feedbackPending === message.id}
+                            disabled={feedbackPendingIds.has(message.id)}
                             onClick={() => handleFeedback(message.id, 'helpful')}
                             className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
                           >
@@ -386,7 +395,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
                           </button>
                           <button
                             type="button"
-                            disabled={feedbackPending === message.id}
+                            disabled={feedbackPendingIds.has(message.id)}
                             onClick={() => handleFeedback(message.id, 'not_helpful')}
                             className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
                           >

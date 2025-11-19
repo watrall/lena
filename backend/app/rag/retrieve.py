@@ -18,19 +18,31 @@ class RetrievedChunk(BaseModel):
     metadata: dict
 
 
-def retrieve(query: str, top_k: int = 6) -> List[RetrievedChunk]:
+def retrieve(query: str, top_k: int = 6, *, course_id: str | None = None) -> List[RetrievedChunk]:
     """Perform semantic search with optional keyword filtering."""
     embedder = get_embedder()
     ensure_collection()
     client = get_qdrant_client()
 
     query_vector = embedder.encode(query).tolist()
+    query_filter = None
+    if course_id:
+        query_filter = qmodels.Filter(
+            must=[
+                qmodels.FieldCondition(
+                    key="course_id",
+                    match=qmodels.MatchValue(value=course_id),
+                )
+            ]
+        )
+
     search_result = client.search(
         collection_name=settings.qdrant_collection,
         query_vector=query_vector,
         limit=top_k,
         with_payload=True,
         with_vectors=False,
+        query_filter=query_filter,
     )
 
     filtered = apply_keyword_bias(search_result, query)

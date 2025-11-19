@@ -88,6 +88,8 @@ Escalation requests initiated from the chat are stored in `storage/escalations.j
 
 > API note: All dashboard endpoints (`/faq`, `/insights`, `/feedback`, `/admin/*`) require an explicit `course_id`. The `/ask` endpoint will fall back to the first configured course if none is provided, which only happens in CLI demos.
 
+> Ingestion tip: organize course content under `data/<course_id>/...` so each vector chunk carries the proper `course_id`. Files placed directly under `data/` inherit the first course from `storage/courses.json`, making it easy to pilot with a single catalog while still supporting multi-course retrieval later.
+
 ### API requirements
 
 - `POST /ask` – body must include `question` and `course_id`. Responses contain a `question_id` you’ll reuse.
@@ -115,6 +117,21 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 Ensure Qdrant is reachable (either `docker run qdrant/qdrant` or the docker compose stack) before hitting `/ask`.
+
+### Testing & linting
+
+Run backend tests (which include a deterministic ingest pass) and the frontend checks before opening a PR:
+
+```bash
+python3 -m pip install -r backend/requirements.txt
+pytest
+
+cd frontend
+npm ci
+npm run lint
+```
+
+Set `LENA_LLM_MODE=off` locally for quick deterministic answers and to avoid downloading large Hugging Face models during test runs.
 
 ---
 

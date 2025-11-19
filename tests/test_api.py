@@ -1,3 +1,5 @@
+import json
+
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
@@ -40,6 +42,13 @@ def test_ask_endpoint_handles_late_policy(ingest_sample_corpus):
     assert payload["escalation_suggested"] in {True, False}
 
 
+def test_ask_endpoint_defaults_course_context(ingest_sample_corpus):
+    client = TestClient(app)
+    response = client.post("/ask", json={"question": "When is Assignment 1 due?"})
+    assert response.status_code == 200
+    assert response.json()["question_id"]
+
+
 def test_courses_endpoint_returns_seed_data(ingest_sample_corpus):
     client = TestClient(app)
     response = client.get("/courses")
@@ -75,6 +84,34 @@ def test_escalation_request_is_logged(ingest_sample_corpus):
     path.unlink(missing_ok=True)
 
 
+def test_feedback_review_uses_recorded_answer(ingest_sample_corpus):
+    client = TestClient(app)
+    ask_response = client.post(
+        "/ask",
+        json={"question": "What is the late policy?", "course_id": _course_id()},
+    )
+    question_id = ask_response.json()["question_id"]
+    client.post(
+        "/feedback",
+        json={
+            "question_id": question_id,
+            "helpful": False,
+            "course_id": _course_id(),
+            "question": "tampered question",
+            "answer": "tampered answer",
+            "citations": [],
+        },
+    )
+    queue_path = storage_path("review_queue.jsonl")
+    entries = [json.loads(line) for line in queue_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    assert entries, "Expected review queue entry"
+    latest = entries[-1]
+    assert latest["question"] == "What is the late policy?"
+    assert latest["answer"] == ask_response.json()["answer"]
+    assert latest["citations"], "Expected citations sourced from stored answer."
+    queue_path.unlink(missing_ok=True)
+
+
 def test_insights_endpoint_structure(ingest_sample_corpus):
     client = TestClient(app)
     response = client.get(f"/insights?course_id={_course_id()}")
@@ -89,3 +126,20 @@ def test_insights_endpoint_structure(ingest_sample_corpus):
         "pain_points",
         "last_updated",
     }
+
+
+def test_course_filter_blocks_cross_course_content(ingest_sample_corpus):
+    client = TestClient(app)
+    anth204_response = client.post(
+        "/ask",
+        json={"question": "Unique Anth204 fact?", "course_id": "anth204"},
+    )
+    assert anth204_response.status_code == 200
+    assert "Unique Anth204 fact" in anth204_response.json()["answer"]
+
+    anth101_response = client.post(
+        "/ask",
+        json={"question": "Unique Anth204 fact?", "course_id": "anth101"},
+    )
+    assert anth101_response.status_code == 200
+    assert "Unique Anth204 fact" not in anth101_response.json()["answer"]

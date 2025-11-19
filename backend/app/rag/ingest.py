@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
-from uuid import uuid4
 
 from ics import Calendar
 from markdown import markdown
@@ -15,6 +14,7 @@ from qdrant_client.http import models as qmodels
 
 from ..models.embeddings import get_embedder
 from ..settings import settings
+from ..services import courses
 from .qdrant_utils import ensure_collection, get_qdrant_client
 
 MAX_TOKENS = 700
@@ -44,6 +44,7 @@ class ParsedDocument:
     collection: str
     title: str
     source_path: str
+    course_id: str
     sections: list[Section]
 
 
@@ -62,25 +63,30 @@ def run_ingest(data_dir: Path | None = None) -> IngestResult:
 
     for document in iter_documents(data_path):
         docs_processed += 1
-        points = []
-        for chunk_text, section_title in chunk_document(document):
-            vector = embedder.encode(chunk_text).tolist()
-            metadata = {
-                "doc_id": document.doc_id,
-                "version_id": document.version_id,
-                "collection": document.collection,
-                "title": document.title,
-                "section": section_title,
-                "source_path": document.source_path,
-                "crawl_ts": datetime.now(timezone.utc).isoformat(),
-            }
+        chunk_payloads = list(chunk_document(document))
+        if not chunk_payloads:
+            continue
+
+        texts = [payload[1] for payload in chunk_payloads]
+        vectors = embedder.encode(
+            texts,
+            batch_size=settings.embedding_batch_size,
+            convert_to_numpy=True,
+        )
+
+        delete_document_chunks(client, document.doc_id)
+
+        points: list[qmodels.PointStruct] = []
+        for (chunk_idx, chunk_text, section_title), vector in zip(chunk_payloads, vectors):
+            metadata = build_metadata(document, section_title)
             points.append(
                 qmodels.PointStruct(
-                    id=uuid4().hex,
-                    vector=vector,
+                    id=deterministic_chunk_id(document.doc_id, chunk_idx),
+                    vector=vector.tolist(),
                     payload={"text": chunk_text, **metadata},
                 )
             )
+
         if points:
             client.upsert(collection_name=settings.qdrant_collection, points=points)
             chunk_count += len(points)
@@ -134,6 +140,7 @@ def parse_markdown(path: Path, root: Path) -> ParsedDocument:
         collection=collection,
         title=title,
         source_path=rel_path,
+        course_id=detect_course_id(path, root),
         sections=sections,
     )
 
@@ -172,14 +179,17 @@ def parse_calendar(path: Path, root: Path) -> ParsedDocument:
         collection="calendar",
         title=path.stem.replace("_", " ").title(),
         source_path=rel_path,
+        course_id=detect_course_id(path, root),
         sections=sections,
     )
 
 
-def chunk_document(document: ParsedDocument) -> Iterable[tuple[str, str]]:
+def chunk_document(document: ParsedDocument) -> Iterable[tuple[int, str, str]]:
+    chunk_index = 0
     for section in document.sections:
         for chunk in chunk_text(section.content):
-            yield chunk, section.title
+            yield chunk_index, chunk, section.title
+            chunk_index += 1
 
 
 def chunk_text(text: str, max_tokens: int = MAX_TOKENS, overlap: int = OVERLAP) -> Iterable[str]:
@@ -209,6 +219,18 @@ def detect_collection(path: Path) -> str:
     return "course"
 
 
+def detect_course_id(path: Path, root: Path) -> str:
+    rel_parts = path.relative_to(root).parts
+    if len(rel_parts) > 1:
+        return rel_parts[0]
+    default_course = courses.get_default_course()
+    if default_course:
+        return default_course["id"]
+    if rel_parts:
+        return rel_parts[0]
+    return "default"
+
+
 def format_arrow(value) -> str:
     if value is None:
         return ""
@@ -220,3 +242,40 @@ def strip_html(raw: str) -> str:
     text = markdown(raw)
     plain = re.sub("<[^<]+?>", "", text)
     return plain.strip()
+
+
+def delete_document_chunks(client, doc_id: str) -> None:
+    try:
+        client.delete(
+            collection_name=settings.qdrant_collection,
+            points_selector=qmodels.FilterSelector(
+                filter=qmodels.Filter(
+                    must=[
+                        qmodels.FieldCondition(
+                            key="doc_id",
+                            match=qmodels.MatchValue(value=doc_id),
+                        )
+                    ]
+                )
+            ),
+        )
+    except Exception:
+        # Collection may not exist yet; creation is handled by ensure_collection.
+        pass
+
+
+def deterministic_chunk_id(doc_id: str, chunk_idx: int) -> str:
+    return hashlib.sha1(f"{doc_id}:{chunk_idx}".encode("utf-8")).hexdigest()
+
+
+def build_metadata(document: ParsedDocument, section_title: str) -> dict[str, str]:
+    return {
+        "doc_id": document.doc_id,
+        "version_id": document.version_id,
+        "collection": document.collection,
+        "title": document.title,
+        "section": section_title,
+        "source_path": document.source_path,
+        "course_id": document.course_id,
+        "crawl_ts": datetime.now(timezone.utc).isoformat(),
+    }

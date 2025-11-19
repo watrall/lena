@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     hf_model: str = "HuggingFaceH4/zephyr-7b-beta"
     hf_max_new_tokens: int = 256
     retrieval_top_k: int = 6
+    embedding_batch_size: int = 16
 
     class Config:
         env_file = ".env"
