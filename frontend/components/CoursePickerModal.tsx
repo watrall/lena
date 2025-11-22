@@ -58,7 +58,7 @@ export default function CoursePickerModal({
     return () => {
       cancelled = true;
     };
-  }, [activeCourseId, loadState, open]);
+  }, [activeCourseId, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -156,8 +156,8 @@ export default function CoursePickerModal({
                     type="button"
                     onClick={() => setSelectedCourseId(course.id)}
                     className={`flex w-full flex-col gap-1 rounded-2xl border px-4 py-3 text-left transition ${isActive
-                        ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
+                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                       }`}
                   >
                     <span className="text-sm font-semibold">
