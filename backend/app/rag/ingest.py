@@ -68,11 +68,7 @@ def run_ingest(data_dir: Path | None = None) -> IngestResult:
             continue
 
         texts = [payload[1] for payload in chunk_payloads]
-        vectors = embedder.encode(
-            texts,
-            batch_size=settings.embedding_batch_size,
-            convert_to_numpy=True,
-        )
+        vectors = embedder.encode(texts)
 
         delete_document_chunks(client, document.doc_id)
 
@@ -264,8 +260,10 @@ def delete_document_chunks(client, doc_id: str) -> None:
         pass
 
 
+import uuid
+
 def deterministic_chunk_id(doc_id: str, chunk_idx: int) -> str:
-    return hashlib.sha1(f"{doc_id}:{chunk_idx}".encode("utf-8")).hexdigest()
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{doc_id}:{chunk_idx}"))
 
 
 def build_metadata(document: ParsedDocument, section_title: str) -> dict[str, str]:

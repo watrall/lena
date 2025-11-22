@@ -3,7 +3,9 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { NextPage } from 'next';
 
-import type { AskResponse, Citation } from '../lib/api';
+import { ChatInput } from '../components/chat/ChatInput';
+import { ChatMessage } from '../components/chat/ChatMessage';
+import { ChatMessage as ChatMessageType } from '../components/chat/types';
 import { askQuestion, requestEscalation, submitFeedback } from '../lib/api';
 import type { ActiveCourse } from '../lib/course';
 
@@ -11,42 +13,21 @@ type PageProps = {
   activeCourse: ActiveCourse | null;
 };
 
-type ChatMessage =
-  | {
-      id: string;
-      role: 'user';
-      content: string;
-      createdAt: Date;
-    }
-  | {
-      id: string;
-      role: 'assistant';
-      content: string;
-      createdAt: Date;
-      response: AskResponse;
-      showCitations: boolean;
-      feedback?: 'helpful' | 'not_helpful';
-      escalationStatus?: 'suggested' | 'opted_out' | 'submitted';
-      questionText: string;
-    };
-
 type ToastState =
   | {
-      type: 'success' | 'error';
-      message: string;
-    }
+    type: 'success' | 'error';
+    message: string;
+  }
   | null;
 
 const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feedbackPendingIds, setFeedbackPendingIds] = useState<Set<string>>(() => new Set());
   const [escalationOpenId, setEscalationOpenId] = useState<string | null>(null);
   const [escalationSubmitting, setEscalationSubmitting] = useState(false);
-  const [studentName, setStudentName] = useState('');
-  const [studentEmail, setStudentEmail] = useState('');
   const [toast, setToast] = useState<ToastState>(null);
   const [escalationError, setEscalationError] = useState<string | null>(null);
 
@@ -73,8 +54,6 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
     setToast(null);
     setEscalationOpenId(null);
     setEscalationError(null);
-    setStudentName('');
-    setStudentEmail('');
   }, [activeCourse?.id]);
 
   const lastAssistantMessage = useMemo(() => {
@@ -87,9 +66,6 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
     return undefined;
   }, [messages]);
 
-  const formatTime = (value: Date) =>
-    value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
   const handleSubmit = async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
@@ -98,7 +74,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
       return;
     }
 
-    const userMessage: ChatMessage = {
+    const userMessage: ChatMessageType = {
       id: crypto.randomUUID(),
       role: 'user',
       content: trimmed,
@@ -113,7 +89,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
     try {
       const response = await askQuestion({ question: trimmed, courseId: activeCourse.id });
 
-      const assistantMessage: ChatMessage = {
+      const assistantMessage: ChatMessageType = {
         id: response.question_id,
         role: 'assistant',
         content: response.answer,
@@ -201,8 +177,6 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
     );
     if (!target || target.role !== 'assistant') return;
     setEscalationOpenId(messageId);
-    setStudentName('');
-    setStudentEmail('');
     setEscalationError(null);
   };
 
@@ -218,7 +192,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
     setEscalationError(null);
   };
 
-  const submitEscalation = async (messageId: string) => {
+  const submitEscalation = async (messageId: string, name: string, email: string) => {
     if (!activeCourse) return;
     const target = messages.find(
       (message) => message.role === 'assistant' && message.id === messageId,
@@ -226,20 +200,6 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
     if (!target || target.role !== 'assistant') return;
 
     setEscalationError(null);
-    const trimmedName = studentName.trim();
-    const trimmedEmail = studentEmail.trim();
-
-    if (!trimmedName || !trimmedEmail) {
-      setEscalationError('Add your name and email so the instructor can reply.');
-      return;
-    }
-
-    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
-    if (!emailValid) {
-      setEscalationError('That email looks off. Give it another look.');
-      return;
-    }
-
     setEscalationSubmitting(true);
     setError(null);
 
@@ -247,8 +207,8 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
       await requestEscalation({
         question_id: messageId,
         question: target.questionText,
-        student_name: trimmedName,
-        student_email: trimmedEmail,
+        student_name: name,
+        student_email: email,
         courseId: activeCourse.id,
       });
 
@@ -260,8 +220,6 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
         ),
       );
       setEscalationOpenId(null);
-      setStudentName('');
-      setStudentEmail('');
       setEscalationError(null);
       setToast({ type: 'success', message: 'Thanks. We flagged this for your instructor.' });
     } catch (err) {
@@ -273,15 +231,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
     }
   };
 
-  const handleKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleSubmit();
-    }
-  };
-
   const courseLocked = !activeCourse;
-  const canSend = !courseLocked && input.trim().length > 0 && !loading;
 
   return (
     <Fragment>
@@ -317,210 +267,21 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
               </div>
             )}
 
-            {messages.map((message) => {
-              if (message.role === 'user') {
-                return (
-                  <div key={message.id} className="flex justify-end">
-                    <div className="max-w-[75%] rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white shadow">
-                      <p className="whitespace-pre-line">{message.content}</p>
-                      <span className="mt-2 block text-xs text-slate-200/80">
-                        You · {formatTime(message.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-                );
-              }
-
-              const { response, showCitations, feedback, escalationStatus } = message;
-              const citations: Citation[] = response.citations;
-              const consentId = `escalation-consent-${message.id}`;
-              const errorId = `escalation-error-${message.id}`;
-              const showEscalationError =
-                escalationOpenId === message.id && Boolean(escalationError && escalationError.length > 0);
-
-              return (
-                <div key={message.id} className="flex justify-start">
-                  <div className="max-w-[75%] rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 shadow">
-                    <p className="whitespace-pre-line">{message.content}</p>
-                    <span className="mt-2 block text-xs text-slate-500">
-                      LENA · {formatTime(message.createdAt)}
-                    </span>
-
-                    {citations.length > 0 && (
-                      <div className="mt-3">
-                        <button
-                          type="button"
-                          onClick={() => toggleCitations(message.id)}
-                          className="text-xs font-semibold text-slate-700 underline-offset-2 hover:underline"
-                        >
-                          {showCitations ? 'Hide citations' : 'Show citations'}
-                        </button>
-                        {showCitations && (
-                          <ul className="mt-2 space-y-2 rounded-2xl border border-slate-200 bg-white p-3">
-                            {citations.map((citation, index) => (
-                              <li key={`${citation.source_path}-${index}`} className="text-xs text-slate-600">
-                                <span className="font-semibold text-slate-700">{citation.title}</span>
-                                {citation.section && (
-                                  <span className="ml-1 text-slate-500">· {citation.section}</span>
-                                )}
-                                <div className="text-slate-400">{citation.source_path}</div>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="mt-3 flex items-center gap-2">
-                      <span className="text-xs font-medium text-slate-500">Did this help?</span>
-                      {feedback ? (
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            feedback === 'helpful'
-                              ? 'bg-emerald-500 text-white'
-                              : 'bg-amber-500 text-white'
-                          }`}
-                        >
-                          {feedback === 'helpful' ? 'Thanks for letting us know!' : 'Noted for review.'}
-                        </span>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            disabled={feedbackPendingIds.has(message.id)}
-                            onClick={() => handleFeedback(message.id, 'helpful')}
-                            className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
-                          >
-                            Helpful
-                          </button>
-                          <button
-                            type="button"
-                            disabled={feedbackPendingIds.has(message.id)}
-                            onClick={() => handleFeedback(message.id, 'not_helpful')}
-                            className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
-                          >
-                            Needs work
-                          </button>
-                        </>
-                      )}
-                    </div>
-
-                    {response.escalation_suggested && escalationStatus !== 'submitted' && (
-                      <div className="mt-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-xs text-indigo-700">
-                        {escalationOpenId === message.id ? (
-                          <div className="space-y-3" role="form" aria-labelledby={consentId}>
-                            <p className="font-semibold text-indigo-800">
-                              Want an instructor to follow up? Drop your info and we&apos;ll pass it along.
-                            </p>
-                            <div className="grid gap-3 md:grid-cols-2">
-                              <label className="flex flex-col gap-1 text-left">
-                                <span className="text-[11px] uppercase tracking-wide text-indigo-500">
-                                  Name
-                                </span>
-                                <input
-                                  type="text"
-                                  value={studentName}
-                                  onChange={(event) => setStudentName(event.target.value)}
-                                  className="rounded-lg border border-indigo-200 px-3 py-2 text-sm text-slate-800 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                                  placeholder="Jordan Smith"
-                                  aria-describedby={`${consentId}${showEscalationError ? ` ${errorId}` : ''}`}
-                                  aria-invalid={showEscalationError && !studentName.trim()}
-                                />
-                              </label>
-                              <label className="flex flex-col gap-1 text-left">
-                                <span className="text-[11px] uppercase tracking-wide text-indigo-500">
-                                  Email
-                                </span>
-                                <input
-                                  type="email"
-                                  value={studentEmail}
-                                  onChange={(event) => setStudentEmail(event.target.value)}
-                                  className="rounded-lg border border-indigo-200 px-3 py-2 text-sm text-slate-800 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                                  placeholder="you@example.edu"
-                                  aria-describedby={`${consentId}${showEscalationError ? ` ${errorId}` : ''}`}
-                                  aria-invalid={showEscalationError && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(studentEmail)}
-                                  onKeyDown={(event) => {
-                                    if (event.key === 'Enter' && !event.shiftKey) {
-                                      event.preventDefault();
-                                      submitEscalation(message.id);
-                                    }
-                                  }}
-                                />
-                              </label>
-                            </div>
-                            <p id={consentId} className="text-[11px] text-indigo-500">
-                              Your name and email will be shared with your instructor to follow up on this question.
-                            </p>
-                            {showEscalationError && (
-                              <div
-                                id={errorId}
-                                role="alert"
-                                className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] text-rose-700"
-                              >
-                                {escalationError}
-                              </div>
-                            )}
-                            <div className="flex flex-wrap items-center gap-3">
-                              <button
-                                type="button"
-                                onClick={() => submitEscalation(message.id)}
-                                disabled={escalationSubmitting}
-                                className="rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition enabled:hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-indigo-300"
-                                aria-label="Submit escalation request"
-                              >
-                                {escalationSubmitting ? 'Sending…' : 'Send to instructor'}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setEscalationOpenId(null);
-                                  setEscalationError(null);
-                                }}
-                                className="text-xs font-semibold text-indigo-500 underline-offset-2 hover:underline"
-                                aria-label="Close escalation form"
-                              >
-                                Back
-                              </button>
-                            </div>
-                          </div>
-                        ) : escalationStatus === 'opted_out' ? (
-                          <span className="text-indigo-500">No follow-up requested.</span>
-                        ) : (
-                          <div className="flex flex-wrap items-center gap-3">
-                            <span className="font-semibold text-indigo-800">
-                              Need an instructor to take a look?
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => handleEscalationRequest(message.id)}
-                              className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-600 shadow-sm transition hover:bg-indigo-100"
-                              aria-label="Open escalation form"
-                              aria-expanded={escalationOpenId === message.id}
-                              aria-controls={consentId}
-                            >
-                              Yes, let&apos;s do it
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleCancelEscalation(message.id)}
-                              className="text-xs font-semibold text-indigo-500 underline-offset-2 hover:underline"
-                            >
-                              No thanks
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {escalationStatus === 'submitted' && (
-                      <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-700">
-                        Instructor follow-up requested. Keep an eye on your inbox.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {messages.map((message) => (
+              <ChatMessage
+                key={message.id}
+                message={message}
+                onToggleCitations={toggleCitations}
+                onFeedback={handleFeedback}
+                onEscalationRequest={handleEscalationRequest}
+                onCancelEscalation={handleCancelEscalation}
+                onSubmitEscalation={submitEscalation}
+                escalationOpenId={escalationOpenId}
+                escalationSubmitting={escalationSubmitting}
+                escalationError={escalationError}
+                feedbackPendingIds={feedbackPendingIds}
+              />
+            ))}
             <div ref={transcriptEndRef} />
           </div>
         </div>
@@ -531,35 +292,19 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
               {error}
             </div>
           )}
-          <div className="flex flex-col gap-3 md:flex-row md:items-end">
-            <label className="flex-1">
-              <span className="sr-only">Ask a question</span>
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={
-                  courseLocked
-                    ? 'Choose a course before you start typing.'
-                    : `Ask something for ${activeCourse?.name ?? 'your course'}`
-                }
-                rows={3}
-                className="w-full resize-y rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
-                disabled={courseLocked || loading}
-              />
-            </label>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={!canSend}
-                className="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-              >
-                {loading ? 'Sending…' : 'Send'}
-              </button>
-            </div>
-          </div>
+          <ChatInput
+            input={input}
+            setInput={setInput}
+            onSubmit={handleSubmit}
+            loading={loading}
+            disabled={courseLocked}
+            inputRef={inputRef}
+            placeholder={
+              courseLocked
+                ? 'Choose a course before you start typing.'
+                : `Ask something for ${activeCourse?.name ?? 'your course'}`
+            }
+          />
           <p className="mt-2 text-xs text-slate-400">
             Responses stay within your course context and log feedback for quality checks.
           </p>
@@ -571,9 +316,8 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
           <div
             role="status"
             aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
-            className={`rounded-full px-4 py-2 text-sm font-semibold shadow ${
-              toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
-            }`}
+            className={`rounded-full px-4 py-2 text-sm font-semibold shadow ${toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
+              }`}
           >
             {toast.message}
           </div>

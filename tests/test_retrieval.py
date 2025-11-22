@@ -28,4 +28,5 @@ def test_course_filter_excludes_other_materials(ingest_sample_corpus):
     anth204_chunks = retrieve("Unique Anth204 fact", course_id="anth204")
     assert anth204_chunks, "Expected Anth204 content to be retrievable."
     anth101_chunks = retrieve("Unique Anth204 fact", course_id="anth101")
-    assert [chunk for chunk in anth101_chunks if chunk.metadata.get("course_id") == "anth101"] == []
+    assert anth101_chunks, "Expected some results from Anth101 even if irrelevant."
+    assert not any("Unique Anth204 fact" in chunk.text for chunk in anth101_chunks), "Should not retrieve Anth204 content in Anth101 context."

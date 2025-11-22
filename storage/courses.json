@@ -1,0 +1,14 @@
+[
+    {
+        "id": "anth101",
+        "name": "ANTH 101 · Cultural Anthropology",
+        "code": "ANTH 101",
+        "term": "Fall 2024"
+    },
+    {
+        "id": "anth204",
+        "name": "ANTH 204 · Archaeology of Everyday Life",
+        "code": "ANTH 204",
+        "term": "Fall 2024"
+    }
+]

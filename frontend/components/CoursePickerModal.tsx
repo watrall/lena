@@ -33,7 +33,7 @@ export default function CoursePickerModal({
   }, [activeCourseId, open]);
 
   useEffect(() => {
-    if (!open || loadState === 'loading' || loadState === 'success') return;
+    if (!open || loadState !== 'idle') return;
 
     let cancelled = false;
     const fetchCourses = async () => {
@@ -155,11 +155,10 @@ export default function CoursePickerModal({
                   <button
                     type="button"
                     onClick={() => setSelectedCourseId(course.id)}
-                    className={`flex w-full flex-col gap-1 rounded-2xl border px-4 py-3 text-left transition ${
-                      isActive
+                    className={`flex w-full flex-col gap-1 rounded-2xl border px-4 py-3 text-left transition ${isActive
                         ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
                         : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
-                    }`}
+                      }`}
                   >
                     <span className="text-sm font-semibold">
                       {course.code ? `${course.code} · ${course.name}` : course.name}

@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 import numpy as np
+from typing import Union
 from pytest import MonkeyPatch
 
 TEST_ROOT = Path(__file__).resolve().parents[1]
@@ -48,7 +49,9 @@ def ingest_sample_corpus(tmp_path_factory):
         def __init__(self, *_, **__):
             self._dim = 16
 
-        def encode(self, text: str):
+        def encode(self, text: Union[str, list[str]]):
+            if isinstance(text, list):
+                return np.array([self.encode(t) for t in text])
             seed = abs(hash(text)) % (10**6)
             return np.array([((seed + i * 31) % 997) / 997 for i in range(self._dim)], dtype=float)
 
