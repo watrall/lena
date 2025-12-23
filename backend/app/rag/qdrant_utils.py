@@ -2,6 +2,7 @@ from functools import lru_cache
 
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qmodels
+from qdrant_client.http.exceptions import UnexpectedResponse
 
 from ..models.embeddings import get_embedder
 from ..settings import settings
@@ -31,7 +32,7 @@ def ensure_collection() -> None:
                 collection_name=settings.qdrant_collection,
                 vectors_config=qmodels.VectorParams(size=dim, distance=qmodels.Distance.COSINE),
             )
-    except Exception:
+    except (UnexpectedResponse, ValueError):
         client.recreate_collection(
             collection_name=settings.qdrant_collection,
             vectors_config=qmodels.VectorParams(size=dim, distance=qmodels.Distance.COSINE),

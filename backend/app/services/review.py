@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Any, List
 from uuid import uuid4
 
-from .storage import append_jsonl, read_json, read_jsonl, storage_path, write_json, write_jsonl
+from .storage import append_jsonl, read_json, read_jsonl, storage_path, utc_timestamp, write_json, write_jsonl
 
 
 def load_faq(course_id: str | None = None) -> List[dict[str, Any]]:
@@ -28,7 +27,7 @@ def append_review_item(item: dict[str, Any]) -> dict[str, Any]:
     payload = {
         **item,
         "id": item.get("id") or uuid4().hex,
-        "submitted_at": datetime.utcnow().isoformat() + "Z",
+        "submitted_at": utc_timestamp(),
     }
     append_jsonl(storage_path("review_queue.jsonl"), payload)
     return payload

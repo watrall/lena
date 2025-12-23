@@ -1,8 +1,9 @@
-from datetime import datetime
+from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
 from ...services import analytics, escalations, questions, review
+from ...services.storage import utc_timestamp
 from ..deps import resolve_course
 from ...schemas.feedback import EscalationRequest, EscalationResponse, FeedbackRequest, FeedbackResponse
 
@@ -20,9 +21,9 @@ def submit_feedback(payload: FeedbackRequest) -> FeedbackResponse:
             "question_id": payload.question_id,
             "helpful": payload.helpful,
             "confidence": payload.confidence,
-             "question": payload.question,
-             "course_id": course_id,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "question": payload.question,
+            "course_id": course_id,
+            "timestamp": utc_timestamp(),
         }
     )
 

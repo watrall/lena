@@ -1,4 +1,3 @@
-// insights.tsx – dashboards the course by blending KPIs, charts, and pain points.
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';

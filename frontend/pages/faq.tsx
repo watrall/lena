@@ -1,4 +1,3 @@
-// faq.tsx – course-aware FAQ list with search and gracious empty states.
 import { useEffect, useMemo, useState } from 'react';
 
 import type { NextPage } from 'next';

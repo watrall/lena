@@ -1,4 +1,3 @@
-// KpiCards.tsx – shows course-level KPIs like total questions and helpful rates.
 import type { ReactNode } from 'react';
 
 interface KpiMetric {

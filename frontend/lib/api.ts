@@ -1,4 +1,3 @@
-// api.ts – typed fetch helpers for LENA endpoints with course-aware parameters.
 export interface CourseSummary {
   id: string;
   name: string;

@@ -1,11 +1,13 @@
-from datetime import datetime
+from __future__ import annotations
+
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from ...models.generate import generate_answer
 from ...rag.retrieve import RetrievedChunk, retrieve
 from ...services import analytics, questions
+from ...services.storage import utc_timestamp
 from ...settings import settings
 from ..deps import resolve_course
 from ...schemas.chat import AskRequest, AskResponse, Citation
@@ -70,9 +72,10 @@ def ask_question(payload: AskRequest) -> AskResponse:
     answer = generate_answer(payload.question, chunks)
     citations = build_citations(chunks)
     confidence = compute_confidence(chunks)
-    escalation = confidence < 0.55
+    escalation = confidence < settings.escalation_confidence_threshold
 
     question_id = uuid4().hex
+    timestamp = utc_timestamp()
     analytics.log_event(
         {
             "type": "ask",
@@ -80,7 +83,7 @@ def ask_question(payload: AskRequest) -> AskResponse:
             "question": payload.question,
             "confidence": confidence,
             "course_id": course_id,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": timestamp,
         }
     )
     questions.record_answer(
@@ -91,7 +94,7 @@ def ask_question(payload: AskRequest) -> AskResponse:
             "answer": answer,
             "citations": [citation.model_dump() for citation in citations],
             "confidence": confidence,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": timestamp,
         }
     )
 

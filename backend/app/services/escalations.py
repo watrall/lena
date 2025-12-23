@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Any, Dict, Iterable, List
+from typing import Any, List
 from uuid import uuid4
 
-from .storage import append_jsonl, read_jsonl, storage_path
+from .storage import append_jsonl, read_jsonl, storage_path, utc_timestamp
 
 
 def _records_path():
@@ -20,7 +19,7 @@ def append_request(payload: dict[str, Any]) -> dict[str, Any]:
         "student": payload.get("student_name"),
         "student_email": payload.get("student_email"),
         "course_id": payload.get("course_id"),
-        "submitted_at": payload.get("submitted_at") or datetime.utcnow().isoformat() + "Z",
+        "submitted_at": payload.get("submitted_at") or utc_timestamp(),
         "delivered": bool(payload.get("delivered", False)),
     }
     append_jsonl(_records_path(), record)

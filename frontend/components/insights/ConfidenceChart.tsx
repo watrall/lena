@@ -1,4 +1,3 @@
-// ConfidenceChart.tsx – plots confidence scores over time for qualitative tracking.
 'use client';
 
 import {
@@ -9,6 +8,7 @@ import {
   LineElement,
   Tooltip,
   Legend,
+  TooltipItem,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
@@ -43,7 +43,7 @@ export default function ConfidenceChart({ labels, values }: ConfidenceChartProps
         beginAtZero: true,
         suggestedMax: 1,
         ticks: {
-          callback: (value: any) => `${Math.round(Number(value) * 100)}%`,
+          callback: (value: string | number) => `${Math.round(Number(value) * 100)}%`,
           color: '#475569',
         },
         grid: { color: '#e2e8f0' },
@@ -57,7 +57,7 @@ export default function ConfidenceChart({ labels, values }: ConfidenceChartProps
       legend: { display: false },
       tooltip: {
         callbacks: {
-          label: (ctx: any) => `${Math.round(Number(ctx.parsed.y) * 100)}% confidence`,
+          label: (ctx: TooltipItem<'line'>) => `${Math.round(Number(ctx.parsed.y) * 100)}% confidence`,
         },
       },
     },

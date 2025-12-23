@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Optional
 
@@ -20,6 +22,8 @@ class Settings(BaseSettings):
     hf_max_new_tokens: int = 256
     retrieval_top_k: int = 6
     embedding_batch_size: int = 16
+    escalation_confidence_threshold: float = 0.55
+    analytics_history_days: int = 90
 
     class Config:
         env_file = ".env"

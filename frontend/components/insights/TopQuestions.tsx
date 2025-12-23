@@ -1,7 +1,6 @@
-// TopQuestions.tsx – renders a bar chart of the most asked questions for the course.
 'use client';
 
-import { Chart as ChartJS, BarElement, CategoryScale, Legend, LinearScale, Tooltip } from 'chart.js';
+import { Chart as ChartJS, BarElement, CategoryScale, Legend, LinearScale, Tooltip, TooltipItem } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -40,7 +39,7 @@ export default function TopQuestions({ labels, values }: TopQuestionsProps) {
     },
     plugins: {
       legend: { display: false },
-      tooltip: { callbacks: { label: (ctx: any) => `${ctx.formattedValue} questions` } },
+      tooltip: { callbacks: { label: (ctx: TooltipItem<'bar'>) => `${ctx.formattedValue} questions` } },
     },
   } as const;
 

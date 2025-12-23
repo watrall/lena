@@ -1,4 +1,3 @@
-// Header.tsx – shared navigation shell and course switcher surfaced on every page.
 'use client';
 
 import Link from 'next/link';

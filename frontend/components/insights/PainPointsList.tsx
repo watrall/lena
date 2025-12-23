@@ -1,4 +1,3 @@
-// PainPointsList.tsx – highlights emerging pain points by week-over-week shift.
 interface PainPoint {
   label: string;
   change: number;

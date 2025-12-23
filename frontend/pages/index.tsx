@@ -1,4 +1,3 @@
-// index.tsx – main chat surface for course-scoped questions, citations, and escalation.
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { NextPage } from 'next';

@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, List
+from typing import Any, Iterable
 
 from ..settings import settings
+
+
+def utc_timestamp() -> str:
+    """Return current UTC time as ISO 8601 string with Z suffix."""
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def ensure_storage() -> None:
@@ -33,7 +39,7 @@ def append_jsonl(path: Path, record: dict[str, Any]) -> None:
         handle.write(json.dumps(record, ensure_ascii=True) + "\n")
 
 
-def read_jsonl(path: Path) -> List[dict[str, Any]]:
+def read_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
     records: list[dict[str, Any]] = []

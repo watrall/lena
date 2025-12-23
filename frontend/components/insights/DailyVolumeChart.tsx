@@ -1,4 +1,3 @@
-// DailyVolumeChart.tsx – displays daily chat volume as a line chart for engagement trends.
 'use client';
 
 import {
@@ -9,6 +8,7 @@ import {
   LineElement,
   Tooltip,
   Legend,
+  TooltipItem,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
@@ -51,7 +51,7 @@ export default function DailyVolumeChart({ labels, values }: DailyVolumeChartPro
     },
     plugins: {
       legend: { display: false },
-      tooltip: { callbacks: { label: (ctx: any) => `${ctx.formattedValue} questions` } },
+      tooltip: { callbacks: { label: (ctx: TooltipItem<'line'>) => `${ctx.formattedValue} questions` } },
     },
   } as const;
 

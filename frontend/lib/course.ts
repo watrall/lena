@@ -1,4 +1,3 @@
-// course.ts – stores the active course in localStorage and broadcasts changes.
 import type { CourseSummary } from './api';
 
 export type ActiveCourse = Pick<CourseSummary, 'id' | 'name' | 'code' | 'term'>;

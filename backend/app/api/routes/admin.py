@@ -1,8 +1,9 @@
-from datetime import datetime
+from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query
 
 from ...services import review
+from ...services.storage import utc_timestamp
 from ..deps import resolve_course
 from ...schemas.admin import FAQEntry, PromoteRequest, ReviewItem
 
@@ -36,7 +37,7 @@ def promote_to_faq(payload: PromoteRequest) -> FAQEntry:
         "question": question_text,
         "answer": answer_text,
         "source_path": payload.source_path or removed.get("source_path"),
-        "updated_at": datetime.utcnow().isoformat() + "Z",
+        "updated_at": utc_timestamp(),
         "course_id": course["id"],
     }
     faq_entries.append(faq_entry)

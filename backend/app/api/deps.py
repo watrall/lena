@@ -1,8 +1,11 @@
-from typing import Optional
+from __future__ import annotations
+
 from fastapi import HTTPException
+
 from ..services import courses
 
-def resolve_course(course_id: Optional[str]) -> dict[str, str]:
+
+def resolve_course(course_id: str | None) -> dict[str, str | None]:
     available = courses.load_courses()
     if not available:
         raise HTTPException(status_code=400, detail="No courses configured. Seed storage/courses.json.")

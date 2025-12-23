@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,6 +12,7 @@ from ics import Calendar
 from markdown import markdown
 from pydantic import BaseModel
 from qdrant_client.http import models as qmodels
+from qdrant_client.http.exceptions import UnexpectedResponse
 
 from ..models.embeddings import get_embedder
 from ..settings import settings
@@ -255,12 +257,9 @@ def delete_document_chunks(client, doc_id: str) -> None:
                 )
             ),
         )
-    except Exception:
-        # Collection may not exist yet; creation is handled by ensure_collection.
+    except UnexpectedResponse:
         pass
 
-
-import uuid
 
 def deterministic_chunk_id(doc_id: str, chunk_idx: int) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{doc_id}:{chunk_idx}"))

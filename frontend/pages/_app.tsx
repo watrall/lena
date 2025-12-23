@@ -1,4 +1,3 @@
-// _app.tsx – wires global layout, metadata, and Tailwind for the LENA frontend.
 import { useEffect, useState } from 'react';
 
 import type { AppProps } from 'next/app';

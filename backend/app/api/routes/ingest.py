@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from fastapi import APIRouter, HTTPException
 
 from ...rag.ingest import IngestResult, run_ingest

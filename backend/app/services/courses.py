@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any
 
 from .storage import read_json, storage_path
 
@@ -20,17 +20,17 @@ DEFAULT_COURSES: list[dict[str, str]] = [
 ]
 
 
-def _coerce_courses(payload: Any) -> list[dict[str, str]]:
+def _coerce_courses(payload: Any) -> list[dict[str, str | None]]:
     if isinstance(payload, list):
-        sanitized: list[dict[str, str]] = []
+        sanitized: list[dict[str, str | None]] = []
         for entry in payload:
             if isinstance(entry, dict) and entry.get("id") and entry.get("name"):
                 sanitized.append(
                     {
                         "id": str(entry["id"]),
                         "name": str(entry["name"]),
-                        "code": entry.get("code"),
-                        "term": entry.get("term"),
+                        "code": str(entry["code"]) if entry.get("code") else None,
+                        "term": str(entry["term"]) if entry.get("term") else None,
                     }
                 )
         if sanitized:
@@ -38,18 +38,18 @@ def _coerce_courses(payload: Any) -> list[dict[str, str]]:
     return DEFAULT_COURSES
 
 
-def load_courses() -> List[dict[str, str]]:
+def load_courses() -> list[dict[str, str | None]]:
     """Load the list of courses from storage, seeding defaults when empty."""
     data = read_json(storage_path("courses.json"), default=DEFAULT_COURSES)
     return _coerce_courses(data)
 
 
-def get_course(course_id: str | None) -> dict[str, str] | None:
+def get_course(course_id: str | None) -> dict[str, str | None] | None:
     if not course_id:
         return None
     return next((course for course in load_courses() if course["id"] == course_id), None)
 
 
-def get_default_course() -> dict[str, str] | None:
+def get_default_course() -> dict[str, str | None] | None:
     courses = load_courses()
     return courses[0] if courses else None

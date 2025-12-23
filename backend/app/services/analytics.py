@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
 from . import escalations as escalation_service
+from ..settings import settings
 from .storage import append_jsonl, read_json, read_jsonl, storage_path, write_json
 
 SUMMARY_FILENAME = "analytics_summary.json"
@@ -105,8 +106,10 @@ def _apply_event_to_summary(event: dict) -> None:
     _save_summary(summary)
 
 
-def _trim_history(mapping: dict[str, Any], max_days: int = 90) -> None:
-    cutoff = datetime.utcnow().date() - timedelta(days=max_days)
+def _trim_history(mapping: dict[str, Any], max_days: int | None = None) -> None:
+    if max_days is None:
+        max_days = settings.analytics_history_days
+    cutoff = datetime.now(timezone.utc).date() - timedelta(days=max_days)
     drop_keys = []
     for key in mapping.keys():
         try:
@@ -153,7 +156,7 @@ def summarize(course_id: str | None = None) -> dict[str, Any]:
     ]
 
     last_30_days = [
-        (datetime.utcnow().date() - timedelta(days=offset)).isoformat()
+        (datetime.now(timezone.utc).date() - timedelta(days=offset)).isoformat()
         for offset in reversed(range(30))
     ]
     daily_volume = [

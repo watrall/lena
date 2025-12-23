@@ -1,4 +1,3 @@
-// CoursePickerModal.tsx – blocks the UI until a course is selected and saves it locally.
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';

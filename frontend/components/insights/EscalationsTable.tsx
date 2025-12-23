@@ -1,4 +1,3 @@
-// EscalationsTable.tsx – tabular view of escalation requests and delivery status.
 interface EscalationRow {
   question: string;
   student: string;
