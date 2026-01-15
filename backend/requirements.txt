@@ -17,6 +17,3 @@ email-validator==2.2.0
 slowapi==0.1.9
 cryptography==44.0.0
 pip-audit==2.7.2
-starlette==0.41.0
-urllib3==2.3.0
-filelock==3.20.3
