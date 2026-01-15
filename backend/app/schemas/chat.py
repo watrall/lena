@@ -1,15 +1,33 @@
 from __future__ import annotations
 
+import re
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class AskRequest(BaseModel):
-    question: str = Field(..., min_length=3, description="Learner or staff question.")
-    course_id: Optional[str] = Field(
-        default=None, description="Course context identifier. Defaults to the first available course."
+    """Request payload for the /ask endpoint."""
+
+    question: str = Field(
+        ...,
+        min_length=3,
+        max_length=2000,
+        description="Learner or staff question (3-2000 characters).",
     )
+    course_id: Optional[str] = Field(
+        default=None,
+        max_length=64,
+        pattern=r"^[a-zA-Z0-9_-]+$",
+        description="Course context identifier. Defaults to the first available course.",
+    )
+
+    @field_validator("question")
+    @classmethod
+    def sanitize_question(cls, value: str) -> str:
+        """Normalize whitespace and strip control characters."""
+        sanitized = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", value)
+        return " ".join(sanitized.split())
 
 
 class Citation(BaseModel):

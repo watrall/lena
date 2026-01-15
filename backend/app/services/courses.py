@@ -1,3 +1,5 @@
+"""Course catalog management."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -21,6 +23,7 @@ DEFAULT_COURSES: list[dict[str, str]] = [
 
 
 def _coerce_courses(payload: Any) -> list[dict[str, str | None]]:
+    """Validate and normalize course data from storage."""
     if isinstance(payload, list):
         sanitized: list[dict[str, str | None]] = []
         for entry in payload:
@@ -45,11 +48,20 @@ def load_courses() -> list[dict[str, str | None]]:
 
 
 def get_course(course_id: str | None) -> dict[str, str | None] | None:
+    """Look up a course by ID.
+
+    Args:
+        course_id: The course identifier to look up.
+
+    Returns:
+        The course record, or None if not found.
+    """
     if not course_id:
         return None
-    return next((course for course in load_courses() if course["id"] == course_id), None)
+    return next((c for c in load_courses() if c["id"] == course_id), None)
 
 
 def get_default_course() -> dict[str, str | None] | None:
+    """Return the first configured course as the default."""
     courses = load_courses()
     return courses[0] if courses else None

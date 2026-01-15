@@ -1,3 +1,5 @@
+"""Semantic retrieval from the Qdrant vector store."""
+
 from __future__ import annotations
 
 import re
@@ -12,14 +14,30 @@ from .qdrant_utils import ensure_collection, get_qdrant_client
 
 
 class RetrievedChunk(BaseModel):
+    """A single retrieved document chunk with metadata."""
+
     id: str
     text: str
     score: float
     metadata: dict
 
 
-def retrieve(query: str, top_k: int = 6, *, course_id: str | None = None) -> List[RetrievedChunk]:
-    """Perform semantic search with optional keyword filtering."""
+def retrieve(
+    query: str,
+    top_k: int = 6,
+    *,
+    course_id: str | None = None,
+) -> List[RetrievedChunk]:
+    """Perform semantic search with optional course filtering.
+
+    Args:
+        query: The search query text.
+        top_k: Maximum number of results to return.
+        course_id: Optional course ID to filter results.
+
+    Returns:
+        A list of retrieved chunks, ordered by relevance.
+    """
     embedder = get_embedder()
     ensure_collection()
     client = get_qdrant_client()
@@ -45,7 +63,7 @@ def retrieve(query: str, top_k: int = 6, *, course_id: str | None = None) -> Lis
         query_filter=query_filter,
     )
 
-    filtered = apply_keyword_bias(search_result, query)
+    filtered = _apply_keyword_bias(search_result, query)
     return [
         RetrievedChunk(
             id=str(hit.id),
@@ -57,8 +75,15 @@ def retrieve(query: str, top_k: int = 6, *, course_id: str | None = None) -> Lis
     ]
 
 
-def apply_keyword_bias(results: Iterable[qmodels.ScoredPoint], query: str) -> List[qmodels.ScoredPoint]:
-    """Promote results whose title or section contains query keywords."""
+def _apply_keyword_bias(
+    results: Iterable[qmodels.ScoredPoint],
+    query: str,
+) -> List[qmodels.ScoredPoint]:
+    """Promote results whose title or section contains query keywords.
+
+    This provides a lightweight boost to exact keyword matches without
+    altering the underlying similarity scores.
+    """
     keywords = {
         w.lower()
         for w in re.findall(r"\w+", query)
@@ -68,8 +93,8 @@ def apply_keyword_bias(results: Iterable[qmodels.ScoredPoint], query: str) -> Li
     if not keywords:
         return list(results)
 
-    preferred = []
-    others = []
+    preferred: List[qmodels.ScoredPoint] = []
+    others: List[qmodels.ScoredPoint] = []
 
     for item in results:
         haystack = " ".join(

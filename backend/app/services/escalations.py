@@ -1,3 +1,5 @@
+"""Escalation request management."""
+
 from __future__ import annotations
 
 from typing import Any, List
@@ -7,11 +9,19 @@ from .storage import append_jsonl, read_jsonl, storage_path, utc_timestamp
 
 
 def _records_path():
+    """Return the path to the escalations storage file."""
     return storage_path("escalations.jsonl")
 
 
 def append_request(payload: dict[str, Any]) -> dict[str, Any]:
-    """Persist a learner escalation request for instructor follow-up."""
+    """Persist a learner escalation request for instructor follow-up.
+
+    Args:
+        payload: Escalation details including student info and question.
+
+    Returns:
+        The persisted record with generated ID and timestamp.
+    """
     record = {
         "id": payload.get("id") or uuid4().hex,
         "question_id": payload.get("question_id"),
@@ -27,7 +37,14 @@ def append_request(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def list_requests(course_id: str | None = None) -> List[dict[str, Any]]:
-    """Return all recorded escalation requests, optionally filtered by course."""
+    """Return all recorded escalation requests, optionally filtered by course.
+
+    Args:
+        course_id: Optional course ID to filter by.
+
+    Returns:
+        A list of escalation request records.
+    """
     entries = read_jsonl(_records_path())
     if course_id is None:
         return entries

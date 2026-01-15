@@ -1,3 +1,5 @@
+"""Chat endpoint for learner question answering."""
+
 from __future__ import annotations
 
 from uuid import uuid4
@@ -6,16 +8,18 @@ from fastapi import APIRouter
 
 from ...models.generate import generate_answer
 from ...rag.retrieve import RetrievedChunk, retrieve
+from ...schemas.chat import AskRequest, AskResponse, Citation
 from ...services import analytics, questions
 from ...services.storage import utc_timestamp
 from ...settings import settings
 from ..deps import resolve_course
-from ...schemas.chat import AskRequest, AskResponse, Citation
 
-router = APIRouter()
+router = APIRouter(tags=["chat"])
 
-def build_citations(chunks: list[RetrievedChunk]) -> list[Citation]:
-    seen = set()
+
+def _build_citations(chunks: list[RetrievedChunk]) -> list[Citation]:
+    """Extract unique citations from retrieved chunks."""
+    seen: set[str] = set()
     citations: list[Citation] = []
     for idx, chunk in enumerate(chunks, start=1):
         source_path = chunk.metadata.get("source_path")
@@ -31,12 +35,23 @@ def build_citations(chunks: list[RetrievedChunk]) -> list[Citation]:
         )
     return citations
 
-def normalize(value: float, lower: float, upper: float) -> float:
+
+def _normalize(value: float, lower: float, upper: float) -> float:
+    """Normalize a value to the 0-1 range."""
     if upper - lower == 0:
         return 0.0
     return max(0.0, min(1.0, (value - lower) / (upper - lower)))
 
-def compute_confidence(chunks: list[RetrievedChunk]) -> float:
+
+def _compute_confidence(chunks: list[RetrievedChunk]) -> float:
+    """Compute a confidence score from retrieval results.
+
+    The score is based on:
+    - Maximum similarity score
+    - Score spread between top results
+    - Consistency across all retrieved chunks
+    - Coverage relative to the configured top_k
+    """
     if not chunks:
         return 0.0
 
@@ -50,10 +65,10 @@ def compute_confidence(chunks: list[RetrievedChunk]) -> float:
     spread = max_score - second_score
     min_score = min(scores)
 
-    score_component = normalize(max_score, 0.3, 1.0)
-    spread_component = normalize(spread, 0.0, 0.4)
-    consistency_component = normalize(max_score - min_score, 0.0, 0.5)
-    coverage_component = normalize(len(scores) / settings.retrieval_top_k, 0.3, 1.0)
+    score_component = _normalize(max_score, 0.3, 1.0)
+    spread_component = _normalize(spread, 0.0, 0.4)
+    consistency_component = _normalize(max_score - min_score, 0.0, 0.5)
+    coverage_component = _normalize(len(scores) / settings.retrieval_top_k, 0.3, 1.0)
 
     combined = (
         0.5 * score_component
@@ -63,19 +78,33 @@ def compute_confidence(chunks: list[RetrievedChunk]) -> float:
     )
     return round(max(0.0, min(1.0, combined)), 2)
 
+
 @router.post("/ask", response_model=AskResponse)
 def ask_question(payload: AskRequest) -> AskResponse:
+    """Answer a learner's question using retrieval-augmented generation.
+
+    Args:
+        payload: The question and optional course context.
+
+    Returns:
+        An answer with citations, confidence score, and escalation flag.
+    """
     course = resolve_course(payload.course_id)
     course_id = course["id"]
 
-    chunks = retrieve(payload.question, top_k=settings.retrieval_top_k, course_id=course_id)
+    chunks = retrieve(
+        payload.question,
+        top_k=settings.retrieval_top_k,
+        course_id=course_id,
+    )
     answer = generate_answer(payload.question, chunks)
-    citations = build_citations(chunks)
-    confidence = compute_confidence(chunks)
+    citations = _build_citations(chunks)
+    confidence = _compute_confidence(chunks)
     escalation = confidence < settings.escalation_confidence_threshold
 
     question_id = uuid4().hex
     timestamp = utc_timestamp()
+
     analytics.log_event(
         {
             "type": "ask",

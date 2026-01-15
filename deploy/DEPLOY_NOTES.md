@@ -18,7 +18,7 @@ These instructions describe how to run the LENA pilot stack with the recommended
 2. **Clone repository**
    ```bash
    ssh root@YOUR_DROPLET_IP
-   git clone https://github.com/OWNER/lena.git
+   git clone https://github.com/watrall/lena.git
    cd lena
    ```
 3. **Configure environment**

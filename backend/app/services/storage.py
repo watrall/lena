@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import json
+import logging
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
 from ..settings import settings
+
+logger = logging.getLogger(__name__)
 
 
 def utc_timestamp() -> str:
@@ -14,43 +18,73 @@ def utc_timestamp() -> str:
 
 
 def ensure_storage() -> None:
+    """Create the storage directory if it does not exist."""
     settings.storage_dir.mkdir(parents=True, exist_ok=True)
 
 
 def storage_path(name: str) -> Path:
+    """Return the full path for a storage file."""
     ensure_storage()
     return settings.storage_dir / name
 
 
 def read_json(path: Path, default: Any) -> Any:
+    """Read JSON from a file, returning a default if missing or invalid."""
     if not path.exists():
         return default
-    return json.loads(path.read_text(encoding="utf-8") or json.dumps(default))
+    try:
+        content = path.read_text(encoding="utf-8")
+        return json.loads(content) if content.strip() else default
+    except (json.JSONDecodeError, OSError) as exc:
+        logger.warning("Failed to read JSON from %s: %s", path, exc)
+        return default
 
 
 def write_json(path: Path, payload: Any) -> None:
+    """Write JSON to a file atomically."""
     ensure_storage()
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=True), encoding="utf-8")
+    content = json.dumps(payload, indent=2, ensure_ascii=True)
+    _atomic_write(path, content)
 
 
 def append_jsonl(path: Path, record: dict[str, Any]) -> None:
+    """Append a single JSON record to a JSONL file."""
     ensure_storage()
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(record, ensure_ascii=True) + "\n")
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
+    """Read all records from a JSONL file."""
     if not path.exists():
         return []
     records: list[dict[str, Any]] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
+    for line_num, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
             records.append(json.loads(line))
+        except json.JSONDecodeError as exc:
+            logger.warning("Skipped malformed JSON at %s:%d: %s", path, line_num, exc)
     return records
 
 
 def write_jsonl(path: Path, records: Iterable[dict[str, Any]]) -> None:
+    """Write records to a JSONL file atomically."""
     ensure_storage()
-    with path.open("w", encoding="utf-8") as handle:
-        for record in records:
-            handle.write(json.dumps(record, ensure_ascii=True) + "\n")
+    lines = [json.dumps(record, ensure_ascii=True) for record in records]
+    _atomic_write(path, "\n".join(lines) + "\n" if lines else "")
+
+
+def _atomic_write(path: Path, content: str) -> None:
+    """Write content to a file atomically using a temporary file."""
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        delete=False,
+        suffix=".tmp",
+    ) as tmp:
+        tmp.write(content)
+        tmp_path = Path(tmp.name)
+    tmp_path.replace(path)

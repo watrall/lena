@@ -1,20 +1,40 @@
+"""Feedback and escalation endpoints."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
+from ...schemas.feedback import (
+    EscalationRequest,
+    EscalationResponse,
+    FeedbackRequest,
+    FeedbackResponse,
+)
 from ...services import analytics, escalations, questions, review
 from ...services.storage import utc_timestamp
 from ..deps import resolve_course
-from ...schemas.feedback import EscalationRequest, EscalationResponse, FeedbackRequest, FeedbackResponse
 
-router = APIRouter()
+router = APIRouter(tags=["feedback"])
+
 
 @router.post("/feedback", response_model=FeedbackResponse)
 def submit_feedback(payload: FeedbackRequest) -> FeedbackResponse:
+    """Record learner feedback on an answer.
+
+    Unhelpful answers are queued for instructor review.
+
+    Args:
+        payload: Feedback details including helpfulness rating.
+
+    Returns:
+        Confirmation and whether the item was queued for review.
+    """
     if not payload.course_id:
         raise HTTPException(status_code=400, detail="course_id is required")
+
     course = resolve_course(payload.course_id)
     course_id = course["id"]
+
     analytics.log_event(
         {
             "type": "feedback",
@@ -33,7 +53,9 @@ def submit_feedback(payload: FeedbackRequest) -> FeedbackResponse:
         question_text = (recorded or {}).get("question") or payload.question
         answer_text = (recorded or {}).get("answer") or payload.answer
         recorded_citations = (recorded or {}).get("citations")
-        citations_payload = recorded_citations or [c.model_dump() for c in payload.citations or []]
+        citations_payload = recorded_citations or [
+            c.model_dump() for c in payload.citations or []
+        ]
         review.append_review_item(
             {
                 "question_id": payload.question_id,
@@ -52,6 +74,14 @@ def submit_feedback(payload: FeedbackRequest) -> FeedbackResponse:
 
 @router.post("/escalations/request", response_model=EscalationResponse)
 def request_escalation(payload: EscalationRequest) -> EscalationResponse:
+    """Submit an escalation request for instructor follow-up.
+
+    Args:
+        payload: Escalation details including student contact info.
+
+    Returns:
+        Confirmation of the escalation request.
+    """
     course = resolve_course(payload.course_id)
     record = escalations.append_request(
         {

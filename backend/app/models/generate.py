@@ -1,18 +1,31 @@
+"""Answer generation using retrieval-augmented generation."""
+
 from __future__ import annotations
 
+import logging
 from functools import lru_cache
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable
 
 from transformers import pipeline
 
-from ..settings import settings
 from ..rag.prompts import build_prompt
 from ..rag.retrieve import RetrievedChunk
+from ..settings import settings
+
+if TYPE_CHECKING:
+    from transformers import Pipeline
+
+logger = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=1)
-def get_generator():
-    """Instantiate the Hugging Face generation pipeline lazily."""
+def get_generator() -> "Pipeline":
+    """Instantiate the Hugging Face generation pipeline lazily.
+
+    Returns:
+        A text-generation pipeline configured for CPU inference.
+    """
+    logger.info("Loading generation model: %s", settings.hf_model)
     return pipeline(
         "text-generation",
         model=settings.hf_model,
@@ -22,11 +35,19 @@ def get_generator():
 
 
 def generate_answer(question: str, chunks: Iterable[RetrievedChunk]) -> str:
-    """Produce a grounded answer using the configured generation strategy."""
+    """Produce a grounded answer using the configured generation strategy.
+
+    Args:
+        question: The user's question.
+        chunks: Retrieved context chunks to ground the answer.
+
+    Returns:
+        A string answer, either generated or extractive depending on config.
+    """
     chunk_list = list(chunks)
 
     if settings.llm_mode == "off":
-        return build_extractive_answer(question, chunk_list)
+        return _build_extractive_answer(question, chunk_list)
 
     prompt = build_prompt(question, chunk_list)
     generator = get_generator()
@@ -41,18 +62,18 @@ def generate_answer(question: str, chunks: Iterable[RetrievedChunk]) -> str:
     return outputs[0]["generated_text"].strip()
 
 
-def build_extractive_answer(question: str, chunks: list[RetrievedChunk]) -> str:
-    """Fallback extractive answer that stitches together top snippets."""
+def _build_extractive_answer(question: str, chunks: list[RetrievedChunk]) -> str:
+    """Build an extractive answer by stitching together top snippets.
+
+    Used as a fallback when LLM generation is disabled.
+    """
     if not chunks:
         return (
-            "I couldn't find supporting context for that question in the current knowledge base. "
-            "You may need to consult the course team."
+            "I couldn't find supporting context for that question in the current "
+            "knowledge base. You may need to consult the course team."
         )
 
-    lines = [
-        "Here is what I found in the course materials:",
-    ]
-
+    lines = ["Here is what I found in the course materials:"]
     for idx, chunk in enumerate(chunks, start=1):
         summary = chunk.text.strip().splitlines()[0]
         lines.append(f"- {summary} [{idx}]")

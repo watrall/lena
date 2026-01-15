@@ -70,6 +70,7 @@ Create a `.env` file at the repo root using `.env.example` as a guide.
 | `LENA_QDRANT_HOST` / `LENA_QDRANT_PORT` | Qdrant connection details if you run the vector store elsewhere. |
 | `LENA_DATA_DIR` / `LENA_STORAGE_DIR` | Override data or storage paths for ingestion/output. |
 | `LENA_LLM_MODE` | `hf` (default) to call a Hugging Face hosted model, or `off` for deterministic demos. |
+| `LENA_CORS_ORIGINS` | Comma-separated list of allowed CORS origins (defaults to `http://localhost:3000`). |
 
 The backend reads any `LENA_*` variables via Pydantic settings, while the frontend only needs the `NEXT_PUBLIC_*` keys because Next.js exposes them to the browser build.
 
@@ -182,7 +183,7 @@ Set `NEXT_PUBLIC_API_BASE=http://localhost:8000` (or your backend host) before s
 
 ## Provenance
 
-This pilot was created within an institution-wide initiative focused on applying AI responsibly across the curriculum to strengthen student learning and institutional outcomes. Lena launched within Department of Anthropology online courses in the summer of 2024.  Faculty, students, and administratos were paired to make sure the guardrails matched the department's pedagogical goals. After two cycles of online classes, the codebase was migrated from MSU's internal GitLab instance to GitHub to share the work openly and invite collaboration from the broader community.
+This pilot was created within an institution-wide initiative focused on applying AI responsibly across the curriculum to strengthen student learning and institutional outcomes. LENA launched within Department of Anthropology online courses in the summer of 2024. Faculty, students, and administrators were paired to ensure the guardrails matched the department's pedagogical goals. After two cycles of online classes, the codebase was migrated from MSU's internal GitLab instance to GitHub to share the work openly and invite collaboration from the broader community.
 
 [ci-badge]: https://github.com/watrall/lena/actions/workflows/ci.yml/badge.svg?branch=main
 [ci-workflow]: https://github.com/watrall/lena/actions/workflows/ci.yml

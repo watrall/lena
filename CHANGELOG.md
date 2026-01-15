@@ -17,4 +17,4 @@ All notable changes to this project will be documented in this file.
 - Pilot is shared under MIT License and runs in “Pilot Mode — No login. Sample data only.”
 - See `deploy/DEPLOY_NOTES.md` for Netlify + DigitalOcean deployment guidance.
 
-[v0.1.0]: https://github.com/OWNER/lena/releases/tag/v0.1.0
+[v0.1.0]: https://github.com/watrall/lena/releases/tag/v0.1.0
