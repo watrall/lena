@@ -57,7 +57,7 @@ export default function CoursePickerModal({
     return () => {
       cancelled = true;
     };
-  }, [activeCourseId, open]);
+  }, [activeCourseId, loadState, open]);
 
   useEffect(() => {
     if (!open) return;

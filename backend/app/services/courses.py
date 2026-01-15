@@ -1,4 +1,8 @@
-"""Course catalog management."""
+"""Course catalog management.
+
+Handles loading, validation, and retrieval of course metadata. Courses are
+stored in a JSON file and seeded with defaults if the file doesn't exist.
+"""
 
 from __future__ import annotations
 

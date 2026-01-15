@@ -1,13 +1,18 @@
-"""Question and answer storage for feedback correlation."""
+"""Question and answer storage for feedback correlation.
+
+Persists Q&A interactions so feedback can be correlated with the original
+response, even when the client doesn't send the full context.
+"""
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from .storage import append_jsonl, read_jsonl, storage_path
 
 
-def _answers_path():
+def _answers_path() -> Path:
     """Return the path to the answers storage file."""
     return storage_path("answers.jsonl")
 

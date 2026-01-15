@@ -1,4 +1,9 @@
-"""Answer generation using retrieval-augmented generation."""
+"""Answer generation using retrieval-augmented generation.
+
+Supports two modes: Hugging Face pipeline generation for full LLM responses,
+or extractive-only mode that stitches together retrieved snippets without
+model inference (useful for demos and testing).
+"""
 
 from __future__ import annotations
 
@@ -58,6 +63,7 @@ def generate_answer(question: str, chunks: Iterable[RetrievedChunk]) -> str:
         temperature=0.1,
         top_p=0.95,
         return_full_text=False,
+        truncation=True,
     )
     return outputs[0]["generated_text"].strip()
 

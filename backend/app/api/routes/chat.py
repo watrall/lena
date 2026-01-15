@@ -1,4 +1,8 @@
-"""Chat endpoint for learner question answering."""
+"""Chat endpoint for learner question answering.
+
+Provides the primary /ask endpoint that performs retrieval-augmented generation
+to answer student questions with grounded, citation-backed responses.
+"""
 
 from __future__ import annotations
 
@@ -18,7 +22,17 @@ router = APIRouter(tags=["chat"])
 
 
 def _build_citations(chunks: list[RetrievedChunk]) -> list[Citation]:
-    """Extract unique citations from retrieved chunks."""
+    """Extract unique citations from retrieved chunks.
+
+    Deduplicates citations by source path to avoid showing the same
+    document multiple times in the response.
+
+    Args:
+        chunks: Retrieved document chunks from the vector store.
+
+    Returns:
+        A deduplicated list of citation objects.
+    """
     seen: set[str] = set()
     citations: list[Citation] = []
     for idx, chunk in enumerate(chunks, start=1):
@@ -82,6 +96,8 @@ def _compute_confidence(chunks: list[RetrievedChunk]) -> float:
 @router.post("/ask", response_model=AskResponse)
 def ask_question(payload: AskRequest) -> AskResponse:
     """Answer a learner's question using retrieval-augmented generation.
+
+    Rate limited to 10 requests per minute per IP address via app-level limiter.
 
     Args:
         payload: The question and optional course context.

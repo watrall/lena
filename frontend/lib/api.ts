@@ -53,16 +53,35 @@ export interface InsightsSummary {
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000').replace(/\/$/, '');
 
+/**
+ * Make an HTTP request to the API backend.
+ *
+ * @param path - API endpoint path (e.g., '/ask')
+ * @param init - Optional fetch configuration
+ * @returns Parsed JSON response
+ * @throws Error if request fails or returns non-OK status
+ */
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
-    cache: 'no-store',
-    ...init,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+      cache: 'no-store',
+      ...init,
+    });
+  } catch (err) {
+    throw new Error('Network error. Please check your connection.');
+  }
 
   if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || `Request failed with status ${response.status}`);
+    let message: string;
+    try {
+      const body = await response.json();
+      message = body.detail || body.message || `Request failed with status ${response.status}`;
+    } catch {
+      message = `Request failed with status ${response.status}`;
+    }
+    throw new Error(message);
   }
 
   if (response.status === 204) {

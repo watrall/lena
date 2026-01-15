@@ -1,4 +1,8 @@
-"""FAQ and review queue management."""
+"""FAQ and review queue management.
+
+Provides persistence for FAQ entries (curated from instructor review) and
+the review queue (low-confidence answers awaiting instructor attention).
+"""
 
 from __future__ import annotations
 

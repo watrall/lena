@@ -1,4 +1,8 @@
-"""Admin endpoints for FAQ management and review queue."""
+"""Admin endpoints for FAQ management and review queue.
+
+Provides instructor-facing endpoints for reviewing low-confidence answers,
+promoting vetted responses to the FAQ, and managing the review queue.
+"""
 
 from __future__ import annotations
 

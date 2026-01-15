@@ -1,4 +1,8 @@
-"""Qdrant vector database client utilities."""
+"""Qdrant vector database client utilities.
+
+Provides connection management and collection initialization for the Qdrant
+vector store. Supports both hosted Qdrant instances and in-memory mode for testing.
+"""
 
 from __future__ import annotations
 

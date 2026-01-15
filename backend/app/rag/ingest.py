@@ -6,11 +6,15 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable
+
+if TYPE_CHECKING:
+    from arrow import Arrow
 
 from ics import Calendar
 from markdown import markdown
 from pydantic import BaseModel
+from qdrant_client import QdrantClient
 from qdrant_client.http import models as qmodels
 from qdrant_client.http.exceptions import UnexpectedResponse
 
@@ -190,12 +194,22 @@ def chunk_document(document: ParsedDocument) -> Iterable[tuple[int, str, str]]:
             chunk_index += 1
 
 
-def chunk_text(text: str, max_tokens: int = MAX_TOKENS, overlap: int = OVERLAP) -> Iterable[str]:
+def chunk_text(text: str, max_tokens: int = MAX_TOKENS, overlap: int = OVERLAP) -> list[str]:
+    """Split text into overlapping chunks of approximately max_tokens words.
+
+    Args:
+        text: The text to chunk.
+        max_tokens: Maximum words per chunk.
+        overlap: Number of words to overlap between chunks.
+
+    Returns:
+        A list of text chunks.
+    """
     words = text.split()
     if not words:
         return []
 
-    chunks = []
+    chunks: list[str] = []
     start = 0
     while start < len(words):
         end = min(start + max_tokens, len(words))
@@ -229,7 +243,15 @@ def detect_course_id(path: Path, root: Path) -> str:
     return "default"
 
 
-def format_arrow(value) -> str:
+def format_arrow(value: "Arrow | None") -> str:
+    """Format an Arrow datetime to ISO 8601 string.
+
+    Args:
+        value: An Arrow datetime object, or None.
+
+    Returns:
+        ISO 8601 formatted string, or empty string if None.
+    """
     if value is None:
         return ""
     dt = value.to("utc").datetime
@@ -242,7 +264,13 @@ def strip_html(raw: str) -> str:
     return plain.strip()
 
 
-def delete_document_chunks(client, doc_id: str) -> None:
+def delete_document_chunks(client: "QdrantClient", doc_id: str) -> None:
+    """Remove all existing chunks for a document before re-ingestion.
+
+    Args:
+        client: The Qdrant client instance.
+        doc_id: The document ID whose chunks should be deleted.
+    """
     try:
         client.delete(
             collection_name=settings.qdrant_collection,

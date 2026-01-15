@@ -1,4 +1,8 @@
-"""Semantic retrieval from the Qdrant vector store."""
+"""Semantic retrieval from the Qdrant vector store.
+
+Provides the core retrieval functionality for RAG, including vector similarity
+search with optional course filtering and keyword-based re-ranking.
+"""
 
 from __future__ import annotations
 

@@ -31,14 +31,18 @@ class AskRequest(BaseModel):
 
 
 class Citation(BaseModel):
-    title: str
-    section: Optional[str]
-    source_path: str
+    """A source citation for a generated answer."""
+
+    title: str = Field(..., description="Document or section title.")
+    section: Optional[str] = Field(default=None, description="Section heading within the document.")
+    source_path: str = Field(..., description="Relative path to the source file.")
 
 
 class AskResponse(BaseModel):
-    question_id: str
-    answer: str
-    citations: list[Citation]
-    confidence: float
-    escalation_suggested: bool
+    """Response payload from the /ask endpoint."""
+
+    question_id: str = Field(..., description="Unique identifier for this Q&A interaction.")
+    answer: str = Field(..., description="Generated or extracted answer text.")
+    citations: list[Citation] = Field(default_factory=list, description="Sources supporting the answer.")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Model confidence score (0-1).")
+    escalation_suggested: bool = Field(..., description="Whether instructor follow-up is recommended.")

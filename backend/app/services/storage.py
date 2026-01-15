@@ -1,3 +1,9 @@
+"""Persistence utilities for JSON and JSONL file storage.
+
+Provides atomic file writes, structured JSON/JSONL read/write operations,
+and storage directory management for the LENA backend.
+"""
+
 from __future__ import annotations
 
 import json
@@ -23,9 +29,26 @@ def ensure_storage() -> None:
 
 
 def storage_path(name: str) -> Path:
-    """Return the full path for a storage file."""
+    """Return the full path for a storage file.
+
+    Args:
+        name: The filename (must not contain path separators).
+
+    Returns:
+        Absolute path to the storage file.
+
+    Raises:
+        ValueError: If name contains path traversal characters.
+    """
+    # Prevent path traversal attacks
+    if ".." in name or "/" in name or "\\" in name or name.startswith("."):
+        raise ValueError(f"Invalid storage filename: {name}")
     ensure_storage()
-    return settings.storage_dir / name
+    resolved = (settings.storage_dir / name).resolve()
+    # Ensure the resolved path is within the storage directory
+    if not str(resolved).startswith(str(settings.storage_dir.resolve())):
+        raise ValueError(f"Path traversal detected: {name}")
+    return resolved
 
 
 def read_json(path: Path, default: Any) -> Any:
@@ -77,7 +100,16 @@ def write_jsonl(path: Path, records: Iterable[dict[str, Any]]) -> None:
 
 
 def _atomic_write(path: Path, content: str) -> None:
-    """Write content to a file atomically using a temporary file."""
+    """Write content to a file atomically using a temporary file.
+
+    Uses a temporary file in the same directory to ensure atomic rename.
+    This prevents partial writes if the process is interrupted.
+
+    Args:
+        path: The target file path.
+        content: The content to write.
+    """
+    ensure_storage()
     with tempfile.NamedTemporaryFile(
         mode="w",
         encoding="utf-8",

@@ -1,27 +1,36 @@
 # syntax=docker/dockerfile:1.6
 
+# Build stage for Python dependencies
 FROM python:3.11-slim AS base
 
-# Create non-root user for security
+# Security: Create non-root user
 RUN groupadd --gid 1000 lena && \
     useradd --uid 1000 --gid lena --shell /bin/bash --create-home lena
 
 WORKDIR /app
 
+# Environment configuration
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONFAULTHANDLER=1
 
+# Install dependencies first for better layer caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
+# Copy application code
 COPY app ./app
 
-# Switch to non-root user
+# Security: Switch to non-root user
 USER lena
 
 EXPOSE 8000
+
+# Health check for container orchestration
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')" || exit 1
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

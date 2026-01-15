@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict
+from typing import Any
 
 from . import escalations as escalation_service
 from ..settings import settings
@@ -36,16 +36,26 @@ class InteractionEvent:
         )
 
 
-def log_event(event: dict) -> None:
+def log_event(event: dict[str, Any]) -> None:
+    """Append an interaction event to the log and update summary.
+
+    Args:
+        event: Event data containing type, question_id, timestamp, etc.
+    """
+    # Truncate excessively long question text to prevent storage abuse
+    if event.get("question") and len(str(event["question"])) > 2000:
+        event = {**event, "question": str(event["question"])[:2000]}
     append_jsonl(storage_path("interactions.jsonl"), event)
     _apply_event_to_summary(event)
 
 
 def _course_key(course_id: str | None) -> str:
+    """Return the storage key for a course, defaulting if not provided."""
     return course_id or DEFAULT_COURSE_KEY
 
 
 def _empty_course_state() -> dict[str, Any]:
+    """Return a fresh analytics state structure for a new course."""
     return {
         "questions": 0,
         "confidence_sum": 0.0,
@@ -61,14 +71,21 @@ def _empty_course_state() -> dict[str, Any]:
 
 
 def _load_summary() -> dict[str, Any]:
+    """Load the analytics summary from storage."""
     return read_json(storage_path(SUMMARY_FILENAME), default={})
 
 
 def _save_summary(summary: dict[str, Any]) -> None:
+    """Persist the analytics summary to storage."""
     write_json(storage_path(SUMMARY_FILENAME), summary)
 
 
-def _apply_event_to_summary(event: dict) -> None:
+def _apply_event_to_summary(event: dict[str, Any]) -> None:
+    """Update the analytics summary with a single event.
+
+    Args:
+        event: The event to apply to the summary.
+    """
     summary = _load_summary()
     key = _course_key(event.get("course_id"))
     state = summary.setdefault(key, _empty_course_state())
@@ -107,6 +124,7 @@ def _apply_event_to_summary(event: dict) -> None:
 
 
 def _trim_history(mapping: dict[str, Any], max_days: int | None = None) -> None:
+    """Remove entries older than max_days from a date-keyed mapping."""
     if max_days is None:
         max_days = settings.analytics_history_days
     cutoff = datetime.now(timezone.utc).date() - timedelta(days=max_days)
@@ -123,6 +141,7 @@ def _trim_history(mapping: dict[str, Any], max_days: int | None = None) -> None:
 
 
 def _ensure_summary_synced() -> None:
+    """Rebuild the summary from interaction logs if out of date."""
     interactions_path = storage_path("interactions.jsonl")
     summary_path = storage_path(SUMMARY_FILENAME)
     if not interactions_path.exists():

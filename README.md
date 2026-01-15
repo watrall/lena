@@ -166,7 +166,7 @@ Set `NEXT_PUBLIC_API_BASE=http://localhost:8000` (or your backend host) before s
 
 ## CORS & Production Considerations
 
-- When deploying the frontend separately (Netlify, Vercel, etc.), set `BACKEND_CORS_ORIGINS` or the equivalent FastAPI middleware to include the web origin (e.g. `https://lena-pilot.example.edu`). The Compose stack already runs both services on the same network so no extra config is required locally.
+- When deploying the frontend separately (Netlify, Vercel, etc.), set `LENA_CORS_ORIGINS` in the backend environment to include the web origin (e.g., `https://lena-pilot.example.edu`). The Compose stack already runs both services on the same network so no extra config is required locally.
 - Mattermost, Slack, LMS, or email integrations should live behind opt-in environment flags so student data only routes to approved channels. The README keeps the defaults closed off; check `docs/SECURITY-NOTES.md` before rolling into a large cohort.
 
 ---

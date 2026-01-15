@@ -2,14 +2,16 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class InsightsTotals(BaseModel):
-    questions: int
-    helpful_rate: float
-    average_confidence: float
-    escalations: int
+    """Aggregate metrics for a course."""
+
+    questions: int = Field(..., description="Total questions asked.")
+    helpful_rate: float = Field(..., ge=0.0, le=1.0, description="Proportion of helpful feedback.")
+    average_confidence: float = Field(..., ge=0.0, le=1.0, description="Mean confidence score.")
+    escalations: int = Field(..., description="Number of escalation requests.")
 
 
 class TopQuestion(BaseModel):

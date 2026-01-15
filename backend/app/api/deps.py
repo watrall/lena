@@ -1,4 +1,8 @@
-"""Shared API dependencies."""
+"""Shared API dependencies.
+
+Provides dependency injection functions used across API routes,
+including course resolution and validation.
+"""
 
 from __future__ import annotations
 

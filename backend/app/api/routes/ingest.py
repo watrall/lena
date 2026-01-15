@@ -31,5 +31,9 @@ def ingest_run() -> IngestResult:
         )
         return result
     except Exception as exc:
-        logger.exception("Ingestion failed")
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        # Log full exception for debugging but return generic message to client
+        logger.exception("Ingestion failed: %s", exc)
+        raise HTTPException(
+            status_code=500,
+            detail="Ingestion failed. Check server logs for details."
+        ) from exc

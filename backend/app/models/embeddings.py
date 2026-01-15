@@ -1,4 +1,8 @@
-"""Embedding model utilities for semantic search."""
+"""Embedding model utilities for semantic search.
+
+Provides a cached SentenceTransformer instance for generating dense vector
+representations of text. The model is loaded lazily on first use.
+"""
 
 from __future__ import annotations
 

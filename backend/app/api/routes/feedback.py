@@ -1,4 +1,8 @@
-"""Feedback and escalation endpoints."""
+"""Feedback and escalation endpoints.
+
+Handles learner feedback submission and escalation requests. Unhelpful
+responses are automatically queued for instructor review.
+"""
 
 from __future__ import annotations
 

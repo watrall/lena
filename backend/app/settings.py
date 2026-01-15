@@ -1,3 +1,9 @@
+"""Application configuration loaded from environment variables.
+
+All settings use the LENA_ prefix and can be overridden via environment
+variables or a .env file in the project root.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,7 +16,24 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    """Application configuration loaded from environment variables."""
+    """Application configuration loaded from environment variables.
+
+    Attributes:
+        embed_model: Sentence transformer model for embeddings.
+        qdrant_host: Hostname of the Qdrant vector store.
+        qdrant_port: Port number for Qdrant connection.
+        qdrant_collection: Name of the Qdrant collection.
+        qdrant_location: Optional path for local Qdrant (e.g., ':memory:').
+        data_dir: Directory containing course materials to ingest.
+        storage_dir: Directory for persisting feedback and analytics.
+        llm_mode: Generation mode ('hf' for Hugging Face, 'off' for extractive).
+        hf_model: Hugging Face model identifier for generation.
+        hf_max_new_tokens: Maximum tokens to generate per response.
+        retrieval_top_k: Number of chunks to retrieve per query.
+        embedding_batch_size: Batch size for embedding generation.
+        escalation_confidence_threshold: Confidence below which to suggest escalation.
+        analytics_history_days: Days of analytics history to retain.
+    """
 
     model_config = SettingsConfigDict(
         env_file=".env",
