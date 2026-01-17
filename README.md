@@ -41,7 +41,23 @@ storage/     Local persisted feedback, cached runs
 
 ---
 
-## Quickstart (Docker)
+## One-Click Start
+
+The fastest way to get LENA running on your machine:
+
+```bash
+git clone https://github.com/watrall/lena.git
+cd lena
+./start.sh
+```
+
+The script checks that Docker is installed, builds the containers, seeds the sample course data, and opens your browser to the chat interface—all in one step. You'll be prompted to choose a course and can start asking questions right away.
+
+---
+
+## Quickstart (Docker Compose)
+
+If you prefer more control over the startup process, or if you're on Windows, use Docker Compose directly:
 
 ```bash
 git clone https://github.com/watrall/lena.git

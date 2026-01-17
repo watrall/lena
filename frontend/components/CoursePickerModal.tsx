@@ -39,7 +39,10 @@ export default function CoursePickerModal({
       setLoadState('loading');
       setErrorMessage(null);
       try {
-        const data = await getCourses();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Connection timed out')), 5000)
+        );
+        const data = (await Promise.race([getCourses(), timeoutPromise])) as CourseSummary[];
         if (cancelled) return;
         setCourses(data);
         setLoadState('success');
