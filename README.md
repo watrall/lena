@@ -1,6 +1,6 @@
 [![CI][ci-badge]][ci-workflow]
 [![Docker Pulls Backend](https://img.shields.io/docker/pulls/watrall/lena-backend?label=backend%20pulls&logo=docker)](https://hub.docker.com/r/watrall/lena-backend)
-[![Docker Pulls Frontend](https://img.shields.io/docker/pulls/watrall/lena-web?label=web%20pulls&logo=docker)](https://hub.docker.com/r/watrall/lena-web)
+[![Docker Pulls Web](https://img.shields.io/docker/pulls/watrall/lena-web?label=web%20pulls&logo=docker)](https://hub.docker.com/r/watrall/lena-web)
 
 # LENA – Learning Engagement & Navigation Assistant
 
