@@ -9,7 +9,10 @@ COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 
 # Copy source and build
+# Copy source and build
 COPY . .
+ARG NEXT_PUBLIC_API_BASE
+ENV NEXT_PUBLIC_API_BASE=${NEXT_PUBLIC_API_BASE}
 RUN npm run build
 
 # Runtime stage: Minimal production image
