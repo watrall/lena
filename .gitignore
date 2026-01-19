@@ -31,3 +31,4 @@ env/
 # Data artifacts
 data/cache/
 .pytest-storage/
+scripts/capture_screenshots.py

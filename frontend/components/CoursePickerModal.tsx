@@ -27,17 +27,21 @@ export default function CoursePickerModal({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) return;
-    setSelectedCourseId(activeCourseId ?? null);
+    if (open) {
+      setSelectedCourseId(activeCourseId ?? null);
+    }
   }, [activeCourseId, open]);
 
   useEffect(() => {
-    if (!open || loadState !== 'idle') return;
+    if (!open) return;
 
+    // Always fetch when modal opens, regardless of current loadState
     let cancelled = false;
+    setLoadState('loading');
+    setErrorMessage(null);
+    setCourses([]);
+
     const fetchCourses = async () => {
-      setLoadState('loading');
-      setErrorMessage(null);
       try {
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Connection timed out')), 5000)
@@ -60,7 +64,7 @@ export default function CoursePickerModal({
     return () => {
       cancelled = true;
     };
-  }, [activeCourseId, loadState, open]);
+  }, [activeCourseId, open]);
 
   useEffect(() => {
     if (!open) return;
