@@ -67,6 +67,44 @@ class Settings(BaseSettings):
     escalation_confidence_threshold: float = Field(default=0.55, ge=0.0, le=1.0)
     analytics_history_days: int = Field(default=90, ge=1, le=365)
 
+    # Feature flags (no authentication in pilot mode; disable risky endpoints by default).
+    enable_ingest_endpoint: bool = Field(
+        default=False,
+        description="Enable POST /ingest/run (expensive; should be restricted in deployments).",
+    )
+    enable_admin_endpoints: bool = Field(
+        default=False,
+        description="Enable instructor/admin endpoints (review queue + promote).",
+    )
+    enable_export_endpoint: bool = Field(
+        default=False,
+        description="Enable GET /admin/export (bulk data export).",
+    )
+    enable_pii_export: bool = Field(
+        default=False,
+        description="Allow include_pii=true in exports (requires LENA_ENCRYPTION_KEY).",
+    )
+
+    # Export safety limits
+    export_max_file_bytes: int = Field(
+        default=50_000_000,
+        ge=1_000_000,
+        le=1_000_000_000,
+        description="Maximum on-disk file size (bytes) allowed for export inputs.",
+    )
+    export_max_records: int = Field(
+        default=200_000,
+        ge=1_000,
+        le=5_000_000,
+        description="Maximum records per exported component (to reduce memory/CPU abuse).",
+    )
+    export_max_components: int = Field(
+        default=20,
+        ge=1,
+        le=100,
+        description="Maximum number of components per export request.",
+    )
+
     @field_validator("data_dir", "storage_dir", mode="before")
     @classmethod
     def coerce_path(cls, value: str | Path) -> Path:

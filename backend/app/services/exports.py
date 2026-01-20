@@ -17,7 +17,8 @@ from zoneinfo import ZoneInfo
 
 from . import courses
 from .crypto import decrypt_pii
-from .storage import read_json, read_jsonl, storage_path
+from .storage import read_json, storage_path
+from ..settings import settings
 
 ExportFormat = Literal["json", "csv"]
 RangeKind = Literal["7d", "30d", "custom", "all"]
@@ -81,6 +82,32 @@ def _parse_timestamp(value: Any) -> datetime | None:
         return None
 
 
+def _read_jsonl_limited(name: str) -> list[dict[str, Any]]:
+    path = storage_path(name)
+    if not path.exists():
+        return []
+
+    try:
+        if path.stat().st_size > settings.export_max_file_bytes:
+            raise ValueError(f"{name} exceeds export_max_file_bytes")
+    except OSError:
+        # If we can't stat, fall back to read attempt with record cap.
+        pass
+
+    records: list[dict[str, Any]] = []
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                records.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+            if len(records) >= settings.export_max_records:
+                break
+    return records
+
+
 def _filter_by_course_and_range(
     records: Iterable[dict[str, Any]],
     *,
@@ -120,7 +147,7 @@ def load_raw_component(
 ) -> list[dict[str, Any]] | dict[str, Any]:
     if component == "raw_interactions":
         return _filter_by_course_and_range(
-            read_jsonl(storage_path("interactions.jsonl")),
+            _read_jsonl_limited("interactions.jsonl"),
             course_id=course_id,
             date_range=date_range,
             tz=tz,
@@ -128,7 +155,7 @@ def load_raw_component(
         )
     if component == "raw_answers":
         return _filter_by_course_and_range(
-            read_jsonl(storage_path("answers.jsonl")),
+            _read_jsonl_limited("answers.jsonl"),
             course_id=course_id,
             date_range=date_range,
             tz=tz,
@@ -136,7 +163,7 @@ def load_raw_component(
         )
     if component == "raw_review_queue":
         return _filter_by_course_and_range(
-            read_jsonl(storage_path("review_queue.jsonl")),
+            _read_jsonl_limited("review_queue.jsonl"),
             course_id=course_id,
             date_range=date_range,
             tz=tz,
@@ -158,7 +185,7 @@ def load_raw_component(
         return filtered
     if component == "raw_escalations":
         entries = _filter_by_course_and_range(
-            read_jsonl(storage_path("escalations.jsonl")),
+            _read_jsonl_limited("escalations.jsonl"),
             course_id=course_id,
             date_range=date_range,
             tz=tz,
@@ -362,4 +389,3 @@ def component_bytes(component_payload: Any, fmt: ExportFormat) -> bytes:
     if fmt == "csv":
         return _csv_bytes(component_payload)
     raise ValueError("Unsupported export format")
-

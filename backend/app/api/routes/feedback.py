@@ -4,9 +4,7 @@ Handles learner feedback submission and escalation requests. Unhelpful
 responses are automatically queued for instructor review.
 """
 
-from __future__ import annotations
-
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Body, HTTPException, Request
 
 from ...schemas.feedback import (
     EscalationRequest,
@@ -14,6 +12,7 @@ from ...schemas.feedback import (
     FeedbackRequest,
     FeedbackResponse,
 )
+from ...limiting import limiter
 from ...services import analytics, escalations, questions, review
 from ...services.storage import utc_timestamp
 from ..deps import resolve_course
@@ -22,7 +21,8 @@ router = APIRouter(tags=["feedback"])
 
 
 @router.post("/feedback", response_model=FeedbackResponse)
-def submit_feedback(payload: FeedbackRequest) -> FeedbackResponse:
+@limiter.limit("30/minute")
+async def submit_feedback(request: Request, payload: FeedbackRequest = Body(...)) -> FeedbackResponse:
     """Record learner feedback on an answer.
 
     Unhelpful answers are queued for instructor review.
@@ -77,7 +77,8 @@ def submit_feedback(payload: FeedbackRequest) -> FeedbackResponse:
 
 
 @router.post("/escalations/request", response_model=EscalationResponse)
-def request_escalation(payload: EscalationRequest) -> EscalationResponse:
+@limiter.limit("10/minute")
+async def request_escalation(request: Request, payload: EscalationRequest = Body(...)) -> EscalationResponse:
     """Submit an escalation request for instructor follow-up.
 
     Args:

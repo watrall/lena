@@ -4,21 +4,13 @@ import os
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-from slowapi.util import get_remote_address
 
 from .api.routes import admin, chat, courses, export, feedback, health, ingest, insights
+from .limiting import limiter
 from .services import storage
-
-# Rate limiter configuration - uses client IP address
-# Default: 100 requests/minute, /ask endpoint: 10 requests/minute
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=["100/minute"],
-    application_limits=["200/minute"],
-)
 
 app = FastAPI(
     title="LENA Backend",
@@ -32,6 +24,16 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
+
+# Basic hardening headers (auth is handled externally in real deployments).
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+    return response
 
 # Configure CORS from environment; defaults to common localhost variants for development.
 _cors_origins_env = os.getenv("LENA_CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")

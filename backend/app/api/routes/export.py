@@ -4,22 +4,23 @@ These endpoints support JSON/CSV exports of raw logs and insights components.
 They are intentionally lightweight for pilot workflows (no auth in demo mode).
 """
 
-from __future__ import annotations
-
 import io
 import zipfile
 from datetime import datetime
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import Response, StreamingResponse
 
 from ...services import exports
+from ...settings import settings
+from ...services.crypto import is_encryption_enabled
+from ...limiting import limiter
 
 router = APIRouter(tags=["export"])
 
-ExportFormat = Literal["json", "csv"]
-RangeKind = Literal["7d", "30d", "custom", "all"]
+ALLOWED_FORMATS = {"json", "csv"}
+ALLOWED_RANGES = {"7d", "30d", "custom", "all"}
 
 KNOWN_COMPONENTS = {
     "insights_totals",
@@ -40,7 +41,7 @@ def _timestamp_suffix() -> str:
     return datetime.utcnow().strftime("%Y%m%d-%H%M%SZ")
 
 
-def _range_token(kind: RangeKind, start_date: str | None, end_date: str | None) -> str:
+def _range_token(kind: str, start_date: str | None, end_date: str | None) -> str:
     if kind in {"7d", "30d", "all"}:
         return f"range-{kind}"
     start = start_date or "custom"
@@ -49,24 +50,38 @@ def _range_token(kind: RangeKind, start_date: str | None, end_date: str | None) 
 
 
 @router.get("/admin/export")
-def export_data(
+@limiter.limit("5/minute")
+async def export_data(
+    request: Request,
     course_id: str = Query(..., description="Course identifier or 'all'"),
     components: list[str] = Query(..., description="Export component keys (repeatable)"),
-    format: ExportFormat = Query("json", description="Export format (json|csv)"),
-    range: RangeKind = Query("30d", description="Date range selector (7d|30d|custom|all)"),
+    format: str = Query("json", description="Export format (json|csv)"),
+    range: str = Query("30d", description="Date range selector (7d|30d|custom|all)"),
     start_date: str | None = Query(None, description="Custom range start (YYYY-MM-DD)"),
     end_date: str | None = Query(None, description="Custom range end (YYYY-MM-DD)"),
     tz: str | None = Query(None, description="IANA timezone name (e.g., America/Detroit)"),
     include_pii: bool = Query(False, description="Include student PII fields (explicit opt-in)"),
     include_pii_confirm: str | None = Query(None, description="Must equal 'INCLUDE' when include_pii=true"),
 ) -> Response:
+    if not settings.enable_export_endpoint:
+        raise HTTPException(status_code=404, detail="Not found")
+    if len(components) > settings.export_max_components:
+        raise HTTPException(status_code=400, detail="Too many components requested")
     if not components:
         raise HTTPException(status_code=400, detail="At least one component is required")
+    if format not in ALLOWED_FORMATS:
+        raise HTTPException(status_code=400, detail="format must be json or csv")
+    if range not in ALLOWED_RANGES:
+        raise HTTPException(status_code=400, detail="range must be one of 7d, 30d, custom, all")
 
     unknown = sorted(set(components) - KNOWN_COMPONENTS)
     if unknown:
         raise HTTPException(status_code=400, detail=f"Unknown components: {', '.join(unknown)}")
 
+    if include_pii and not settings.enable_pii_export:
+        raise HTTPException(status_code=400, detail="PII export is disabled on this server")
+    if include_pii and not is_encryption_enabled():
+        raise HTTPException(status_code=400, detail="PII export requires LENA_ENCRYPTION_KEY to be configured")
     if include_pii and include_pii_confirm != "INCLUDE":
         raise HTTPException(
             status_code=400,
@@ -172,4 +187,3 @@ def export_data(
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{zip_name}"'},
     )
-

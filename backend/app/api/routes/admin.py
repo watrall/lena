@@ -4,13 +4,13 @@ Provides instructor-facing endpoints for reviewing low-confidence answers,
 promoting vetted responses to the FAQ, and managing the review queue.
 """
 
-from __future__ import annotations
-
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Body, HTTPException, Query, Request
 
 from ...schemas.admin import FAQEntry, PromoteRequest, ReviewItem
+from ...limiting import limiter
 from ...services import review
 from ...services.storage import utc_timestamp
+from ...settings import settings
 from ..deps import resolve_course
 
 router = APIRouter(tags=["admin"])
@@ -33,7 +33,9 @@ def get_faq(
 
 
 @router.get("/admin/review", response_model=list[ReviewItem])
-def get_review_queue(
+@limiter.limit("30/minute")
+async def get_review_queue(
+    request: Request,
     course_id: str = Query(..., description="Course identifier"),
 ) -> list[ReviewItem]:
     """Retrieve the instructor review queue for a course.
@@ -44,6 +46,8 @@ def get_review_queue(
     Returns:
         A list of items awaiting instructor review.
     """
+    if not settings.enable_admin_endpoints:
+        raise HTTPException(status_code=404, detail="Not found")
     return [
         ReviewItem(**entry)
         for entry in review.list_review_queue()
@@ -52,7 +56,8 @@ def get_review_queue(
 
 
 @router.post("/admin/promote", response_model=FAQEntry)
-def promote_to_faq(payload: PromoteRequest) -> FAQEntry:
+@limiter.limit("10/minute")
+async def promote_to_faq(request: Request, payload: PromoteRequest = Body(...)) -> FAQEntry:
     """Promote a review queue item to the FAQ.
 
     Args:
@@ -65,6 +70,8 @@ def promote_to_faq(payload: PromoteRequest) -> FAQEntry:
         HTTPException: If the review item is not found or belongs to
             a different course.
     """
+    if not settings.enable_admin_endpoints:
+        raise HTTPException(status_code=404, detail="Not found")
     removed = review.remove_review_item(payload.queue_id)
     if removed is None:
         raise HTTPException(status_code=404, detail="Review item not found")

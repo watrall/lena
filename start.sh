@@ -56,8 +56,11 @@ echo -e "\n${GREEN}Backend is up!${NC}"
 
 # 5. Seed Data
 echo "Seeding pilot data..."
-curl -s -X POST http://localhost:8000/ingest/run > /dev/null
-echo -e "${GREEN}Data seeded.${NC}"
+if curl -s -X POST http://localhost:8000/ingest/run > /dev/null; then
+    echo -e "${GREEN}Data seeded.${NC}"
+else
+    echo -e "${YELLOW}Skipped seeding (ingest endpoint disabled or unavailable).${NC}"
+fi
 
 # 6. Launch Browser
 echo -e "${GREEN}LENA is ready! Opening browser...${NC}"

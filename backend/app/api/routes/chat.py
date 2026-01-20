@@ -4,15 +4,14 @@ Provides the primary /ask endpoint that performs retrieval-augmented generation
 to answer student questions with grounded, citation-backed responses.
 """
 
-from __future__ import annotations
-
 from uuid import uuid4
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body, Request
 
 from ...models.generate import generate_answer
 from ...rag.retrieve import RetrievedChunk, retrieve
 from ...schemas.chat import AskRequest, AskResponse, Citation
+from ...limiting import limiter
 from ...services import analytics, questions
 from ...services.storage import utc_timestamp
 from ...settings import settings
@@ -94,7 +93,8 @@ def _compute_confidence(chunks: list[RetrievedChunk]) -> float:
 
 
 @router.post("/ask", response_model=AskResponse)
-def ask_question(payload: AskRequest) -> AskResponse:
+@limiter.limit("10/minute")
+async def ask_question(request: Request, payload: AskRequest = Body(...)) -> AskResponse:
     """Answer a learner's question using retrieval-augmented generation.
 
     Rate limited to 10 requests per minute per IP address via app-level limiter.

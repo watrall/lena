@@ -5,9 +5,11 @@ from datetime import datetime, timezone
 
 import pytest
 from fastapi.testclient import TestClient
+from cryptography.fernet import Fernet
 
 from backend.app.main import app
 from backend.app.settings import settings
+from backend.app.services import crypto
 from backend.app.services.storage import append_jsonl, storage_path
 
 
@@ -38,6 +40,10 @@ def _write_escalation(course_id: str, submitted_at: str, **extra):
 @pytest.fixture()
 def isolated_client(tmp_path, monkeypatch):
     monkeypatch.setattr(settings, "storage_dir", tmp_path)
+    monkeypatch.setattr(settings, "enable_export_endpoint", True)
+    monkeypatch.setattr(settings, "enable_pii_export", True)
+    monkeypatch.setenv("LENA_ENCRYPTION_KEY", Fernet.generate_key().decode("utf-8"))
+    crypto._get_fernet.cache_clear()
     return TestClient(app)
 
 
@@ -151,4 +157,3 @@ def test_export_custom_range_filters_by_local_date(isolated_client):
     questions = {row.get("question") for row in payload}
     assert "late" in questions
     assert "early" not in questions
-
