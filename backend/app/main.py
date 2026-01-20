@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
-from .api.routes import admin, chat, courses, feedback, health, ingest, insights
+from .api.routes import admin, chat, courses, export, feedback, health, ingest, insights
 from .services import storage
 
 # Rate limiter configuration - uses client IP address
@@ -54,3 +54,4 @@ app.include_router(chat.router)
 app.include_router(feedback.router)
 app.include_router(admin.router)
 app.include_router(insights.router)
+app.include_router(export.router)

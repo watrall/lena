@@ -10,6 +10,7 @@ import DailyVolumeChart from '../components/insights/DailyVolumeChart';
 import EscalationsTable from '../components/insights/EscalationsTable';
 import PainPointsList from '../components/insights/PainPointsList';
 import TopQuestions from '../components/insights/TopQuestions';
+import ExportDataModal from '../components/insights/ExportDataModal';
 import type { InsightsSummary } from '../lib/api';
 import { fetchInsights } from '../lib/api';
 import type { ActiveCourse } from '../lib/course';
@@ -22,6 +23,7 @@ const InsightsPage: NextPage<InsightsPageProps> = ({ activeCourse }) => {
   const [insights, setInsights] = useState<InsightsSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const loadInsights = useCallback(
     async (courseId: string) => {
@@ -130,15 +132,27 @@ const InsightsPage: NextPage<InsightsPageProps> = ({ activeCourse }) => {
             .
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleRefresh}
-          disabled={courseLocked || loading}
-          className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-        >
-          {loading ? 'Refreshing…' : 'Refresh data'}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setExportOpen(true)}
+            disabled={loading}
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+          >
+            Export data
+          </button>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={courseLocked || loading}
+            className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            {loading ? 'Refreshing…' : 'Refresh data'}
+          </button>
+        </div>
       </header>
+
+      <ExportDataModal open={exportOpen} activeCourse={activeCourse} onClose={() => setExportOpen(false)} />
 
       {courseLocked && (
         <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">

@@ -146,3 +146,68 @@ export const fetchFaq = (courseId: string) =>
 
 export const fetchInsights = (courseId: string) =>
   request<InsightsSummary>(`/insights?course_id=${encodeURIComponent(courseId)}`);
+
+export type ExportRangeKind = '7d' | '30d' | 'custom' | 'all';
+export type ExportFormat = 'json' | 'csv';
+
+export type ExportComponent =
+  | 'insights_totals'
+  | 'insights_top_questions'
+  | 'insights_daily_volume'
+  | 'insights_confidence_trend'
+  | 'insights_pain_points'
+  | 'insights_escalations'
+  | 'raw_interactions'
+  | 'raw_answers'
+  | 'raw_review_queue'
+  | 'raw_faq'
+  | 'raw_escalations';
+
+export async function exportData(payload: {
+  courseId: string; // course_id or 'all'
+  components: ExportComponent[];
+  format: ExportFormat;
+  range: ExportRangeKind;
+  startDate?: string;
+  endDate?: string;
+  tz?: string;
+  includePii: boolean;
+  includePiiConfirm?: string;
+}): Promise<{ blob: Blob; filename: string }> {
+  const params = new URLSearchParams();
+  params.set('course_id', payload.courseId);
+  params.set('format', payload.format);
+  params.set('range', payload.range);
+  if (payload.startDate) params.set('start_date', payload.startDate);
+  if (payload.endDate) params.set('end_date', payload.endDate);
+  if (payload.tz) params.set('tz', payload.tz);
+  if (payload.includePii) {
+    params.set('include_pii', 'true');
+    if (payload.includePiiConfirm) params.set('include_pii_confirm', payload.includePiiConfirm);
+  }
+  for (const component of payload.components) {
+    params.append('components', component);
+  }
+
+  const response = await fetch(`${API_BASE}/admin/export?${params.toString()}`, {
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    let message = `Export failed with status ${response.status}`;
+    try {
+      const body = await response.json();
+      message = body.detail || body.message || message;
+    } catch {
+      // ignore
+    }
+    throw new Error(message);
+  }
+
+  const disposition = response.headers.get('content-disposition') || '';
+  const match = disposition.match(/filename="([^"]+)"/i);
+  const filename = match?.[1] || 'lena_export.bin';
+
+  const blob = await response.blob();
+  return { blob, filename };
+}
