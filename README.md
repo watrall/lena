@@ -10,6 +10,12 @@ LENA isn’t meant to replace instructors. It handles common questions and point
 
 Students interact through a simple chat interface that works on desktop and mobile. Instructors and course admins can view real-time insights in an analytics dashboard—tracking trends, top questions, and emerging pain points across multiple courses. The pilot version is fully containerized (FastAPI backend + Next.js frontend + Qdrant vector store) and integrates with GitHub Actions for automated testing and builds.
 
+## Demo-mode (no authentication)
+
+This repo is a pilot/demo build: it ships with demo courses and sample content, and it does not include authentication or role-based access control. That means both the student chat UI and the insights dashboard are publicly accessible to anyone who can reach the running web app.
+
+For any real deployment, add authentication (and authorization) in front of the web UI and lock down the API endpoints appropriately.
+
 ## Screenshots
 
 <p>
