@@ -10,6 +10,16 @@ LENA isn’t meant to replace instructors. It handles common questions and point
 
 Students interact through a simple chat interface that works on desktop and mobile. Instructors and course admins can view real-time insights in an analytics dashboard—tracking trends, top questions, and emerging pain points across multiple courses. The pilot version is fully containerized (FastAPI backend + Next.js frontend + Qdrant vector store) and integrates with GitHub Actions for automated testing and builds.
 
+## Screenshots
+
+<p>
+  <img src="docs/screens/01_course_picker.png" alt="Course picker" width="48%" />
+  <img src="docs/screens/02_chat.png" alt="Chat interface" width="48%" />
+</p>
+<p>
+  <img src="docs/screens/03_faq.png" alt="FAQ page" width="48%" />
+  <img src="docs/screens/04_insights.png" alt="Insights dashboard" width="48%" />
+</p>
 
 - **Student view** – Ask a question, get a sourced answer.  
   - Each response links back to the syllabus, policy doc, or calendar event it pulled from.  

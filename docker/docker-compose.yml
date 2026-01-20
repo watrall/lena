@@ -10,7 +10,7 @@ services:
       LENA_QDRANT_PORT: "6333"
       LENA_DATA_DIR: "/data/input"
       LENA_STORAGE_DIR: "/data/storage"
-      LENA_CORS_ORIGINS: "http://localhost:3000"
+      LENA_CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
     command: uvicorn app.main:app --host 0.0.0.0 --port ${BACKEND_PORT:-8000}
     volumes:
       - ../data:/data/input:ro

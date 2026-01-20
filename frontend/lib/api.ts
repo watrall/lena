@@ -70,7 +70,7 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
       ...init,
     });
   } catch (err) {
-    throw new Error('Network error. Please check your connection.');
+    throw new Error('Network error. Check that the API is reachable and CORS allows this origin.');
   }
 
   if (!response.ok) {

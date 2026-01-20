@@ -25,6 +25,7 @@ export default function CoursePickerModal({
   const [loadState, setLoadState] = useState<LoadState>('idle');
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(activeCourseId ?? null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     if (open) {
@@ -64,7 +65,7 @@ export default function CoursePickerModal({
     return () => {
       cancelled = true;
     };
-  }, [activeCourseId, open]);
+  }, [activeCourseId, open, reloadToken]);
 
   useEffect(() => {
     if (!open) return;
@@ -92,7 +93,7 @@ export default function CoursePickerModal({
   }, [onClose, selectedCourse]);
 
   const handleRetry = () => {
-    setLoadState('idle');
+    setReloadToken((current) => current + 1);
   };
 
   if (!open) return null;

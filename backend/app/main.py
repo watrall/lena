@@ -33,8 +33,8 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-# Configure CORS from environment; defaults to localhost for development.
-_cors_origins_env = os.getenv("LENA_CORS_ORIGINS", "http://localhost:3000")
+# Configure CORS from environment; defaults to common localhost variants for development.
+_cors_origins_env = os.getenv("LENA_CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
 CORS_ORIGINS = [origin.strip() for origin in _cors_origins_env.split(",") if origin.strip()]
 
 app.add_middleware(

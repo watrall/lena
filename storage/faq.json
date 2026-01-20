@@ -3,6 +3,63 @@
     "question": "How do I ask LENA about assignment dates?",
     "answer": "Use natural questions such as “When is Assignment 1 due?” and LENA will respond with the relevant due date and citation from the syllabus or calendar.",
     "source_path": "assignments.md",
-    "updated_at": "2024-03-01T00:00:00Z"
+    "updated_at": "2024-03-01T00:00:00Z",
+    "course_id": "anth101"
+  },
+  {
+    "question": "What is cultural relativism?",
+    "answer": "Cultural relativism means interpreting beliefs and practices within their own cultural context instead of judging them by outside standards.",
+    "source_path": "lectures/week-1.md",
+    "updated_at": "2024-03-02T00:00:00Z",
+    "course_id": "anth101"
+  },
+  {
+    "question": "What is the late work policy?",
+    "answer": "Late submissions lose 10% within 48 hours unless the syllabus specifies an exception. Ask if you need an extension and include your circumstances.",
+    "source_path": "policies/late-work.md",
+    "updated_at": "2024-03-03T00:00:00Z",
+    "course_id": "anth101"
+  },
+  {
+    "question": "How do I cite course readings?",
+    "answer": "Use the citation style required by the instructor (often APA). Include author, year, title, and page number when quoting.",
+    "source_path": "citation-guide.md",
+    "updated_at": "2024-03-04T00:00:00Z",
+    "course_id": "anth101"
+  },
+  {
+    "question": "Where can I find office hours?",
+    "answer": "Office hours are listed in the syllabus and the weekly announcements. If you can’t attend, email to request an alternative time.",
+    "source_path": "syllabus.md",
+    "updated_at": "2024-03-05T00:00:00Z",
+    "course_id": "anth101"
+  },
+  {
+    "question": "What should I include in a discussion post?",
+    "answer": "State your claim, support it with a specific example from the reading, and end with one question for peers. Keep it concise and concrete.",
+    "source_path": "discussions.md",
+    "updated_at": "2024-03-06T00:00:00Z",
+    "course_id": "anth101"
+  },
+  {
+    "question": "What is the best way to prep for the field notes assignment?",
+    "answer": "Bring a notebook, record observations with timestamps, and separate description from interpretation; include sketches if helpful.",
+    "source_path": "assignments/field-notes.md",
+    "updated_at": "2024-03-02T00:00:00Z",
+    "course_id": "anth204"
+  },
+  {
+    "question": "Where do Anth204 announcements live?",
+    "answer": "Weekly Anth204 announcements are posted in the announcements section. Use LENA to ask “What changed this week?” for a quick summary.",
+    "source_path": "announcements.md",
+    "updated_at": "2024-03-03T00:00:00Z",
+    "course_id": "anth204"
+  },
+  {
+    "question": "Where can I find office hours and contact info?",
+    "answer": "Check the syllabus and the weekly announcements; office hours are listed there along with the instructor email.",
+    "source_path": "syllabus.md",
+    "updated_at": "2026-01-20T00:03:01.976529Z",
+    "course_id": "anth101"
   }
 ]
