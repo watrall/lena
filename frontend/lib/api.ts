@@ -150,7 +150,7 @@ export const fetchInsights = (courseId: string) =>
   request<InsightsSummary>(`/insights?course_id=${encodeURIComponent(courseId)}`, {
     headers: (() => {
       const token = getInstructorToken();
-      return token ? { Authorization: `Bearer ${token}` } : {};
+      return token ? { Authorization: `Bearer ${token}` } : undefined;
     })(),
   });
 
