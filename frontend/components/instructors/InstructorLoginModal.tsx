@@ -70,7 +70,7 @@ export default function InstructorLoginModal({ open, submitting, error, onClose,
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               disabled={submitting}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+              className="lena-input"
               autoComplete="username"
             />
           </div>
@@ -85,19 +85,19 @@ export default function InstructorLoginModal({ open, submitting, error, onClose,
               type="password"
               onChange={(event) => setPassword(event.target.value)}
               disabled={submitting}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+              className="lena-input"
               autoComplete="current-password"
             />
           </div>
 
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+          <div className="lena-alert-warn text-xs">
             Demo credentials are listed in the repository README.
           </div>
 
           <button
             type="submit"
             disabled={submitting || username.trim().length === 0 || password.length === 0}
-            className="w-full rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="lena-button-primary w-full px-5 py-2 text-sm"
           >
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>
@@ -106,4 +106,3 @@ export default function InstructorLoginModal({ open, submitting, error, onClose,
     </div>
   );
 }
-

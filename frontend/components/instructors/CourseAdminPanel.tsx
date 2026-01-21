@@ -161,24 +161,24 @@ export default function CourseAdminPanel({ activeCourse }: Props) {
   };
 
   return (
-    <section className="flex w-full flex-1 flex-col gap-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 md:p-8">
+    <section className="lena-card lena-card-padding flex w-full flex-1 flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold text-slate-900 md:text-2xl">Course management</h1>
-          <p className="text-sm text-slate-600">Add or retire courses and manage uploaded resources without touching the server filesystem.</p>
+          <h1 className="lena-title">Course management</h1>
+          <p className="lena-subtitle">Add or retire courses and manage uploaded resources without touching the server filesystem.</p>
         </div>
         <button
           type="button"
           onClick={refreshCourses}
           disabled={courseLoad === 'loading'}
-          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+          className="lena-button-secondary"
         >
           Refresh list
         </button>
       </header>
 
       {courseError && (
-        <div className="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700">{courseError}</div>
+        <div className="lena-alert-error">{courseError}</div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -189,33 +189,33 @@ export default function CourseAdminPanel({ activeCourse }: Props) {
               value={newId}
               onChange={(e) => setNewId(e.target.value)}
               placeholder="Course ID (e.g., anth305)"
-              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+              className="lena-input"
             />
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Course name"
-              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+              className="lena-input"
             />
             <div className="grid gap-3 md:grid-cols-2">
               <input
                 value={newCode}
                 onChange={(e) => setNewCode(e.target.value)}
                 placeholder="Code (optional)"
-                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                className="lena-input"
               />
               <input
                 value={newTerm}
                 onChange={(e) => setNewTerm(e.target.value)}
                 placeholder="Term (optional)"
-                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                className="lena-input"
               />
             </div>
             <button
               type="button"
               onClick={handleCreateCourse}
               disabled={!newId.trim() || !newName.trim()}
-              className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="lena-button-primary px-5 py-2 text-sm"
             >
               Create course
             </button>
@@ -234,7 +234,7 @@ export default function CourseAdminPanel({ activeCourse }: Props) {
             type="button"
             onClick={handleDeleteCourse}
             disabled={!selectedCourseId}
-            className="mt-4 rounded-full border border-rose-200 bg-rose-50 px-5 py-2 text-sm font-semibold text-rose-800 transition enabled:hover:border-rose-300 enabled:hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="lena-button-danger mt-4 px-5 py-2 text-sm"
           >
             Delete course
           </button>
@@ -254,20 +254,20 @@ export default function CourseAdminPanel({ activeCourse }: Props) {
             type="button"
             onClick={() => selectedCourseId && refreshResources(selectedCourseId)}
             disabled={!selectedCourseId || resourceLoad === 'loading'}
-            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+            className="lena-button-secondary"
           >
             Refresh resources
           </button>
         </div>
 
         {!selectedCourseId && (
-          <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+          <div className="mt-4 lena-callout rounded-2xl px-4 py-6">
             Choose an active course in the header to manage its resources.
           </div>
         )}
 
         {selectedCourseId && resourceError && (
-          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700">{resourceError}</div>
+          <div className="mt-4 lena-alert-error rounded-2xl px-4 py-4">{resourceError}</div>
         )}
 
         {selectedCourseId && (
@@ -297,19 +297,19 @@ export default function CourseAdminPanel({ activeCourse }: Props) {
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                   placeholder="https://…"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                  className="lena-input"
                 />
                 <input
                   value={linkTitle}
                   onChange={(e) => setLinkTitle(e.target.value)}
                   placeholder="Title (optional)"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                  className="lena-input"
                 />
                 <button
                   type="button"
                   onClick={handleAddLink}
                   disabled={!linkUrl.trim() || linkSubmitting}
-                  className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  className="lena-button-primary px-5 py-2 text-sm"
                 >
                   {linkSubmitting ? 'Adding…' : 'Add link'}
                 </button>
@@ -322,12 +322,12 @@ export default function CourseAdminPanel({ activeCourse }: Props) {
           <div className="mt-6">
             <h3 className="text-sm font-semibold text-slate-800">Current resources</h3>
             {resourceLoad === 'loading' && (
-              <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+              <div className="mt-3 lena-callout rounded-2xl px-4 py-6">
                 Loading resources…
               </div>
             )}
             {resourceLoad !== 'loading' && resources.length === 0 && (
-              <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+              <div className="mt-3 lena-callout rounded-2xl px-4 py-6">
                 No resources yet.
               </div>
             )}
@@ -344,7 +344,7 @@ export default function CourseAdminPanel({ activeCourse }: Props) {
                     <button
                       type="button"
                       onClick={() => handleDeleteResource(r.id)}
-                      className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                      className="lena-button-secondary"
                     >
                       Delete
                     </button>
@@ -358,4 +358,3 @@ export default function CourseAdminPanel({ activeCourse }: Props) {
     </section>
   );
 }
-

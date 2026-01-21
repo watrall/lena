@@ -139,7 +139,7 @@ export default function CoursePickerModal({
             <p className="mt-1">{errorMessage}</p>
             <button
               type="button"
-              className="mt-4 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+              className="lena-button-primary mt-4 px-4 py-2 text-sm"
               onClick={handleRetry}
             >
               Try again
@@ -187,7 +187,7 @@ export default function CoursePickerModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              className="lena-button-secondary px-4 py-2 text-sm"
             >
               Cancel
             </button>
@@ -196,7 +196,7 @@ export default function CoursePickerModal({
             type="button"
             onClick={handleConfirm}
             disabled={!selectedCourse || isLoading}
-            className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="lena-button-primary px-5 py-2 text-sm"
           >
             {selectedCourse ? 'Use this course' : 'Select a course'}
           </button>

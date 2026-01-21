@@ -43,7 +43,7 @@ export default function Header({ activeCourse, onSwitchCourse }: HeaderProps) {
                 >
                   <span>{link.label}</span>
                   {isActive && (
-                    <span className="pointer-events-none absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-slate-900" aria-hidden />
+                    <span className="pointer-events-none absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-lena-primary" aria-hidden />
                   )}
                 </Link>
               );
@@ -69,7 +69,7 @@ export default function Header({ activeCourse, onSwitchCourse }: HeaderProps) {
           <button
             type="button"
             onClick={onSwitchCourse}
-            className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-200"
+            className="lena-button-secondary bg-white px-4 py-2"
           >
             {activeCourse ? 'Switch course' : 'Choose course'}
           </button>

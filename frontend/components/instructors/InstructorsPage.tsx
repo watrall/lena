@@ -85,11 +85,11 @@ export default function InstructorsPage({ activeCourse }: Props) {
       />
 
       <div className="flex w-full flex-1 flex-col gap-6">
-        <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 md:p-8">
+        <section className="lena-card lena-card-padding">
           <header className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-6">
             <div className="flex flex-col gap-1">
-              <h1 className="text-xl font-semibold text-slate-900 md:text-2xl">Instructors</h1>
-              <p className="text-sm text-slate-600">{subtitle}</p>
+              <h1 className="lena-title">Instructors</h1>
+              <p className="lena-subtitle">{subtitle}</p>
               <p className="text-xs text-slate-500">
                 Demo-only access control. Credentials are documented in the repo README.
               </p>
@@ -100,14 +100,14 @@ export default function InstructorsPage({ activeCourse }: Props) {
                   <button
                     type="button"
                     onClick={() => setLoginOpen(true)}
-                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                    className="lena-button-secondary"
                   >
                     Switch account
                   </button>
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                    className="lena-button-secondary"
                   >
                     Log out
                   </button>
@@ -116,7 +116,7 @@ export default function InstructorsPage({ activeCourse }: Props) {
                 <button
                   type="button"
                   onClick={() => setLoginOpen(true)}
-                  className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-700"
+                  className="lena-button-primary"
                 >
                   Sign in
                 </button>
@@ -130,20 +130,14 @@ export default function InstructorsPage({ activeCourse }: Props) {
                 <button
                   type="button"
                   onClick={() => setTab('insights')}
-                  className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
-                    tab === 'insights'
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
+                  className={`lena-tab ${tab === 'insights' ? 'lena-tab-active' : 'lena-tab-inactive'}`}
                 >
                   Insights
                 </button>
                 <button
                   type="button"
                   onClick={() => setTab('admin')}
-                  className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
-                    tab === 'admin' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
+                  className={`lena-tab ${tab === 'admin' ? 'lena-tab-active' : 'lena-tab-inactive'}`}
                 >
                   Course admin
                 </button>
@@ -153,7 +147,7 @@ export default function InstructorsPage({ activeCourse }: Props) {
                 <button
                   type="button"
                   onClick={() => setExportOpen(true)}
-                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                  className="lena-button-secondary"
                 >
                   Export data
                 </button>
@@ -161,7 +155,7 @@ export default function InstructorsPage({ activeCourse }: Props) {
                   type="button"
                   onClick={handleRunIngest}
                   disabled={ingestState === 'running'}
-                  className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  className="lena-button-primary"
                 >
                   {ingestState === 'running' ? 'Ingesting…' : 'Run ingest'}
                 </button>
@@ -171,11 +165,7 @@ export default function InstructorsPage({ activeCourse }: Props) {
 
           {token && ingestMessage && (
             <div
-              className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
-                ingestState === 'error'
-                  ? 'border-rose-200 bg-rose-50 text-rose-700'
-                  : 'border-emerald-200 bg-emerald-50 text-emerald-800'
-              }`}
+              className={`mt-4 ${ingestState === 'error' ? 'lena-alert-error' : 'lena-alert-success'}`}
             >
               {ingestMessage}
             </div>
@@ -184,7 +174,7 @@ export default function InstructorsPage({ activeCourse }: Props) {
           <ExportDataModal open={exportOpen} activeCourse={activeCourse} onClose={() => setExportOpen(false)} />
 
           {!token && (
-            <div className="mt-6 rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+            <div className="mt-6 lena-callout">
               Sign in to access instructor tools.
             </div>
           )}
@@ -193,7 +183,7 @@ export default function InstructorsPage({ activeCourse }: Props) {
         {token && tab === 'insights' && (
           <>
             {!canUseInsights ? (
-              <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+              <div className="lena-callout">
                 Choose a course in the header to load its insights dashboard.
               </div>
             ) : (

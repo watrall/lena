@@ -234,23 +234,23 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
 
   return (
     <Fragment>
-      <section className="flex w-full flex-1 flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 md:p-8">
+      <section className="lena-card lena-card-padding flex w-full flex-1 flex-col">
         <header className="flex flex-col gap-2 border-b border-slate-100 pb-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-xl font-semibold text-slate-900 md:text-2xl">Chat with LENA</h1>
-              <p className="text-sm text-slate-600">
+              <h1 className="lena-title">Chat with LENA</h1>
+              <p className="lena-subtitle">
                 Ask about policies, schedules, or coursework. You&apos;ll always see the sources.
               </p>
             </div>
             {lastAssistantMessage && lastAssistantMessage.role === 'assistant' && (
-              <span className="rounded-full bg-slate-900/5 px-4 py-2 text-xs font-semibold text-slate-600">
+              <span className="rounded-full bg-lena-secondary px-4 py-2 text-xs font-semibold text-lena-primary">
                 Confidence {Math.round(lastAssistantMessage.response.confidence * 100)}%
               </span>
             )}
           </div>
           {courseLocked && (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            <div className="lena-callout p-4">
               Choose a course to unlock the chat. Use the button in the header to get started.
             </div>
           )}
@@ -259,7 +259,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
         <div className="mt-6 flex-1 overflow-y-auto">
           <div className="flex min-h-[320px] flex-col gap-4">
             {messages.length === 0 && (
-              <div className="flex flex-1 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center text-sm text-slate-500">
+              <div className="flex flex-1 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center text-sm leading-relaxed text-slate-500">
                 {courseLocked
                   ? 'Select your course to start a conversation.'
                   : 'Ask something like “When is the next assignment due?”'}
@@ -287,7 +287,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
 
         <footer className="mt-6 border-t border-slate-100 pt-6">
           {error && (
-            <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div className="lena-alert-error mb-4 px-4 py-3">
               {error}
             </div>
           )}
@@ -304,7 +304,7 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
                 : `Ask something for ${activeCourse?.name ?? 'your course'}`
             }
           />
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-2 text-xs leading-relaxed text-slate-400">
             Responses stay within your course context and log feedback for quality checks.
           </p>
         </footer>

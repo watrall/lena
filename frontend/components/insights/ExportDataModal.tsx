@@ -204,7 +204,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                       value={chosenCourseId}
                       onChange={(event) => setChosenCourseId(event.target.value)}
                       disabled={submitting}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                      className="lena-input"
                     >
                       <option value="" disabled>
                         Select a course
@@ -242,9 +242,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                   type="button"
                   onClick={() => setFormat('json')}
                   disabled={submitting}
-                  className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
-                    format === 'json' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
+                  className={`lena-tab ${format === 'json' ? 'lena-tab-active' : 'lena-tab-inactive'}`}
                 >
                   JSON
                 </button>
@@ -252,9 +250,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                   type="button"
                   onClick={() => setFormat('csv')}
                   disabled={submitting}
-                  className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
-                    format === 'csv' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
+                  className={`lena-tab ${format === 'csv' ? 'lena-tab-active' : 'lena-tab-inactive'}`}
                 >
                   CSV
                 </button>
@@ -269,7 +265,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                   onClick={() => setRange('7d')}
                   disabled={submitting}
                   className={`rounded-2xl border px-3 py-2 text-left transition ${
-                    range === '7d' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white hover:bg-slate-50'
+                    range === '7d' ? 'border-lena-primary bg-lena-primary text-white' : 'border-slate-200 bg-white hover:bg-slate-50'
                   }`}
                 >
                   Last 7 days
@@ -279,7 +275,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                   onClick={() => setRange('30d')}
                   disabled={submitting}
                   className={`rounded-2xl border px-3 py-2 text-left transition ${
-                    range === '30d' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white hover:bg-slate-50'
+                    range === '30d' ? 'border-lena-primary bg-lena-primary text-white' : 'border-slate-200 bg-white hover:bg-slate-50'
                   }`}
                 >
                   Last 30 days
@@ -289,7 +285,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                   onClick={() => setRange('all')}
                   disabled={submitting}
                   className={`rounded-2xl border px-3 py-2 text-left transition ${
-                    range === 'all' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white hover:bg-slate-50'
+                    range === 'all' ? 'border-lena-primary bg-lena-primary text-white' : 'border-slate-200 bg-white hover:bg-slate-50'
                   }`}
                 >
                   All time
@@ -299,7 +295,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                   onClick={() => setRange('custom')}
                   disabled={submitting}
                   className={`rounded-2xl border px-3 py-2 text-left transition ${
-                    range === 'custom' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white hover:bg-slate-50'
+                    range === 'custom' ? 'border-lena-primary bg-lena-primary text-white' : 'border-slate-200 bg-white hover:bg-slate-50'
                   }`}
                 >
                   Custom…
@@ -317,7 +313,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                       value={startDate}
                       onChange={(event) => setStartDate(event.target.value)}
                       disabled={submitting}
-                      className="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                      className="lena-input mt-1"
                     />
                   </div>
                   <div>
@@ -330,7 +326,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                       value={endDate}
                       onChange={(event) => setEndDate(event.target.value)}
                       disabled={submitting}
-                      className="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                      className="lena-input mt-1"
                     />
                   </div>
                 </div>
@@ -347,7 +343,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                     type="button"
                     onClick={selectAll}
                     disabled={submitting}
-                    className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                    className="lena-button-ghost px-3 py-1"
                   >
                     Select all
                   </button>
@@ -355,7 +351,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                     type="button"
                     onClick={clearAll}
                     disabled={submitting}
-                    className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                    className="lena-button-ghost px-3 py-1"
                   >
                     Clear
                   </button>
@@ -431,7 +427,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
                     onChange={(event) => setIncludePiiConfirm(event.target.value)}
                     disabled={submitting}
                     placeholder="Type INCLUDE"
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                    className="lena-input mt-1"
                   />
                   {!piiConfirmed && (
                     <p className="mt-2 text-xs text-rose-700">Type INCLUDE to enable PII export.</p>
@@ -447,7 +443,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:bg-slate-100"
+            className="lena-button-secondary px-4 py-2 text-sm"
           >
             Cancel
           </button>
@@ -455,7 +451,7 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
             type="button"
             onClick={handleDownload}
             disabled={!formReady}
-            className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="lena-button-primary px-5 py-2 text-sm"
           >
             {submitting ? 'Preparing…' : 'Download export'}
           </button>
@@ -464,4 +460,3 @@ export default function ExportDataModal({ open, activeCourse, onClose }: Props) 
     </div>
   );
 }
-

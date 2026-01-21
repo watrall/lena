@@ -102,7 +102,7 @@ export const ChatMessage = ({
                 </div>
 
                 {response.escalation_suggested && escalationStatus !== 'submitted' && (
-                    <div className="mt-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-xs text-indigo-700">
+                    <div className="mt-4 rounded-2xl border border-slate-200 bg-lena-secondary p-4 text-xs text-lena-primary">
                         {escalationOpenId === message.id ? (
                             <EscalationForm
                                 messageId={message.id}
@@ -112,16 +112,16 @@ export const ChatMessage = ({
                                 error={escalationError}
                             />
                         ) : escalationStatus === 'opted_out' ? (
-                            <span className="text-indigo-500">No follow-up requested.</span>
+                            <span className="text-slate-500">No follow-up requested.</span>
                         ) : (
                             <div className="flex flex-wrap items-center gap-3">
-                                <span className="font-semibold text-indigo-800">
+                                <span className="font-semibold text-slate-800">
                                     Need an instructor to take a look?
                                 </span>
                                 <button
                                     type="button"
                                     onClick={() => onEscalationRequest(message.id)}
-                                    className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-600 shadow-sm transition hover:bg-indigo-100"
+                                    className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-lena-primary shadow-sm transition hover:bg-slate-50"
                                     aria-label="Open escalation form"
                                     aria-expanded={escalationOpenId === message.id}
                                     aria-controls={consentId}
@@ -131,7 +131,7 @@ export const ChatMessage = ({
                                 <button
                                     type="button"
                                     onClick={() => onCancelEscalation(message.id)}
-                                    className="text-xs font-semibold text-indigo-500 underline-offset-2 hover:underline"
+                                    className="text-xs font-semibold text-lena-primary underline-offset-2 hover:underline"
                                 >
                                     No thanks
                                 </button>

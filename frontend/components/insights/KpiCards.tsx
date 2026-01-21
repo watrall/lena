@@ -23,7 +23,7 @@ export default function KpiCards({ metrics, onRefresh, refreshing }: KpiCardsPro
             type="button"
             onClick={onRefresh}
             disabled={refreshing}
-            className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 transition enabled:hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="lena-button-secondary bg-slate-50 px-3 py-1"
           >
             {refreshing ? 'Refreshing…' : 'Refresh'}
           </button>
@@ -35,9 +35,7 @@ export default function KpiCards({ metrics, onRefresh, refreshing }: KpiCardsPro
             key={metric.id}
             className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-5 text-sm text-slate-700 shadow-sm"
           >
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-              {metric.label}
-            </p>
+            <p className="lena-label tracking-widest">{metric.label}</p>
             <div className="mt-3 text-2xl font-semibold text-slate-900">{metric.value}</div>
             {metric.description && <p className="mt-2 text-xs text-slate-500">{metric.description}</p>}
           </article>

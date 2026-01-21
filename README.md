@@ -10,17 +10,16 @@ LENA isn't meant to replace instructors. It handles common questions and points 
 
 Students interact through a simple chat interface that works on desktop and mobile. Instructors and course admins can view real-time insights in an analytics dashboard - tracking trends, top questions, and emerging pain points across multiple courses. The pilot version is fully containerized (FastAPI backend + Next.js frontend + Qdrant vector store) and integrates with GitHub Actions for automated testing and builds.
 
-## Demo Authentication
+## LENA Features
 
-This repo is a pilot/demo build: it ships with demo courses and sample content, and it does not include production-ready authentication or role-based access control.
-
-- **Student experience** (Chat + Course FAQ) is intentionally open in the pilot.
-- **Instructor tools** (Insights + Course management + Data export + Ingest) are behind a **demo-only login prompt** to demonstrate a basic authentication flow:
-
-- Username: `demo`
-- Password: `demo`
-
-For any production environment, the app must be connected to institutional authentication for proper security and compliance. This applies to both chat access and role-based access to Insights and Course Admin for instructors, staff, and administrators.
+- **Student view** - Ask a question, get a sourced answer.  
+  - Each response links back to the syllabus, policy doc, or calendar event it pulled from.  
+  - When the bot isn't confident, it invites the student to escalate to the instructor and collects consented contact info.
+- **Instructor view** - Review the course dashboard.  
+  - KPI cards highlight volume, helpfulness, and escalations.  
+  - Trend charts and emerging pain points call out what needs syllabus edits or follow-up announcements.
+  - Course management tools let instructors/admins add or retire courses, upload documents, save link snapshots, and re-run ingestion so new materials are searchable - without touching the server filesystem.
+- **Admin / support staff** - Watch aggregate metrics across pilots, tune ingest jobs, and plug alerts into campus systems as needed.
 
 ## Screenshots
 
@@ -45,14 +44,17 @@ Insights page (course trends, top questions, and escalations).
 ![Export modal](docs/screens/export-modal.png)
 Export modal (choose course scope, components, time range, and CSV or JSON).
 
-- **Student view** - Ask a question, get a sourced answer.  
-  - Each response links back to the syllabus, policy doc, or calendar event it pulled from.  
-  - When the bot isn't confident, it invites the student to escalate to the instructor and collects consented contact info.
-- **Instructor view** - Review the course dashboard.  
-  - KPI cards highlight volume, helpfulness, and escalations.  
-  - Trend charts and emerging pain points call out what needs syllabus edits or follow-up announcements.
-  - Course management tools let instructors/admins add or retire courses, upload documents, save link snapshots, and re-run ingestion so new materials are searchable - without touching the server filesystem.
-- **Admin / support staff** - Watch aggregate metrics across pilots, tune ingest jobs, and plug alerts into campus systems as needed.
+## Demo Authentication
+
+This repo is a pilot/demo build: it ships with demo courses and sample content, and it does not include production-ready authentication or role-based access control.
+
+- **Student experience** (Chat + Course FAQ) is intentionally open in the pilot.
+- **Instructor tools** (Insights + Course management + Data export + Ingest) are behind a **demo-only login prompt** to demonstrate a basic authentication flow.
+
+- Username: `demo`
+- Password: `demo`
+
+For any production environment, the app **must** be connected to institutional authentication for proper security and compliance. This applies to both chat access and role-based access to Insights and Course Admin for instructors, staff, and administrators.
 
 ---
 

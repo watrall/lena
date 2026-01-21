@@ -67,12 +67,12 @@ const FAQPage: NextPage<FAQPageProps> = ({ activeCourse }) => {
   const hasSearchTerm = search.trim().length > 0;
 
   return (
-    <section className="flex w-full flex-1 flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 md:p-8">
+    <section className="lena-card lena-card-padding flex w-full flex-1 flex-col">
       <header className="flex flex-col gap-2 border-b border-slate-100 pb-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-semibold text-slate-900 md:text-2xl">Course FAQ</h1>
-            <p className="text-sm text-slate-600">
+            <h1 className="lena-title">Course FAQ</h1>
+            <p className="lena-subtitle">
               Questions promoted from recent student activity. Tailored to{' '}
               {activeCourse ? (
                 <span className="font-medium text-slate-800">{activeCourse.name}</span>
@@ -83,7 +83,7 @@ const FAQPage: NextPage<FAQPageProps> = ({ activeCourse }) => {
             </p>
           </div>
           {loading && (
-            <span className="rounded-full bg-slate-900/5 px-4 py-2 text-xs font-semibold text-slate-600">
+            <span className="rounded-full bg-lena-secondary px-4 py-2 text-xs font-semibold text-lena-primary">
               Loading…
             </span>
           )}
@@ -102,25 +102,25 @@ const FAQPage: NextPage<FAQPageProps> = ({ activeCourse }) => {
             onChange={(event) => setSearch(event.target.value)}
             placeholder={courseLocked ? 'Pick a course to enable search.' : 'Search questions or keywords'}
             disabled={courseLocked || loading}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+            className="lena-input px-4 py-3"
           />
         </div>
 
         <div className="space-y-4">
           {courseLocked && (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+            <div className="lena-callout rounded-2xl px-4 py-6">
               Choose a course to view curated FAQ content.
             </div>
           )}
 
           {!courseLocked && error && (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700" role="alert">
+            <div className="lena-alert-error rounded-2xl px-4 py-3" role="alert">
               {error}
             </div>
           )}
 
           {!courseLocked && !error && !loading && !hasEntries && (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm leading-relaxed text-slate-600">
               {hasSearchTerm
                 ? 'Nothing matches that search yet. Try a different keyword or ask the chatbot so we can learn.'
                 : 'No FAQ entries yet. As the chat answers more questions, we’ll start capturing the best responses here.'}
@@ -135,7 +135,7 @@ const FAQPage: NextPage<FAQPageProps> = ({ activeCourse }) => {
                   className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-800 shadow-sm"
                 >
                   <h2 className="text-sm font-semibold text-slate-900">{entry.question}</h2>
-                  <p className="mt-2 whitespace-pre-line text-slate-700">{entry.answer}</p>
+                  <p className="mt-2 whitespace-pre-line leading-relaxed text-slate-700">{entry.answer}</p>
                   <div className="mt-3 text-xs text-slate-500">
                     {entry.source_path && <span>Source: {entry.source_path}</span>}
                     {entry.updated_at && (

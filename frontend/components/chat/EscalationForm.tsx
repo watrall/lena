@@ -39,33 +39,33 @@ export const EscalationForm = ({ messageId, onSubmit, onCancel, isSubmitting, er
 
     return (
         <div className="space-y-3" role="form" aria-labelledby={consentId}>
-            <p className="font-semibold text-indigo-800">
+            <p className="font-semibold text-slate-800">
                 Want an instructor to follow up? Drop your info and we&apos;ll pass it along.
             </p>
             <div className="grid gap-3 md:grid-cols-2">
                 <label className="flex flex-col gap-1 text-left">
-                    <span className="text-[11px] uppercase tracking-wide text-indigo-500">
+                    <span className="text-[11px] uppercase tracking-wide text-slate-500">
                         Name
                     </span>
                     <input
                         type="text"
                         value={studentName}
                         onChange={(event) => setStudentName(event.target.value)}
-                        className="rounded-lg border border-indigo-200 px-3 py-2 text-sm text-slate-800 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                        className="lena-input rounded-lg px-3 py-2"
                         placeholder="Jordan Smith"
                         aria-describedby={`${consentId}${showEscalationError ? ` ${errorId}` : ''}`}
                         aria-invalid={showEscalationError && !studentName.trim()}
                     />
                 </label>
                 <label className="flex flex-col gap-1 text-left">
-                    <span className="text-[11px] uppercase tracking-wide text-indigo-500">
+                    <span className="text-[11px] uppercase tracking-wide text-slate-500">
                         Email
                     </span>
                     <input
                         type="email"
                         value={studentEmail}
                         onChange={(event) => setStudentEmail(event.target.value)}
-                        className="rounded-lg border border-indigo-200 px-3 py-2 text-sm text-slate-800 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                        className="lena-input rounded-lg px-3 py-2"
                         placeholder="you@example.edu"
                         aria-describedby={`${consentId}${showEscalationError ? ` ${errorId}` : ''}`}
                         aria-invalid={showEscalationError && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(studentEmail)}
@@ -78,7 +78,7 @@ export const EscalationForm = ({ messageId, onSubmit, onCancel, isSubmitting, er
                     />
                 </label>
             </div>
-            <p id={consentId} className="text-[11px] text-indigo-500">
+            <p id={consentId} className="text-[11px] text-slate-500">
                 Your name and email will be shared with your instructor to follow up on this question.
             </p>
             {showEscalationError && (
@@ -95,7 +95,7 @@ export const EscalationForm = ({ messageId, onSubmit, onCancel, isSubmitting, er
                     type="button"
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition enabled:hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-indigo-300"
+                    className="lena-button-primary px-4 py-2"
                     aria-label="Submit escalation request"
                 >
                     {isSubmitting ? 'Sending…' : 'Send to instructor'}
@@ -103,7 +103,7 @@ export const EscalationForm = ({ messageId, onSubmit, onCancel, isSubmitting, er
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="text-xs font-semibold text-indigo-500 underline-offset-2 hover:underline"
+                    className="text-xs font-semibold text-lena-primary underline-offset-2 hover:underline"
                     aria-label="Close escalation form"
                 >
                     Back

@@ -9,8 +9,10 @@ module.exports = {
     extend: {
       colors: {
         lena: {
-          primary: '#1e3a8a',
-          secondary: '#e0e7ff',
+          primary: '#1e678a',
+          primaryHover: '#17506b',
+          ring: '#b9e2f1',
+          secondary: '#e6f3f7',
         },
       },
     },

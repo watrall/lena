@@ -39,7 +39,7 @@ export const ChatInput = ({
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
                     rows={3}
-                    className="w-full resize-y rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+                    className="lena-textarea"
                     disabled={disabled || loading}
                 />
             </label>
@@ -48,7 +48,7 @@ export const ChatInput = ({
                     type="button"
                     onClick={onSubmit}
                     disabled={!canSend}
-                    className="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                    className="lena-button-primary px-6 py-3 text-sm"
                 >
                     {loading ? 'Sending…' : 'Send'}
                 </button>
