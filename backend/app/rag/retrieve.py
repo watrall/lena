@@ -1,8 +1,4 @@
-"""Semantic retrieval from the Qdrant vector store.
-
-Provides the core retrieval functionality for RAG, including vector similarity
-search with optional course filtering and keyword-based re-ranking.
-"""
+"""Vector retrieval from Qdrant."""
 
 from __future__ import annotations
 
@@ -32,16 +28,7 @@ def retrieve(
     *,
     course_id: str | None = None,
 ) -> List[RetrievedChunk]:
-    """Perform semantic search with optional course filtering.
-
-    Args:
-        query: The search query text.
-        top_k: Maximum number of results to return.
-        course_id: Optional course ID to filter results.
-
-    Returns:
-        A list of retrieved chunks, ordered by relevance.
-    """
+    """Perform semantic search with optional course filtering."""
     embedder = get_embedder()
     ensure_collection()
     client = get_qdrant_client()

@@ -12,7 +12,7 @@ These instructions describe how to run the LENA pilot stack with the recommended
 ## 2. Backend + Qdrant on DigitalOcean
 
 1. **Create Droplet**
-   - Marketplace image: “Docker 24.x on Ubuntu 22.04”.
+   - Marketplace image: "Docker 24.x on Ubuntu 22.04".
    - Size: at least 2 vCPUs / 4 GB RAM for comfortable CPU inference.
    - Enable SSH keys and private networking.
 2. **Clone repository**
@@ -61,13 +61,13 @@ These instructions describe how to run the LENA pilot stack with the recommended
    - `NEXT_PUBLIC_API_BASE=https://your-api-domain.edu` (point at the FastAPI endpoint exposed from DigitalOcean or your reverse proxy).
 4. **Deploy**
    - Netlify will run `npm ci && npm run build` using the `package-lock.json`.
-   - Verify the banner shows “Pilot Mode — No login. Sample data only.”
+   - Verify the banner shows "Pilot Mode - No login. Sample data only."
 
 ## 4. Post-Deployment Checklist
 
 - [ ] Run `curl http://API_DOMAIN/healthz` from your workstation to ensure ingress is open.
-- [ ] Visit `https://your-netlify-site.netlify.app` and ask “When is Assignment 1 due?” – confirm citation links work.
-- [ ] Submit a “Not helpful” response and promote it via `POST /admin/promote` to verify storage permissions.
+- [ ] Visit `https://your-netlify-site.netlify.app` and ask "When is Assignment 1 due?" - confirm citation links work.
+- [ ] Submit a "Not helpful" response and promote it via `POST /admin/promote` to verify storage permissions.
 - [ ] Review `/insights` for aggregate metrics.
 - [ ] Configure HTTPS (Netlify handles TLS automatically; for the backend use Let’s Encrypt or DigitalOcean’s managed certificates).
 

@@ -1,8 +1,4 @@
-"""Question and answer storage for feedback correlation.
-
-Persists Q&A interactions so feedback can be correlated with the original
-response, even when the client doesn't send the full context.
-"""
+"""Q&A storage to correlate feedback with the original answer."""
 
 from __future__ import annotations
 
@@ -18,23 +14,12 @@ def _answers_path() -> Path:
 
 
 def record_answer(payload: dict[str, Any]) -> None:
-    """Persist an answer record for later feedback correlation.
-
-    Args:
-        payload: Answer details including question, answer text, and citations.
-    """
+    """Persist an answer record for later feedback correlation."""
     append_jsonl(_answers_path(), payload)
 
 
 def lookup_answer(question_id: str) -> dict[str, Any] | None:
-    """Look up a recorded answer by question ID.
-
-    Args:
-        question_id: The question ID to look up.
-
-    Returns:
-        The answer record, or None if not found.
-    """
+    """Look up a recorded answer by question ID."""
     for entry in reversed(read_jsonl(_answers_path())):
         if entry.get("question_id") == question_id:
             return entry

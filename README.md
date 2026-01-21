@@ -2,29 +2,25 @@
 [![Docker Pulls Backend](https://img.shields.io/docker/pulls/watrall/lena-backend?label=backend%20pulls&logo=docker)](https://hub.docker.com/r/watrall/lena-backend)
 [![Docker Pulls Web](https://img.shields.io/docker/pulls/watrall/lena-web?label=web%20pulls&logo=docker)](https://hub.docker.com/r/watrall/lena-web)
 
-# LENA – Learning Engagement & Navigation Assistant
+# LENA - Learning Engagement & Navigation Assistant
 
 LENA (Learner Engagement and Needs Assistant) is a lightweight AI chatbot pilot designed to support students in online courses. It helps learners get quick, accurate answers about assignments, schedules, and university policies, reducing instructor burden in high-enrollment classes and accelerating response times so students stay on track and succeed.
 
-LENA isn’t meant to replace instructors. It handles common questions and points students toward resources, then captures any low-confidence answers for instructors to review. Every question and interaction is logged, creating a feedback loop that helps instructors spot confusion early, adjust materials, and improve the course.
+LENA isn't meant to replace instructors. It handles common questions and points students toward resources, then captures any low-confidence answers for instructors to review. Every question and interaction is logged, creating a feedback loop that helps instructors spot confusion early, adjust materials, and improve the course.
 
-Students interact through a simple chat interface that works on desktop and mobile. Instructors and course admins can view real-time insights in an analytics dashboard—tracking trends, top questions, and emerging pain points across multiple courses. The pilot version is fully containerized (FastAPI backend + Next.js frontend + Qdrant vector store) and integrates with GitHub Actions for automated testing and builds.
+Students interact through a simple chat interface that works on desktop and mobile. Instructors and course admins can view real-time insights in an analytics dashboard - tracking trends, top questions, and emerging pain points across multiple courses. The pilot version is fully containerized (FastAPI backend + Next.js frontend + Qdrant vector store) and integrates with GitHub Actions for automated testing and builds.
 
-## Demo-mode (no production authentication)
+## Demo Authentication
 
 This repo is a pilot/demo build: it ships with demo courses and sample content, and it does not include production-ready authentication or role-based access control.
 
 - **Student experience** (Chat + Course FAQ) is intentionally open in the pilot.
-- **Instructor tools** (Insights + Course management + Data export + Ingest) are behind a **demo-only login prompt** to demonstrate a basic authentication flow.
-
-For any real deployment, add authentication (and authorization) in front of the web UI and lock down the API endpoints appropriately.
-
-### Demo instructor credentials
+- **Instructor tools** (Insights + Course management + Data export + Ingest) are behind a **demo-only login prompt** to demonstrate a basic authentication flow:
 
 - Username: `demo`
 - Password: `demo`
 
-This is intentionally simple and should never be used for a real deployment.
+For any production environment, the app must be connected to institutional authentication for proper security and compliance. This applies to both chat access and role-based access to Insights and Course Admin for instructors, staff, and administrators.
 
 ## Screenshots
 
@@ -37,23 +33,23 @@ This is intentionally simple and should never be used for a real deployment.
   <img src="docs/screens/04_insights.png" alt="Insights dashboard" width="48%" />
 </p>
 
-- **Student view** – Ask a question, get a sourced answer.  
+- **Student view** - Ask a question, get a sourced answer.  
   - Each response links back to the syllabus, policy doc, or calendar event it pulled from.  
-  - When the bot isn’t confident, it invites the student to escalate to the instructor and collects consented contact info.
-- **Instructor view** – Review the course dashboard.  
+  - When the bot isn't confident, it invites the student to escalate to the instructor and collects consented contact info.
+- **Instructor view** - Review the course dashboard.  
   - KPI cards highlight volume, helpfulness, and escalations.  
   - Trend charts and emerging pain points call out what needs syllabus edits or follow-up announcements.
-  - Course management tools let instructors/admins add or retire courses, upload documents, save link snapshots, and re-run ingestion so new materials are searchable—without touching the server filesystem.
-- **Admin / support staff** – Watch aggregate metrics across pilots, tune ingest jobs, and plug alerts into campus systems as needed.
+  - Course management tools let instructors/admins add or retire courses, upload documents, save link snapshots, and re-run ingestion so new materials are searchable - without touching the server filesystem.
+- **Admin / support staff** - Watch aggregate metrics across pilots, tune ingest jobs, and plug alerts into campus systems as needed.
 
 ---
 
 ## Stack at a Glance
 
-- **Frontend** – Next.js (Pages router) + TypeScript + Tailwind, ships as a standalone Node server.
-- **Backend** – FastAPI service that handles ingestion, retrieval, and the `/ask` workflow.
-- **Vector store** – Qdrant (running inside Docker by default).
-- **CI** – GitHub Actions runs backend tests and a frontend build on every push / PR.
+- **Frontend** - Next.js (Pages router) + TypeScript + Tailwind, ships as a standalone Node server.
+- **Backend** - FastAPI service that handles ingestion, retrieval, and the `/ask` workflow.
+- **Vector store** - Qdrant (running inside Docker by default).
+- **CI** - GitHub Actions runs backend tests and a frontend build on every push / PR.
 
 Directory map:
 
@@ -78,7 +74,7 @@ cd lena
 ./start.sh
 ```
 
-The script checks that Docker is installed, builds the containers, seeds the sample course data, and opens your browser to the chat interface—all in one step. You'll be prompted to choose a course and can start asking questions right away.
+The script checks that Docker is installed, builds the containers, seeds the sample course data, and opens your browser to the chat interface - all in one step. You'll be prompted to choose a course and can start asking questions right away.
 
 ---
 
@@ -95,9 +91,9 @@ docker compose -f docker/docker-compose.yml up --build
 Once the stack is up:
 
 1. Seed content (optional but handy): `curl -X POST http://localhost:8000/ingest/run`
-2. Open the chat: <http://localhost:3000> and ask “When is Assignment 1 due?”
+2. Open the chat: <http://localhost:3000> and ask "When is Assignment 1 due?"
 3. Open instructor tools: <http://localhost:3000/instructors> (requires demo instructor login; graphs fill in after a few `/ask` + `/feedback` events)
-4. When prompted, pick one of the sample courses—the backend validates the `course_id` on `/ask`, `/feedback`, `/faq`, `/insights`, and `/escalations/request`.
+4. When prompted, pick one of the sample courses - the backend validates the `course_id` on `/ask`, `/feedback`, `/faq`, `/insights`, and `/escalations/request`.
 
 If you change course data or want a clean slate, stop the stack and remove `storage/` before restarting.
 
@@ -121,7 +117,7 @@ The backend reads any `LENA_*` variables via Pydantic settings, while the fronte
 
 ### Courses & multi-course mode
 
-The course picker reads from `storage/courses.json`. If the file doesn’t exist, the backend seeds two sample anthropology courses so the UI always has something to display. To customize the pilot, drop in your own catalog:
+The course picker reads from `storage/courses.json`. If the file doesn't exist, the backend seeds two sample anthropology courses so the UI always has something to display. To customize the pilot, drop in your own catalog:
 
 ```json
 [
@@ -138,12 +134,12 @@ Escalation requests initiated from the chat are stored in `storage/escalations.j
 
 ### API requirements
 
-- `POST /ask` – body must include `question` and `course_id`. Responses contain a `question_id` you’ll reuse.
-- `POST /feedback` – requires `question_id`, `course_id`, and the user’s helpfulness choice (plus optional transcript context).
-- `GET /faq` – requires `course_id` query params; the backend rejects empty IDs.
-- `GET /insights` – requires instructor login + `course_id` query params.
-- `POST /escalations/request` – include `course_id`, `student_name`, and `student_email` so instructors can follow up.
-- `GET /admin/review` / `POST /admin/promote` / `GET /admin/export` / `POST /ingest/run` – require instructor login and are locked down via feature flags for the demo.
+- `POST /ask` - body must include `question` and `course_id`. Responses contain a `question_id` you'll reuse.
+- `POST /feedback` - requires `question_id`, `course_id`, and the user's helpfulness choice (plus optional transcript context).
+- `GET /faq` - requires `course_id` query params; the backend rejects empty IDs.
+- `GET /insights` - requires instructor login + `course_id` query params.
+- `POST /escalations/request` - include `course_id`, `student_name`, and `student_email` so instructors can follow up.
+- `GET /admin/review` / `POST /admin/promote` / `GET /admin/export` / `POST /ingest/run` - require instructor login and are locked down via feature flags for the demo.
 
 ### Running without Docker
 
@@ -188,8 +184,8 @@ The LENA pilot publishes both backend and frontend containers for reproducibilit
 
 | Service | Image | Technology | Description |
 |----------|--------|-------------|--------------|
-| **Backend** | [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-lena--backend-blue?logo=docker)](https://hub.docker.com/repository/docker/watrall/lena-backend) | FastAPI | FastAPI backend for LENA AI—course Q&A, feedback, and analytics to support online learning. |
-| **Frontend** | [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-lena--web-blue?logo=docker)](https://hub.docker.com/repository/docker/watrall/lena-web) | Next.js | Next.js frontend for LENA AI—chat Q&A and learner analytics for online course support. |
+| **Backend** | [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-lena--backend-blue?logo=docker)](https://hub.docker.com/repository/docker/watrall/lena-backend) | FastAPI | FastAPI backend for LENA AI - course Q&A, feedback, and analytics to support online learning. |
+| **Frontend** | [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-lena--web-blue?logo=docker)](https://hub.docker.com/repository/docker/watrall/lena-web) | Next.js | Next.js frontend for LENA AI - chat Q&A and learner analytics for online course support. |
 
 ### Pull and Run
 

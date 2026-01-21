@@ -12,9 +12,5 @@ router = APIRouter(tags=["courses"])
 
 @router.get("/courses", response_model=list[CourseSummary])
 def list_courses_endpoint() -> list[CourseSummary]:
-    """List all available courses.
-
-    Returns:
-        A list of course summaries with id, name, code, and term.
-    """
+    """List all available courses."""
     return [CourseSummary(**entry) for entry in courses.load_courses()]

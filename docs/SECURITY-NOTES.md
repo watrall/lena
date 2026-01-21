@@ -3,7 +3,7 @@
 ## Security Features
 
 ### Rate Limiting
-The `/ask` endpoint is rate-limited to **10 requests per minute per IP address** to prevent denial-of-service attacks and resource exhaustion from LLM inference.
+The `/ask` endpoint is rate-limited to **10 requests per minute per IP address** to prevent denial-of-service attacks and resource exhaustion from model inference.
 
 Global default limit: 100 requests/minute per IP address.
 
@@ -63,9 +63,9 @@ If you enable these endpoints, use additional deployment controls (VPN, IP allow
 ## Prompt Injection Mitigation
 
 The RAG pipeline includes basic prompt injection defenses:
-- System prompt explicitly instructs the LLM to ignore override attempts
+- Model instructions explicitly say to ignore override attempts
 - User input is scanned for common injection patterns
-- Suspicious inputs are wrapped with `[User question]:` prefix
+- Suspicious inputs are wrapped with a `[User question]:` prefix
 
 ## Deployment Considerations
 - **TLS termination** - Place Nginx or a managed load balancer in front of FastAPI for HTTPS.

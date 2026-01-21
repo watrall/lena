@@ -1,8 +1,4 @@
-"""Course catalog management.
-
-Handles loading, validation, and retrieval of course metadata. Courses are
-stored in a JSON file and seeded with defaults if the file doesn't exist.
-"""
+"""Course catalog storage."""
 
 from __future__ import annotations
 
@@ -52,14 +48,7 @@ def load_courses() -> list[dict[str, str | None]]:
 
 
 def get_course(course_id: str | None) -> dict[str, str | None] | None:
-    """Look up a course by ID.
-
-    Args:
-        course_id: The course identifier to look up.
-
-    Returns:
-        The course record, or None if not found.
-    """
+    """Look up a course by ID."""
     if not course_id:
         return None
     return next((c for c in load_courses() if c["id"] == course_id), None)

@@ -13,9 +13,5 @@ logger = logging.getLogger(__name__)
 
 @router.get("/healthz")
 def healthcheck() -> dict[str, Any]:
-    """Basic readiness probe for infrastructure integrations.
-
-    Returns:
-        A dictionary indicating the service is healthy.
-    """
+    """Basic readiness probe for infrastructure integrations."""
     return {"ok": True, "service": "lena-backend"}

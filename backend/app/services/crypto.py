@@ -1,8 +1,4 @@
-"""Cryptographic utilities for PII protection.
-
-Provides symmetric encryption for sensitive data at rest using Fernet.
-The encryption key should be set via LENA_ENCRYPTION_KEY environment variable.
-"""
+"""Fernet-based helpers for encrypting/decrypting stored PII."""
 
 from __future__ import annotations
 
@@ -23,14 +19,7 @@ _ENCRYPTION_KEY_ENV = "LENA_ENCRYPTION_KEY"
 
 @lru_cache(maxsize=1)
 def _get_fernet() -> Optional[Fernet]:
-    """Get the Fernet cipher instance, or None if encryption is disabled.
-
-    The key is derived from the LENA_ENCRYPTION_KEY environment variable.
-    If not set, encryption is disabled and a warning is logged.
-
-    Returns:
-        A Fernet instance for encryption/decryption, or None if disabled.
-    """
+    """Return a Fernet instance when configured, otherwise None."""
     key = os.getenv(_ENCRYPTION_KEY_ENV)
     if not key:
         logger.warning(
@@ -49,16 +38,7 @@ def _get_fernet() -> Optional[Fernet]:
 
 
 def encrypt_pii(plaintext: str) -> str:
-    """Encrypt sensitive PII data.
-
-    If encryption is not configured, returns the plaintext with a marker prefix.
-
-    Args:
-        plaintext: The sensitive data to encrypt.
-
-    Returns:
-        Encrypted data as a base64 string, or original text if encryption disabled.
-    """
+    """Encrypt a PII value when configured; otherwise return plaintext."""
     fernet = _get_fernet()
     if fernet is None:
         return plaintext
@@ -68,17 +48,7 @@ def encrypt_pii(plaintext: str) -> str:
 
 
 def decrypt_pii(ciphertext: str) -> str:
-    """Decrypt sensitive PII data.
-
-    Handles both encrypted (ENC: prefix) and plaintext data for backwards
-    compatibility with existing unencrypted records.
-
-    Args:
-        ciphertext: The encrypted data or plaintext.
-
-    Returns:
-        The decrypted plaintext.
-    """
+    """Decrypt a stored PII value, supporting legacy plaintext values."""
     # Handle unencrypted legacy data
     if not ciphertext.startswith("ENC:"):
         return ciphertext
@@ -101,9 +71,5 @@ def decrypt_pii(ciphertext: str) -> str:
 
 
 def is_encryption_enabled() -> bool:
-    """Check if PII encryption is configured and enabled.
-
-    Returns:
-        True if encryption is available, False otherwise.
-    """
+    """Return True when an encryption key is configured."""
     return _get_fernet() is not None

@@ -1,8 +1,4 @@
-"""FAQ and review queue management.
-
-Provides persistence for FAQ entries (curated from instructor review) and
-the review queue (low-confidence answers awaiting instructor attention).
-"""
+"""FAQ and review queue storage."""
 
 from __future__ import annotations
 
@@ -21,14 +17,7 @@ from .storage import (
 
 
 def load_faq(course_id: str | None = None) -> List[dict[str, Any]]:
-    """Load FAQ entries, optionally filtered by course.
-
-    Args:
-        course_id: Optional course ID to filter by.
-
-    Returns:
-        A list of FAQ entries.
-    """
+    """Load FAQ entries, optionally filtered by course."""
     entries = read_json(storage_path("faq.json"), default=[])
     if not isinstance(entries, list):
         return []
@@ -38,32 +27,17 @@ def load_faq(course_id: str | None = None) -> List[dict[str, Any]]:
 
 
 def save_faq(entries: List[dict[str, Any]]) -> None:
-    """Persist FAQ entries to storage.
-
-    Args:
-        entries: The complete list of FAQ entries to save.
-    """
+    """Persist FAQ entries to storage."""
     write_json(storage_path("faq.json"), entries)
 
 
 def list_review_queue() -> List[dict[str, Any]]:
-    """Load all items in the review queue.
-
-    Returns:
-        A list of review queue items.
-    """
+    """Load all items in the review queue."""
     return read_jsonl(storage_path("review_queue.jsonl"))
 
 
 def append_review_item(item: dict[str, Any]) -> dict[str, Any]:
-    """Add an item to the review queue.
-
-    Args:
-        item: The review item details.
-
-    Returns:
-        The persisted item with generated ID and timestamp.
-    """
+    """Add an item to the review queue."""
     payload = {
         **item,
         "id": item.get("id") or uuid4().hex,
@@ -74,14 +48,7 @@ def append_review_item(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def remove_review_item(item_id: str) -> dict[str, Any] | None:
-    """Remove an item from the review queue.
-
-    Args:
-        item_id: The ID of the item to remove.
-
-    Returns:
-        The removed item, or None if not found.
-    """
+    """Remove an item from the review queue."""
     entries = list_review_queue()
     remaining: List[dict[str, Any]] = []
     removed: dict[str, Any] | None = None

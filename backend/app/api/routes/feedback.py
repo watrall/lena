@@ -1,8 +1,4 @@
-"""Feedback and escalation endpoints.
-
-Handles learner feedback submission and escalation requests. Unhelpful
-responses are automatically queued for instructor review.
-"""
+"""Feedback and escalation endpoints."""
 
 from fastapi import APIRouter, Body, HTTPException, Request
 
@@ -23,16 +19,7 @@ router = APIRouter(tags=["feedback"])
 @router.post("/feedback", response_model=FeedbackResponse)
 @limiter.limit("30/minute")
 async def submit_feedback(request: Request, payload: FeedbackRequest = Body(...)) -> FeedbackResponse:
-    """Record learner feedback on an answer.
-
-    Unhelpful answers are queued for instructor review.
-
-    Args:
-        payload: Feedback details including helpfulness rating.
-
-    Returns:
-        Confirmation and whether the item was queued for review.
-    """
+    """Record learner feedback; unhelpful answers are queued for review."""
     if not payload.course_id:
         raise HTTPException(status_code=400, detail="course_id is required")
 
@@ -79,14 +66,7 @@ async def submit_feedback(request: Request, payload: FeedbackRequest = Body(...)
 @router.post("/escalations/request", response_model=EscalationResponse)
 @limiter.limit("10/minute")
 async def request_escalation(request: Request, payload: EscalationRequest = Body(...)) -> EscalationResponse:
-    """Submit an escalation request for instructor follow-up.
-
-    Args:
-        payload: Escalation details including student contact info.
-
-    Returns:
-        Confirmation of the escalation request.
-    """
+    """Submit an escalation request for instructor follow-up."""
     course = resolve_course(payload.course_id)
     record = escalations.append_request(
         {

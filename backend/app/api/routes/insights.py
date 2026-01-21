@@ -17,15 +17,7 @@ def get_insights(
     _: dict = Depends(require_instructor),
     course_id: str = Query(..., description="Course identifier"),
 ) -> InsightsResponse:
-    """Retrieve analytics insights for a specific course.
-
-    Args:
-        course_id: The course to retrieve insights for.
-
-    Returns:
-        Aggregated metrics including question volume, confidence trends,
-        and escalation data.
-    """
+    """Return analytics insights for a course."""
     course = resolve_course(course_id)
     summary = analytics.summarize(course_id=course["id"])
     return InsightsResponse(**summary)

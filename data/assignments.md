@@ -5,7 +5,7 @@
 - **Due Date:** 2024-09-15 23:59
 - **Submission:** LMS dropbox
 - **Weight:** 20%
-- **Notes:** Submit reflective journal summarizing week 1–3 learnings. Late submissions follow policy below.
+- **Notes:** Submit reflective journal summarizing week 1-3 learnings. Late submissions follow policy below.
 
 ## Assignment 2: Group Presentation
 

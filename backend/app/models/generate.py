@@ -1,9 +1,4 @@
-"""Answer generation using retrieval-augmented generation.
-
-Supports two modes: Hugging Face pipeline generation for full LLM responses,
-or extractive-only mode that stitches together retrieved snippets without
-model inference (useful for demos and testing).
-"""
+"""Answer generation (model-backed or extractive-only)."""
 
 from __future__ import annotations
 
@@ -25,11 +20,7 @@ logger = logging.getLogger(__name__)
 
 @lru_cache(maxsize=1)
 def get_generator() -> "Pipeline":
-    """Instantiate the Hugging Face generation pipeline lazily.
-
-    Returns:
-        A text-generation pipeline configured for CPU inference.
-    """
+    """Instantiate the Hugging Face generation pipeline lazily."""
     logger.info("Loading generation model: %s", settings.hf_model)
     return pipeline(
         "text-generation",
@@ -40,15 +31,7 @@ def get_generator() -> "Pipeline":
 
 
 def generate_answer(question: str, chunks: Iterable[RetrievedChunk]) -> str:
-    """Produce a grounded answer using the configured generation strategy.
-
-    Args:
-        question: The user's question.
-        chunks: Retrieved context chunks to ground the answer.
-
-    Returns:
-        A string answer, either generated or extractive depending on config.
-    """
+    """Produce a grounded answer using the configured generation strategy."""
     chunk_list = list(chunks)
 
     if settings.llm_mode == "off":

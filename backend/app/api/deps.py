@@ -1,8 +1,4 @@
-"""Shared API dependencies.
-
-Provides dependency injection functions used across API routes,
-including course resolution and validation.
-"""
+"""Shared API dependencies."""
 
 from __future__ import annotations
 
@@ -15,17 +11,7 @@ from ..settings import settings
 
 
 def resolve_course(course_id: str | None) -> dict[str, str | None]:
-    """Resolve and validate a course identifier.
-
-    Args:
-        course_id: The course ID to resolve, or None for the default.
-
-    Returns:
-        The course record dictionary.
-
-    Raises:
-        HTTPException: If no courses are configured or the course is not found.
-    """
+    """Resolve and validate a course identifier."""
     available = courses.load_courses()
     if not available:
         raise HTTPException(

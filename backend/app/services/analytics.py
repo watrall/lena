@@ -37,11 +37,7 @@ class InteractionEvent:
 
 
 def log_event(event: dict[str, Any]) -> None:
-    """Append an interaction event to the log and update summary.
-
-    Args:
-        event: Event data containing type, question_id, timestamp, etc.
-    """
+    """Append an interaction event to storage and update the summary."""
     # Truncate excessively long question text to prevent storage abuse
     if event.get("question") and len(str(event["question"])) > 2000:
         event = {**event, "question": str(event["question"])[:2000]}
@@ -81,11 +77,7 @@ def _save_summary(summary: dict[str, Any]) -> None:
 
 
 def _apply_event_to_summary(event: dict[str, Any]) -> None:
-    """Update the analytics summary with a single event.
-
-    Args:
-        event: The event to apply to the summary.
-    """
+    """Update the analytics summary with a single event."""
     summary = _load_summary()
     key = _course_key(event.get("course_id"))
     state = summary.setdefault(key, _empty_course_state())

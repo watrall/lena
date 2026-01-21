@@ -1,8 +1,4 @@
-"""Chat endpoint for learner question answering.
-
-Provides the primary /ask endpoint that performs retrieval-augmented generation
-to answer student questions with grounded, citation-backed responses.
-"""
+"""Learner chat endpoints (primarily `/ask`)."""
 
 from uuid import uuid4
 
@@ -21,17 +17,7 @@ router = APIRouter(tags=["chat"])
 
 
 def _build_citations(chunks: list[RetrievedChunk]) -> list[Citation]:
-    """Extract unique citations from retrieved chunks.
-
-    Deduplicates citations by source path to avoid showing the same
-    document multiple times in the response.
-
-    Args:
-        chunks: Retrieved document chunks from the vector store.
-
-    Returns:
-        A deduplicated list of citation objects.
-    """
+    """Extract unique citations from retrieved chunks."""
     seen: set[str] = set()
     citations: list[Citation] = []
     for idx, chunk in enumerate(chunks, start=1):
@@ -57,14 +43,7 @@ def _normalize(value: float, lower: float, upper: float) -> float:
 
 
 def _compute_confidence(chunks: list[RetrievedChunk]) -> float:
-    """Compute a confidence score from retrieval results.
-
-    The score is based on:
-    - Maximum similarity score
-    - Score spread between top results
-    - Consistency across all retrieved chunks
-    - Coverage relative to the configured top_k
-    """
+    """Compute a heuristic confidence score from retrieval results."""
     if not chunks:
         return 0.0
 
@@ -95,16 +74,7 @@ def _compute_confidence(chunks: list[RetrievedChunk]) -> float:
 @router.post("/ask", response_model=AskResponse)
 @limiter.limit("10/minute")
 async def ask_question(request: Request, payload: AskRequest = Body(...)) -> AskResponse:
-    """Answer a learner's question using retrieval-augmented generation.
-
-    Rate limited to 10 requests per minute per IP address via app-level limiter.
-
-    Args:
-        payload: The question and optional course context.
-
-    Returns:
-        An answer with citations, confidence score, and escalation flag.
-    """
+    """Answer a learner question, returning citations and confidence."""
     course = resolve_course(payload.course_id)
     course_id = course["id"]
 

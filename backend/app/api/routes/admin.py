@@ -1,8 +1,4 @@
-"""Admin endpoints for FAQ management and review queue.
-
-Provides instructor-facing endpoints for reviewing low-confidence answers,
-promoting vetted responses to the FAQ, and managing the review queue.
-"""
+"""Instructor/admin endpoints for review queue and FAQ curation."""
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request
 
@@ -21,14 +17,7 @@ router = APIRouter(tags=["admin"])
 def get_faq(
     course_id: str = Query(..., description="Course identifier"),
 ) -> list[FAQEntry]:
-    """Retrieve FAQ entries for a course.
-
-    Args:
-        course_id: The course to retrieve FAQs for.
-
-    Returns:
-        A list of curated FAQ entries.
-    """
+    """Return FAQ entries for a course."""
     course = resolve_course(course_id)
     return [FAQEntry(**entry) for entry in review.load_faq(course_id=course["id"])]
 
@@ -40,14 +29,7 @@ async def get_review_queue(
     _: dict = Depends(require_instructor),
     course_id: str = Query(..., description="Course identifier"),
 ) -> list[ReviewItem]:
-    """Retrieve the instructor review queue for a course.
-
-    Args:
-        course_id: The course to retrieve review items for.
-
-    Returns:
-        A list of items awaiting instructor review.
-    """
+    """Return the instructor review queue for a course."""
     if not settings.enable_admin_endpoints:
         raise HTTPException(status_code=404, detail="Not found")
     analytics.log_event(
@@ -72,18 +54,7 @@ async def promote_to_faq(
     _: dict = Depends(require_instructor),
     payload: PromoteRequest = Body(...),
 ) -> FAQEntry:
-    """Promote a review queue item to the FAQ.
-
-    Args:
-        payload: The promotion request with queue item ID and answer.
-
-    Returns:
-        The newly created FAQ entry.
-
-    Raises:
-        HTTPException: If the review item is not found or belongs to
-            a different course.
-    """
+    """Promote a review queue item to the FAQ."""
     if not settings.enable_admin_endpoints:
         raise HTTPException(status_code=404, detail="Not found")
     removed = review.remove_review_item(payload.queue_id)

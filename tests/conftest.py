@@ -1,8 +1,4 @@
-"""Pytest fixtures and configuration for LENA backend tests.
-
-This module provides shared fixtures including a mock embedding model
-and in-memory Qdrant instance for fast, isolated test execution.
-"""
+"""Shared pytest fixtures for backend tests."""
 
 import os
 import shutil
@@ -34,15 +30,7 @@ from backend.app.settings import settings  # noqa: E402
 
 @pytest.fixture(scope="session", autouse=True)
 def ingest_sample_corpus(tmp_path_factory):
-    """Load the sample data set into an in-memory Qdrant instance.
-
-    This fixture runs once per test session and provides a pre-populated
-    vector store with test data. It uses a mock embedder to avoid downloading
-    large models during CI runs.
-
-    Yields:
-        IngestResult containing document and chunk counts.
-    """
+    """Load the sample data set into an in-memory Qdrant instance."""
     data_src = TEST_ROOT / "data"
     temp_dir = tmp_path_factory.mktemp("data")
     shutil.copytree(data_src, temp_dir, dirs_exist_ok=True)

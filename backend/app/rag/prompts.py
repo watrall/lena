@@ -1,8 +1,4 @@
-"""Prompt templates for grounded answer generation.
-
-Contains the system prompt and prompt construction logic for the RAG pipeline.
-Prompts are designed to encourage citation of sources and acknowledge knowledge gaps.
-"""
+"""Model instruction templates used by the RAG pipeline."""
 
 from __future__ import annotations
 
@@ -20,10 +16,7 @@ SYSTEM_PROMPT = (
 
 
 def _sanitize_user_input(text: str) -> str:
-    """Sanitize user input to mitigate prompt injection attacks.
-
-    Escapes or removes patterns commonly used in prompt injection.
-    """
+    """Sanitize user input to reduce prompt injection risk."""
     # Remove common prompt injection patterns
     sanitized = text
     # Escape attempts to inject new instructions
@@ -33,7 +26,7 @@ def _sanitize_user_input(text: str) -> str:
         "disregard",
         "forget everything",
         "new instructions",
-        "system prompt",
+        "system instructions",
         "you are now",
         "act as",
         "pretend to be",
@@ -48,10 +41,7 @@ def _sanitize_user_input(text: str) -> str:
 
 
 def build_prompt(question: str, chunks: Iterable[RetrievedChunk]) -> str:
-    """Construct a prompt that places citations before the user question.
-
-    Includes sanitization to mitigate prompt injection attacks.
-    """
+    """Construct the model input with sources first, then the question."""
     context_blocks = []
     for idx, chunk in enumerate(chunks, start=1):
         meta = chunk.metadata

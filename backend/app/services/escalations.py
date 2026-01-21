@@ -1,11 +1,4 @@
-"""Escalation request management.
-
-Handles persistence and retrieval of learner escalation requests that require
-instructor follow-up. Escalations are stored in JSONL format for auditability.
-
-PII (student name and email) is encrypted at rest when LENA_ENCRYPTION_KEY
-environment variable is set.
-"""
+"""Escalation request storage (with optional PII encryption)."""
 
 from __future__ import annotations
 
@@ -23,16 +16,7 @@ def _records_path() -> Path:
 
 
 def append_request(payload: dict[str, Any]) -> dict[str, Any]:
-    """Persist a learner escalation request for instructor follow-up.
-
-    PII fields (student_name, student_email) are encrypted at rest.
-
-    Args:
-        payload: Escalation details including student info and question.
-
-    Returns:
-        The persisted record with generated ID and timestamp.
-    """
+    """Persist a learner escalation request for instructor follow-up."""
     # Encrypt PII fields before storage
     student_name = payload.get("student_name") or ""
     student_email = payload.get("student_email") or ""
@@ -52,16 +36,7 @@ def append_request(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def list_requests(course_id: str | None = None) -> List[dict[str, Any]]:
-    """Return all recorded escalation requests, optionally filtered by course.
-
-    PII fields are decrypted when returned.
-
-    Args:
-        course_id: Optional course ID to filter by.
-
-    Returns:
-        A list of escalation request records with decrypted PII.
-    """
+    """Return recorded escalation requests, optionally filtered by course."""
     entries = read_jsonl(_records_path())
 
     # Decrypt PII fields for each entry
