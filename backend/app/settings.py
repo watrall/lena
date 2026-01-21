@@ -117,6 +117,12 @@ class Settings(BaseSettings):
         description="Max request body size in bytes (best-effort via Content-Length).",
     )
 
+    # Demo helpers
+    demo_seed_data: bool = Field(
+        default=False,
+        description="Seed synthetic interaction logs for demo exports when storage is empty.",
+    )
+
     @field_validator("data_dir", "storage_dir", mode="before")
     @classmethod
     def coerce_path(cls, value: str | Path) -> Path:

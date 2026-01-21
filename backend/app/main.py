@@ -11,6 +11,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .api.routes import admin, chat, courses, export, feedback, health, ingest, insights
 from .limiting import limiter
+from .services import demo_seed
 from .services import storage
 from .settings import settings
 
@@ -67,6 +68,7 @@ app.add_middleware(
 )
 
 storage.ensure_storage()
+demo_seed.maybe_seed()
 
 app.include_router(health.router)
 app.include_router(ingest.router)

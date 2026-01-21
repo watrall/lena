@@ -17,6 +17,8 @@ services:
       LENA_ENABLE_EXPORT_ENDPOINT: "true"
       # Keep PII export off by default even in demo mode.
       LENA_ENABLE_PII_EXPORT: "false"
+      # Seed synthetic interaction logs so exports demonstrate structure immediately.
+      LENA_DEMO_SEED_DATA: "true"
     command: uvicorn app.main:app --host 0.0.0.0 --port ${BACKEND_PORT:-8000}
     volumes:
       - ../data:/data/input:ro

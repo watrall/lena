@@ -80,3 +80,14 @@
 {"type": "feedback", "question_id": "e6afa49221154a7f9717ced3f15bf565", "timestamp": "2025-11-14T11:36:47.014762Z", "helpful": true, "course_id": "anth101", "question": "Explain the difference between emic and etic."}
 {"type": "ask", "question_id": "969dc49e90a949dc81cba519a733ae09", "timestamp": "2025-11-23T17:31:17.014762Z", "confidence": 0.9352268239460846, "course_id": "anth101", "question": "When is the midterm?"}
 {"type": "feedback", "question_id": "969dc49e90a949dc81cba519a733ae09", "timestamp": "2025-11-23T17:35:17.014762Z", "helpful": true, "course_id": "anth101", "question": "When is the midterm?"}
+{"type": "admin_export", "question_id": "n/a", "course_id": "anth101", "timestamp": "2026-01-21T16:48:29.907952Z"}
+{"type": "ask", "question_id": "demo_anth101_q1", "question": "When is Assignment 1 due? (demo seed)", "confidence": 0.82, "course_id": "anth101", "timestamp": "2026-01-19T16:58:43.916226Z"}
+{"type": "feedback", "question_id": "demo_anth101_q1", "helpful": true, "confidence": 0.82, "question": "When is Assignment 1 due? (demo seed)", "course_id": "anth101", "timestamp": "2026-01-19T16:58:43.916226Z"}
+{"type": "ask", "question_id": "demo_anth101_q2", "question": "What is the late policy? (demo seed)", "confidence": 0.42, "course_id": "anth101", "timestamp": "2026-01-20T16:58:43.916226Z"}
+{"type": "feedback", "question_id": "demo_anth101_q2", "helpful": false, "confidence": 0.42, "question": "What is the late policy? (demo seed)", "course_id": "anth101", "timestamp": "2026-01-20T16:58:43.916226Z"}
+{"type": "ask", "question_id": "demo_anth204_q1", "question": "When is Assignment 1 due? (demo seed)", "confidence": 0.82, "course_id": "anth204", "timestamp": "2026-01-19T16:58:43.916226Z"}
+{"type": "feedback", "question_id": "demo_anth204_q1", "helpful": true, "confidence": 0.82, "question": "When is Assignment 1 due? (demo seed)", "course_id": "anth204", "timestamp": "2026-01-19T16:58:43.916226Z"}
+{"type": "ask", "question_id": "demo_anth204_q2", "question": "What is the late policy? (demo seed)", "confidence": 0.42, "course_id": "anth204", "timestamp": "2026-01-20T16:58:43.916226Z"}
+{"type": "feedback", "question_id": "demo_anth204_q2", "helpful": false, "confidence": 0.42, "question": "What is the late policy? (demo seed)", "course_id": "anth204", "timestamp": "2026-01-20T16:58:43.916226Z"}
+{"type": "admin_export", "question_id": "n/a", "course_id": "anth101", "timestamp": "2026-01-21T16:58:55.906082Z"}
+{"type": "admin_export", "question_id": "n/a", "course_id": "anth101", "timestamp": "2026-01-21T16:58:55.924689Z"}

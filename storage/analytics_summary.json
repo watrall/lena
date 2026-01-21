@@ -1,16 +1,18 @@
 {
   "anth101": {
-    "questions": 50,
-    "confidence_sum": 42.93886709649085,
-    "confidence_count": 50,
-    "helpful_total": 26,
-    "feedback_total": 31,
+    "questions": 52,
+    "confidence_sum": 44.178867096490855,
+    "confidence_count": 52,
+    "helpful_total": 27,
+    "feedback_total": 33,
     "question_counts": {
       "What is cultural relativism?": 11,
       "How do I cite sources?": 13,
       "When is the midterm?": 8,
       "What is ethnography?": 10,
-      "Explain the difference between emic and etic.": 8
+      "Explain the difference between emic and etic.": 8,
+      "When is Assignment 1 due? (demo seed)": 1,
+      "What is the late policy? (demo seed)": 1
     },
     "daily_volume": {
       "2025-11-18": 2,
@@ -37,7 +39,9 @@
       "2025-11-10": 1,
       "2025-10-28": 3,
       "2025-11-16": 1,
-      "2025-11-14": 1
+      "2025-11-14": 1,
+      "2026-01-19": 1,
+      "2026-01-20": 1
     },
     "confidence_daily": {
       "2025-11-18": {
@@ -139,6 +143,14 @@
       "2025-11-14": {
         "sum": 0.7187899189592998,
         "count": 1
+      },
+      "2026-01-19": {
+        "sum": 0.82,
+        "count": 1
+      },
+      "2026-01-20": {
+        "sum": 0.42,
+        "count": 1
       }
     },
     "feedback_by_question": {
@@ -161,8 +173,52 @@
       "When is the midterm?": {
         "helpful": 3,
         "total": 6
+      },
+      "When is Assignment 1 due? (demo seed)": {
+        "helpful": 1,
+        "total": 1
+      },
+      "What is the late policy? (demo seed)": {
+        "helpful": 0,
+        "total": 1
       }
     },
-    "last_updated": "2025-11-23T17:35:17.014762Z"
+    "last_updated": "2026-01-21T16:58:55.924689Z"
+  },
+  "anth204": {
+    "questions": 2,
+    "confidence_sum": 1.24,
+    "confidence_count": 2,
+    "helpful_total": 1,
+    "feedback_total": 2,
+    "question_counts": {
+      "When is Assignment 1 due? (demo seed)": 1,
+      "What is the late policy? (demo seed)": 1
+    },
+    "daily_volume": {
+      "2026-01-19": 1,
+      "2026-01-20": 1
+    },
+    "confidence_daily": {
+      "2026-01-19": {
+        "sum": 0.82,
+        "count": 1
+      },
+      "2026-01-20": {
+        "sum": 0.42,
+        "count": 1
+      }
+    },
+    "feedback_by_question": {
+      "When is Assignment 1 due? (demo seed)": {
+        "helpful": 1,
+        "total": 1
+      },
+      "What is the late policy? (demo seed)": {
+        "helpful": 0,
+        "total": 1
+      }
+    },
+    "last_updated": "2026-01-20T16:58:43.916226Z"
   }
 }
