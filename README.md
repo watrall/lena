@@ -43,6 +43,7 @@ This is intentionally simple and should never be used for a real deployment.
 - **Instructor view** – Review the course dashboard.  
   - KPI cards highlight volume, helpfulness, and escalations.  
   - Trend charts and emerging pain points call out what needs syllabus edits or follow-up announcements.
+  - Course management tools let instructors/admins add or retire courses, upload documents, save link snapshots, and re-run ingestion so new materials are searchable—without touching the server filesystem.
 - **Admin / support staff** – Watch aggregate metrics across pilots, tune ingest jobs, and plug alerts into campus systems as needed.
 
 ---
