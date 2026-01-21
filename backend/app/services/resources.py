@@ -8,10 +8,12 @@ import json
 import os
 import re
 import shutil
+import socket
 from datetime import datetime, timezone
+from ipaddress import ip_address
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import httpx
 
@@ -96,8 +98,9 @@ def delete_resource(course_id: str, resource_id: str) -> dict[str, Any] | None:
                 resolved = file_path.resolve()
                 if str(resolved).startswith(str((settings.uploads_dir / course_id).resolve())) and resolved.exists():
                     resolved.unlink(missing_ok=True)
-        except Exception:
-            pass
+        except OSError:
+            # Best-effort deletion; resource metadata already removed.
+            return removed
     return removed
 
 
@@ -111,37 +114,123 @@ def delete_course_resources(course_id: str) -> None:
 
 
 def _is_private_host(hostname: str) -> bool:
-    # Avoid DNS/network SSRF complexity; implement a conservative blocklist.
+    # Conservative hostname blocklist; DNS resolution checks happen separately.
     lowered = hostname.lower()
     if lowered in {"localhost"} or lowered.endswith(".local"):
         return True
     if re.match(r"^\d{1,3}(\.\d{1,3}){3}$", lowered):
         # Block all IPv4 literals in demo to reduce SSRF risk
         return True
+    if ":" in lowered:
+        # Block obvious IPv6 literals
+        return True
     return False
 
 
-def fetch_link_snapshot(url: str, max_bytes: int = 1_000_000) -> str:
-    parsed = urlparse(url)
+def _is_blocked_ip(ip: str) -> bool:
+    addr = ip_address(ip)
+    return (
+        addr.is_private
+        or addr.is_loopback
+        or addr.is_link_local
+        or addr.is_multicast
+        or addr.is_reserved
+        or addr.is_unspecified
+    )
+
+
+def _hostname_resolves_to_blocked_ip(hostname: str) -> bool:
+    try:
+        infos = socket.getaddrinfo(hostname, None)
+    except Exception:
+        return True
+    for info in infos:
+        ip = info[4][0]
+        try:
+            if _is_blocked_ip(ip):
+                return True
+        except Exception:
+            return True
+    return False
+
+
+def _validate_snapshot_url(raw_url: str) -> str:
+    parsed = urlparse(raw_url)
     if parsed.scheme not in {"http", "https"}:
         raise ValueError("Only http/https URLs are supported")
+    if parsed.username or parsed.password:
+        raise ValueError("Userinfo in URL is not allowed")
     if not parsed.hostname:
         raise ValueError("Invalid URL")
     if _is_private_host(parsed.hostname):
         raise ValueError("Blocked hostname")
+    if _hostname_resolves_to_blocked_ip(parsed.hostname):
+        raise ValueError("Blocked hostname")
+
+    allowed_ports = {
+        int(p.strip())
+        for p in settings.link_snapshot_allowed_ports.split(",")
+        if p.strip().isdigit()
+    }
+    port = parsed.port
+    if port is not None and allowed_ports and port not in allowed_ports:
+        raise ValueError("Blocked port")
+
+    return parsed.geturl()
+
+
+def fetch_link_snapshot(url: str, max_bytes: int = 1_000_000) -> str:
+    current_url = _validate_snapshot_url(url)
 
     # Optional allowlist by domain.
     allowlist = [d.strip().lower() for d in os.getenv("LENA_ALLOWED_LINK_DOMAINS", "").split(",") if d.strip()]
     if allowlist:
-        if not any(parsed.hostname.lower() == d or parsed.hostname.lower().endswith(f".{d}") for d in allowlist):
+        hostname = urlparse(current_url).hostname or ""
+        if not any(hostname.lower() == d or hostname.lower().endswith(f".{d}") for d in allowlist):
             raise ValueError("URL domain not allowed")
 
-    with httpx.Client(follow_redirects=True, timeout=10.0) as client:
-        resp = client.get(url, headers={"User-Agent": "LENA-DemoFetcher/1.0"})
-        resp.raise_for_status()
-        content = resp.content[: max_bytes + 1]
-        if len(content) > max_bytes:
-            raise ValueError("Content too large")
+    visited: set[str] = set()
+    redirects = 0
+    timeout = httpx.Timeout(settings.link_snapshot_timeout_seconds)
+    limits = httpx.Limits(max_connections=5, max_keepalive_connections=0)
+
+    with httpx.Client(follow_redirects=False, timeout=timeout, limits=limits) as client:
+        while True:
+            if current_url in visited:
+                raise ValueError("Redirect loop")
+            visited.add(current_url)
+
+            with client.stream("GET", current_url, headers={"User-Agent": "LENA-DemoFetcher/1.0"}) as resp:
+                # Handle redirects manually so we can re-validate each hop.
+                if resp.status_code in {301, 302, 303, 307, 308}:
+                    location = resp.headers.get("location")
+                    if not location:
+                        raise ValueError("Redirect missing location")
+                    redirects += 1
+                    if redirects > settings.link_snapshot_max_redirects:
+                        raise ValueError("Too many redirects")
+                    next_url = urljoin(current_url, location)
+                    current_url = _validate_snapshot_url(next_url)
+                    if allowlist:
+                        hostname = urlparse(current_url).hostname or ""
+                        if not any(hostname.lower() == d or hostname.lower().endswith(f".{d}") for d in allowlist):
+                            raise ValueError("URL domain not allowed")
+                    continue
+
+                resp.raise_for_status()
+                ctype = (resp.headers.get("content-type") or "").lower()
+                if ctype and not (ctype.startswith("text/") or "application/xhtml+xml" in ctype):
+                    raise ValueError("Unsupported content type")
+
+                buf = bytearray()
+                for chunk in resp.iter_bytes():
+                    if not chunk:
+                        continue
+                    buf.extend(chunk)
+                    if len(buf) > max_bytes:
+                        raise ValueError("Content too large")
+                content = bytes(buf)
+                break
 
     # Best-effort text extraction
     text = content.decode(resp.encoding or "utf-8", errors="replace")

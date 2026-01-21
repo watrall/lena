@@ -37,16 +37,17 @@ export LENA_ENABLE_DOCS=true
 ```
 
 ## Pilot Guardrails
-- **No authentication** - The pilot runs in "Pilot Mode - No login". All users share the same experience.
+- **Student view is open** - Chat and Course FAQ do not require login in this pilot.
+- **Instructor tools use demo authentication** - Insights, course management, ingest, review queue, and exports require a demo-only login. This is not production authentication or role-based access control.
 - **Sample data only** - Course materials in `data/` are synthetic or sanitized for demonstration.
 - **Non-production storage** - Feedback and interactions persist in JSON/JSONL files under `storage/`.
 
-## Endpoint Hardening (No-Auth Pilots)
-Because this pilot intentionally ships without authentication, the backend includes feature flags to
-disable higher-risk endpoints unless explicitly enabled by the operator.
+## Endpoint Hardening (Demo Pilots)
+Even with the demo login, treat this as a no-auth pilot for deployment planning. The backend keeps higher-risk endpoints behind feature flags so operators can disable them by default and only enable them in controlled environments.
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
+| `LENA_ENABLE_INSTRUCTOR_AUTH` | Require demo instructor auth for instructor-only endpoints | `true` |
 | `LENA_ENABLE_INGEST_ENDPOINT` | Enable `POST /ingest/run` | `false` |
 | `LENA_ENABLE_ADMIN_ENDPOINTS` | Enable `GET /admin/review` + `POST /admin/promote` | `false` |
 | `LENA_ENABLE_EXPORT_ENDPOINT` | Enable `GET /admin/export` | `false` |
@@ -105,6 +106,7 @@ All dependencies have been updated to address known CVEs as of January 2026.
 | Variable | Purpose | Default |
 |----------|---------|---------|
 | `LENA_ENCRYPTION_KEY` | Fernet key for PII encryption | None (plaintext) |
+| `LENA_ENABLE_INSTRUCTOR_AUTH` | Require demo instructor auth for instructor-only endpoints | `true` |
 | `LENA_ENABLE_INGEST_ENDPOINT` | Enable `POST /ingest/run` | `false` |
 | `LENA_ENABLE_ADMIN_ENDPOINTS` | Enable admin endpoints | `false` |
 | `LENA_ENABLE_EXPORT_ENDPOINT` | Enable `GET /admin/export` | `false` |

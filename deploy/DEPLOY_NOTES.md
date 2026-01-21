@@ -41,13 +41,24 @@ These instructions describe how to run the LENA pilot stack with the recommended
 6. **Health check**
    ```bash
    curl http://localhost:8000/healthz
-   curl -X POST http://localhost:8000/ingest/run
    ```
 7. **Sample smoke test**
    ```bash
-   curl -s -X POST http://localhost:8000/ask \
+   # Demo instructor token (demo/demo)
+   TOKEN="$(curl -sS -X POST http://localhost:8000/instructors/login \
      -H "Content-Type: application/json" \
-     -d '{"question":"When is Assignment 1 due?"}' | jq
+     -d '{"username":"demo","password":"demo"}' | python -c "import json,sys; print(json.load(sys.stdin)['access_token'])")"
+
+   # Optional: refresh corpus (requires LENA_ENABLE_INGEST_ENDPOINT=true)
+   curl -sS -X POST http://localhost:8000/ingest/run -H "Authorization: Bearer $TOKEN"
+
+   # List courses and pick an id
+   curl -sS http://localhost:8000/courses
+
+   # Ask a question (course_id required)
+   curl -sS -X POST http://localhost:8000/ask \
+     -H "Content-Type: application/json" \
+     -d '{"question":"When is Assignment 1 due?","course_id":"anth101"}' | jq
    ```
 
 ## 3. Frontend on Netlify
@@ -61,7 +72,7 @@ These instructions describe how to run the LENA pilot stack with the recommended
    - `NEXT_PUBLIC_API_BASE=https://your-api-domain.edu` (point at the FastAPI endpoint exposed from DigitalOcean or your reverse proxy).
 4. **Deploy**
    - Netlify will run `npm ci && npm run build` using the `package-lock.json`.
-   - Verify the banner shows "Pilot Mode - No login. Sample data only."
+   - Verify Chat and Course FAQ work without login, and instructor tools prompt for the demo credentials.
 
 ## 4. Post-Deployment Checklist
 
@@ -98,16 +109,17 @@ Useful for uptime monitors:
 set -euo pipefail
 
 API="${1:-https://your-api-domain.edu}"
+COURSE_ID="${2:-anth101}"
 
 curl -fsSL "$API/healthz"
-curl -fsSL -X POST "$API/ingest/run"
+curl -fsSL "$API/courses" >/dev/null
 curl -fsSL -X POST "$API/ask" \
   -H "Content-Type: application/json" \
-  -d '{"question":"When is Assignment 1 due?"}'
+  -d "{\"question\":\"When is Assignment 1 due?\",\"course_id\":\"$COURSE_ID\"}"
 ```
 
 ## 7. Scaling Thoughts
 
 - Swap the JSONL storage for managed Postgres or DynamoDB to support concurrent feedback at scale.
-- Configure autosensing logging (e.g., DigitalOcean tailing or Datadog) to monitor ingest and ask latency.
+- Configure structured logging and ship it to a central system (DigitalOcean, Datadog) to monitor ingest and ask latency.
 - Move from CPU inference to GPU or hosted endpoints when the question volume or team accuracy requirements grow.

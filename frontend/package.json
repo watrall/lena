@@ -25,5 +25,12 @@
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.4",
     "typescript": "5.3.3"
+  },
+  "overrides": {
+    "@next/eslint-plugin-next": {
+      "glob": "10.5.0"
+    },
+    "glob": "10.5.0",
+    "js-yaml": "4.1.1"
   }
 }

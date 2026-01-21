@@ -220,7 +220,8 @@ def compute_insights_components(
         tz=tz,
         include_pii=False,
     )
-    assert isinstance(interactions, list)
+    if not isinstance(interactions, list):
+        interactions = []
 
     totals_questions = 0
     confidence_sum = 0.0
@@ -279,7 +280,8 @@ def compute_insights_components(
         tz=tz,
         include_pii=include_pii,
     )
-    assert isinstance(escalations, list)
+    if not isinstance(escalations, list):
+        escalations = []
 
     pain_points = []
     for question, stats in feedback_by_question.items():

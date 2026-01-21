@@ -163,7 +163,7 @@ export default function CoursePickerModal({
                     type="button"
                     onClick={() => setSelectedCourseId(course.id)}
                     className={`flex w-full flex-col gap-1 rounded-2xl border px-4 py-3 text-left transition ${isActive
-                      ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
+                      ? 'border-lena-primary bg-lena-primary text-white shadow-sm'
                       : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                       }`}
                   >
@@ -171,7 +171,7 @@ export default function CoursePickerModal({
                       {course.code ? `${course.code} · ${course.name}` : course.name}
                     </span>
                     {course.term && (
-                      <span className={`text-xs ${isActive ? 'text-slate-100/90' : 'text-slate-500'}`}>
+                      <span className={`text-xs ${isActive ? 'text-white/90' : 'text-slate-500'}`}>
                         {course.term}
                       </span>
                     )}

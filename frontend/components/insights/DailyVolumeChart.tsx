@@ -12,6 +12,8 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
+import { LENA_ACCENT, LENA_ACCENT_FILL, LENA_GRID, LENA_TICKS } from '../../lib/theme';
+
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 interface DailyVolumeChartProps {
@@ -26,8 +28,8 @@ export default function DailyVolumeChart({ labels, values }: DailyVolumeChartPro
       {
         label: 'Daily questions',
         data: values,
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(37, 99, 235, 0.15)',
+        borderColor: LENA_ACCENT,
+        backgroundColor: LENA_ACCENT_FILL,
         fill: true,
         tension: 0.35,
         pointRadius: 3,
@@ -41,11 +43,11 @@ export default function DailyVolumeChart({ labels, values }: DailyVolumeChartPro
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { precision: 0, color: '#475569' },
-        grid: { color: '#e2e8f0' },
+        ticks: { precision: 0, color: LENA_TICKS },
+        grid: { color: LENA_GRID },
       },
       x: {
-        ticks: { color: '#475569' },
+        ticks: { color: LENA_TICKS },
         grid: { display: false },
       },
     },

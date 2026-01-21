@@ -180,7 +180,8 @@ async def export_data(
 
             for component in components:
                 if component.startswith("insights_"):
-                    assert insights_payload is not None
+                    if insights_payload is None:
+                        raise HTTPException(status_code=500, detail="Insights payload unavailable")
                     payload = insights_payload[component]
                 else:
                     payload = exports.load_raw_component(

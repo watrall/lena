@@ -9,7 +9,7 @@
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 font-sans antialiased;
+  @apply bg-lena-surface text-slate-900 font-sans antialiased;
 }
 
 a {
@@ -30,7 +30,7 @@ main {
 
 @layer components {
   .lena-card {
-    @apply rounded-3xl bg-white shadow-sm ring-1 ring-slate-100;
+    @apply rounded-3xl bg-lena-card border border-slate-200/70 shadow-[0_1px_2px_rgba(15,23,42,0.06),0_16px_32px_rgba(15,23,42,0.04)];
   }
 
   .lena-card-padding {
@@ -103,7 +103,7 @@ main {
   }
 
   .lena-callout {
-    @apply rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm leading-relaxed text-slate-600;
+    @apply rounded-3xl border border-slate-200 bg-lena-inset px-4 py-6 text-sm leading-relaxed text-slate-600;
   }
 
   .lena-alert-error {

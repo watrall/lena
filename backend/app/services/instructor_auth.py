@@ -34,7 +34,12 @@ def issue_token(username: str) -> dict[str, Any]:
     payload = {"sub": username, "iat": int(now.timestamp()), "exp": int(exp.timestamp())}
     body = _b64url_encode(json.dumps(payload, separators=(",", ":")).encode("utf-8"))
     sig = _sign(body.encode("utf-8"))
-    return {"access_token": f"{body}.{sig}", "token_type": "bearer", "expires_at": exp.isoformat().replace("+00:00", "Z")}
+    # token_type is OAuth-style metadata, not a password. (bandit false positive)
+    return {
+        "access_token": f"{body}.{sig}",
+        "token_type": "bearer",  # nosec B105
+        "expires_at": exp.isoformat().replace("+00:00", "Z"),
+    }
 
 
 def verify_token(token: str) -> Dict[str, Any] | None:
@@ -58,5 +63,7 @@ def verify_token(token: str) -> Dict[str, Any] | None:
 
 
 def check_credentials(username: str, password: str) -> bool:
-    return username == settings.instructor_username and password == settings.instructor_password
-
+    # Constant-time comparisons to reduce trivial timing differences.
+    return hmac.compare_digest(username, settings.instructor_username) and hmac.compare_digest(
+        password, settings.instructor_password
+    )

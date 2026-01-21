@@ -46,6 +46,7 @@ All notable changes to this project will be documented in this file.
 - Documentation set including architecture overview, demo script, security notes, and screen placeholders.
 
 ### Notes
-- Pilot is shared under MIT License and runs in "Pilot Mode - No login. Sample data only."
+- Pilot is shared under MIT License. Chat and Course FAQ are open; instructor tools use demo authentication. Sample data only.
 - See `deploy/DEPLOY_NOTES.md` for Netlify + DigitalOcean deployment guidance.
-[v0.2.0]: https://github.com/watrall/lena/releases/tag/v0.2.0[v0.1.0]: https://github.com/watrall/lena/releases/tag/v0.1.0
+[v0.2.0]: https://github.com/watrall/lena/releases/tag/v0.2.0
+[v0.1.0]: https://github.com/watrall/lena/releases/tag/v0.1.0

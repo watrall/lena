@@ -119,7 +119,7 @@ def parse_markdown(path: Path, root: Path, prefix: str) -> ParsedDocument:
     text = path.read_text(encoding="utf-8")
     rel_path = str(path.relative_to(root))
     source_path = f"{prefix}/{rel_path}"
-    doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()
+    doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()  # nosec B324
     version_id = str(int(path.stat().st_mtime))
     collection = detect_collection(path)
 
@@ -161,7 +161,7 @@ def parse_calendar(path: Path, root: Path, prefix: str) -> ParsedDocument:
     content = path.read_text(encoding="utf-8")
     rel_path = str(path.relative_to(root))
     source_path = f"{prefix}/{rel_path}"
-    doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()
+    doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()  # nosec B324
     version_id = str(int(path.stat().st_mtime))
     calendar = Calendar(content)
 
@@ -200,7 +200,7 @@ def parse_text(path: Path, root: Path, prefix: str) -> ParsedDocument:
     content = path.read_text(encoding="utf-8", errors="replace")
     rel_path = str(path.relative_to(root))
     source_path = f"{prefix}/{rel_path}"
-    doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()
+    doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()  # nosec B324
     version_id = str(int(path.stat().st_mtime))
     title = path.stem.replace("_", " ").replace("-", " ").title()
     return ParsedDocument(

@@ -55,6 +55,8 @@ async def security_headers(request: Request, call_next):
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "no-referrer")
     response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+    response.headers.setdefault("Cache-Control", "no-store")
+    response.headers.setdefault("Pragma", "no-cache")
     return response
 
 # Configure CORS from environment; defaults to common localhost variants for development.

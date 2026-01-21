@@ -144,6 +144,32 @@ class Settings(BaseSettings):
         default=None,
         description="Writable directory for uploaded course resources and link snapshots (defaults to storage_dir/uploads).",
     )
+    uploads_allowed_extensions: str = Field(
+        default=".md,.markdown,.txt,.ics",
+        description="Comma-separated list of allowed upload file extensions (matched case-insensitively).",
+    )
+    uploads_max_bytes: int = Field(
+        default=25_000_000,
+        ge=1_000_000,
+        le=100_000_000,
+        description="Maximum allowed bytes for a single uploaded file.",
+    )
+    link_snapshot_allowed_ports: str = Field(
+        default="80,443",
+        description="Comma-separated list of allowed ports for link snapshots.",
+    )
+    link_snapshot_max_redirects: int = Field(
+        default=5,
+        ge=0,
+        le=20,
+        description="Maximum redirects to follow when fetching link snapshots.",
+    )
+    link_snapshot_timeout_seconds: float = Field(
+        default=10.0,
+        ge=1.0,
+        le=60.0,
+        description="Timeout in seconds for link snapshot fetches.",
+    )
 
     @field_validator("data_dir", "storage_dir", "uploads_dir", mode="before")
     @classmethod

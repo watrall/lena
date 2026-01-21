@@ -88,7 +88,7 @@ cd lena
 ./start.sh
 ```
 
-The script checks that Docker is installed, builds the containers, seeds the sample course data, and opens your browser to the chat interface - all in one step. You'll be prompted to choose a course and can start asking questions right away.
+The script checks that Docker is installed, builds the containers, and opens your browser to the chat interface in one step. After the stack is up, use the **Instructors** page to re-run ingestion so the demo course materials are searchable.
 
 ---
 
@@ -104,10 +104,20 @@ docker compose -f docker/docker-compose.yml up --build
 
 Once the stack is up:
 
-1. Seed content (optional but handy): `curl -X POST http://localhost:8000/ingest/run`
+1. Seed content (optional but handy): open <http://localhost:3000/instructors>, log in (`demo` / `demo`), and click **Re-run ingestion**
 2. Open the chat: <http://localhost:3000> and ask "When is Assignment 1 due?"
 3. Open instructor tools: <http://localhost:3000/instructors> (requires demo instructor login; graphs fill in after a few `/ask` + `/feedback` events)
 4. When prompted, pick one of the sample courses - the backend validates the `course_id` on `/ask`, `/feedback`, `/faq`, `/insights`, and `/escalations/request`.
+
+Optional API-only ingest:
+
+```bash
+TOKEN="$(curl -sS -X POST http://localhost:8000/instructors/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"demo","password":"demo"}' | python -c "import json,sys; print(json.load(sys.stdin)['access_token'])")"
+
+curl -sS -X POST http://localhost:8000/ingest/run -H "Authorization: Bearer $TOKEN"
+```
 
 If you change course data or want a clean slate, stop the stack and remove `storage/` before restarting.
 
@@ -117,7 +127,7 @@ If you change course data or want a clean slate, stop the stack and remove `stor
 
 ### Environment variables
 
-Create a `.env` file at the repo root using `.env.example` as a guide.
+Create a `.env` file at the repo root using `.env.example` as a guide (used by `./start.sh` and Docker Compose). If you run the backend directly from `backend/`, either export the `LENA_*` variables in your shell or create a `backend/.env` file as well.
 
 | Variable | Description |
 | --- | --- |

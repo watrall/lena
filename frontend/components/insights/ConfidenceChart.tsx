@@ -12,6 +12,8 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
+import { LENA_ACCENT, LENA_ACCENT_FILL, LENA_GRID, LENA_TICKS } from '../../lib/theme';
+
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 interface ConfidenceChartProps {
@@ -26,8 +28,8 @@ export default function ConfidenceChart({ labels, values }: ConfidenceChartProps
       {
         label: 'Average confidence',
         data: values,
-        borderColor: '#0ea5e9',
-        backgroundColor: 'rgba(14, 165, 233, 0.15)',
+        borderColor: LENA_ACCENT,
+        backgroundColor: LENA_ACCENT_FILL,
         fill: true,
         tension: 0.3,
         pointRadius: 3,
@@ -44,12 +46,12 @@ export default function ConfidenceChart({ labels, values }: ConfidenceChartProps
         suggestedMax: 1,
         ticks: {
           callback: (value: string | number) => `${Math.round(Number(value) * 100)}%`,
-          color: '#475569',
+          color: LENA_TICKS,
         },
-        grid: { color: '#e2e8f0' },
+        grid: { color: LENA_GRID },
       },
       x: {
-        ticks: { color: '#475569' },
+        ticks: { color: LENA_TICKS },
         grid: { display: false },
       },
     },

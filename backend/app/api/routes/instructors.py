@@ -1,13 +1,15 @@
 """Demo instructor authentication and course management endpoints."""
 
 import hashlib
+import logging
 import re
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import APIRouter, Body, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field, HttpUrl
 
+from ...limiting import limiter
 from ...services import courses
 from ...services import resources
 from ...services.instructor_auth import check_credentials, issue_token
@@ -15,6 +17,7 @@ from ...settings import settings
 from ..deps import require_instructor
 
 router = APIRouter(prefix="/instructors", tags=["instructors"])
+logger = logging.getLogger(__name__)
 
 
 class LoginRequest(BaseModel):
@@ -36,7 +39,8 @@ class CourseCreateRequest(BaseModel):
 
 
 @router.post("/login", response_model=LoginResponse)
-def login(payload: LoginRequest = Body(...)) -> LoginResponse:
+@limiter.limit("10/minute")
+def login(request: Request, payload: LoginRequest = Body(...)) -> LoginResponse:
     if not check_credentials(payload.username, payload.password):
         raise HTTPException(status_code=401, detail="Invalid username or password")
     token = issue_token(payload.username)
@@ -116,18 +120,51 @@ async def upload_resource(course_id: str, file: UploadFile, _: dict = Depends(re
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
+    original_name = file.filename or "upload"
+    suffix = Path(original_name).suffix.lower()
+    allowed_exts = {
+        ext.strip().lower()
+        for ext in settings.uploads_allowed_extensions.split(",")
+        if ext.strip()
+    }
+    if allowed_exts and suffix not in allowed_exts:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type. Allowed: {', '.join(sorted(allowed_exts))}",
+        )
+
     resources.ensure_course_dir(course_id)
     resource_id = uuid4().hex
-    safe_name = re.sub(r"[^a-zA-Z0-9._-]+", "_", file.filename or "upload")
+    safe_name = re.sub(r"[^a-zA-Z0-9._-]+", "_", original_name)[:200]
     dest = settings.uploads_dir / course_id / "files" / f"{resource_id}_{safe_name}"
 
-    content = await file.read()
-    if len(content) > 25_000_000:
-        raise HTTPException(status_code=413, detail="File too large")
-    dest.write_bytes(content)
+    bytes_written = 0
+    with dest.open("wb") as handle:
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            bytes_written += len(chunk)
+            if bytes_written > settings.uploads_max_bytes:
+                try:
+                    dest.unlink(missing_ok=True)
+                except OSError as exc:
+                    logger.debug("Unable to remove partial upload %s: %s", dest, exc)
+                raise HTTPException(status_code=413, detail="File too large")
+            handle.write(chunk)
+
+    if suffix in {".md", ".markdown", ".txt", ".ics"}:
+        try:
+            dest.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            try:
+                dest.unlink(missing_ok=True)
+            except OSError as exc:
+                logger.debug("Unable to remove non-UTF8 upload %s: %s", dest, exc)
+            raise HTTPException(status_code=400, detail="Uploaded file must be valid UTF-8 text")
 
     source_path = f"uploads/{course_id}/files/{dest.name}"
-    record = resources.add_file_resource(course_id, resource_id, file.filename or dest.name, source_path)
+    record = resources.add_file_resource(course_id, resource_id, original_name, source_path)
     return {"ok": True, "resource": record}
 
 
@@ -166,13 +203,13 @@ def delete_course_resource(course_id: str, resource_id: str, _: dict = Depends(r
     # Delete vectors by doc_id (doc_id is sha1 of source_path used during ingestion).
     source_path = removed.get("source_path")
     if isinstance(source_path, str):
-        doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()
+        doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()  # nosec B324
         try:
             from ...rag.qdrant_utils import get_qdrant_client
             from ...rag.ingest import delete_document_chunks
 
             delete_document_chunks(get_qdrant_client(), doc_id)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug("Unable to delete vectors for %s: %s", doc_id, exc)
 
     return {"ok": True}

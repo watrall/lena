@@ -8,9 +8,9 @@
                                |
                         HTTPS (Netlify)
                                |
-                +--------------v--------------+
+                    +--------------v--------------+
                 |      Next.js Frontend       |
-                |  (Chat UI, FAQ, Insights)   |
+                | (Chat UI, FAQ, Instructors) |
                 +--------------+--------------+
                                |
                         HTTPS / JSON
@@ -46,11 +46,13 @@
 ### Key API Routes
 
 - `GET /courses` - feeds the course picker so every interaction has an explicit `course_id`.
-- `POST /ask` - runs retrieval + generation for a question scoped to the chosen course.
+- `POST /ask` - runs retrieval + generation for a question scoped to the chosen course (requires `course_id`).
 - `POST /feedback` - records helpfulness along with the originating course and question text.
 - `POST /escalations/request` - stores instructor follow-ups (learner name/email + question) in `storage/escalations.jsonl`.
-- `GET /faq`, `GET /insights` - return course-filtered FAQ entries and the dashboard payload used by the frontend.
-- `GET /admin/review`, `POST /admin/promote` - allow staff to triage low-confidence answers and promote vetted responses into the FAQ.
+- `GET /faq` - returns course-filtered FAQ entries used by the frontend.
+- `GET /insights` - returns the instructor dashboard payload (requires demo instructor auth).
+- `POST /ingest/run` - refreshes the vector store from `data/` and uploaded resources (requires demo instructor auth and `LENA_ENABLE_INGEST_ENDPOINT=true`).
+- `GET /admin/review`, `POST /admin/promote` - review queue and FAQ curation (requires demo instructor auth and `LENA_ENABLE_ADMIN_ENDPOINTS=true`).
 
 ## Swapping Language Models
 

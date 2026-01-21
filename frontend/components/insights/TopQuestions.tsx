@@ -3,6 +3,8 @@
 import { Chart as ChartJS, BarElement, CategoryScale, Legend, LinearScale, Tooltip, TooltipItem } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
+import { LENA_ACCENT, LENA_GRID, LENA_TICKS } from '../../lib/theme';
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 interface TopQuestionsProps {
@@ -17,7 +19,7 @@ export default function TopQuestions({ labels, values }: TopQuestionsProps) {
       {
         label: 'Count',
         data: values,
-        backgroundColor: '#1d4ed8',
+        backgroundColor: LENA_ACCENT,
         borderRadius: 12,
       },
     ],
@@ -29,11 +31,11 @@ export default function TopQuestions({ labels, values }: TopQuestionsProps) {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { precision: 0, color: '#475569' },
-        grid: { color: '#e2e8f0' },
+        ticks: { precision: 0, color: LENA_TICKS },
+        grid: { color: LENA_GRID },
       },
       x: {
-        ticks: { color: '#475569' },
+        ticks: { color: LENA_TICKS },
         grid: { display: false },
       },
     },
