@@ -2,13 +2,14 @@
 
 import logging
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from ...rag.ingest import IngestResult, run_ingest
 from ...limiting import limiter
 from ...settings import settings
 from ...services import analytics
 from ...services.storage import utc_timestamp
+from ..deps import require_instructor
 
 router = APIRouter(tags=["ingest"])
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ async def ingest_run(request: Request) -> IngestResult:
     Raises:
         HTTPException: If ingestion fails.
     """
+    _ = require_instructor(request)
     if not settings.enable_ingest_endpoint:
         raise HTTPException(status_code=404, detail="Not found")
     try:

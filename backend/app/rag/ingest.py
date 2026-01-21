@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import hashlib
 import re
 import uuid
@@ -57,17 +55,24 @@ class ParsedDocument:
 def run_ingest(data_dir: Path | None = None) -> IngestResult:
     """Main ingestion entry point for FastAPI endpoint and CLI usage."""
     data_path = data_dir or settings.data_dir
+    uploads_path = settings.uploads_dir
     docs_processed = 0
     chunk_count = 0
 
-    if not data_path.exists():
+    roots: list[tuple[Path, str]] = []
+    if data_path.exists():
+        roots.append((data_path, "data"))
+    if uploads_path.exists():
+        roots.append((uploads_path, "uploads"))
+
+    if not roots:
         return IngestResult(ok=True, counts=IngestCounts(docs=0, chunks=0))
 
     embedder = get_embedder()
     ensure_collection()
     client = get_qdrant_client()
 
-    for document in iter_documents(data_path):
+    for document in iter_documents(roots):
         docs_processed += 1
         chunk_payloads = list(chunk_document(document))
         if not chunk_payloads:
@@ -96,20 +101,25 @@ def run_ingest(data_dir: Path | None = None) -> IngestResult:
     return IngestResult(ok=True, counts=IngestCounts(docs=docs_processed, chunks=chunk_count))
 
 
-def iter_documents(data_path: Path) -> Iterable[ParsedDocument]:
-    for path in sorted(data_path.rglob("*")):
-        if path.is_dir():
-            continue
-        if path.suffix.lower() in {".md", ".markdown"}:
-            yield parse_markdown(path, data_path)
-        elif path.suffix.lower() == ".ics":
-            yield parse_calendar(path, data_path)
+def iter_documents(roots: list[tuple[Path, str]]) -> Iterable[ParsedDocument]:
+    for root, prefix in roots:
+        for path in sorted(root.rglob("*")):
+            if path.is_dir():
+                continue
+            suffix = path.suffix.lower()
+            if suffix in {".md", ".markdown"}:
+                yield parse_markdown(path, root, prefix)
+            elif suffix == ".ics":
+                yield parse_calendar(path, root, prefix)
+            elif suffix in {".txt"}:
+                yield parse_text(path, root, prefix)
 
 
-def parse_markdown(path: Path, root: Path) -> ParsedDocument:
+def parse_markdown(path: Path, root: Path, prefix: str) -> ParsedDocument:
     text = path.read_text(encoding="utf-8")
     rel_path = str(path.relative_to(root))
-    doc_id = hashlib.sha1(rel_path.encode("utf-8")).hexdigest()
+    source_path = f"{prefix}/{rel_path}"
+    doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()
     version_id = str(int(path.stat().st_mtime))
     collection = detect_collection(path)
 
@@ -141,16 +151,17 @@ def parse_markdown(path: Path, root: Path) -> ParsedDocument:
         version_id=version_id,
         collection=collection,
         title=title,
-        source_path=rel_path,
-        course_id=detect_course_id(path, root),
+        source_path=source_path,
+        course_id=detect_course_id(rel_path),
         sections=sections,
     )
 
 
-def parse_calendar(path: Path, root: Path) -> ParsedDocument:
+def parse_calendar(path: Path, root: Path, prefix: str) -> ParsedDocument:
     content = path.read_text(encoding="utf-8")
     rel_path = str(path.relative_to(root))
-    doc_id = hashlib.sha1(rel_path.encode("utf-8")).hexdigest()
+    source_path = f"{prefix}/{rel_path}"
+    doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()
     version_id = str(int(path.stat().st_mtime))
     calendar = Calendar(content)
 
@@ -180,11 +191,27 @@ def parse_calendar(path: Path, root: Path) -> ParsedDocument:
         version_id=version_id,
         collection="calendar",
         title=path.stem.replace("_", " ").title(),
-        source_path=rel_path,
-        course_id=detect_course_id(path, root),
+        source_path=source_path,
+        course_id=detect_course_id(rel_path),
         sections=sections,
     )
 
+def parse_text(path: Path, root: Path, prefix: str) -> ParsedDocument:
+    content = path.read_text(encoding="utf-8", errors="replace")
+    rel_path = str(path.relative_to(root))
+    source_path = f"{prefix}/{rel_path}"
+    doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()
+    version_id = str(int(path.stat().st_mtime))
+    title = path.stem.replace("_", " ").replace("-", " ").title()
+    return ParsedDocument(
+        doc_id=doc_id,
+        version_id=version_id,
+        collection=detect_collection(path),
+        title=title,
+        source_path=source_path,
+        course_id=detect_course_id(rel_path),
+        sections=[Section(title=title, content=content)],
+    )
 
 def chunk_document(document: ParsedDocument) -> Iterable[tuple[int, str, str]]:
     chunk_index = 0
@@ -231,15 +258,15 @@ def detect_collection(path: Path) -> str:
     return "course"
 
 
-def detect_course_id(path: Path, root: Path) -> str:
-    rel_parts = path.relative_to(root).parts
-    if len(rel_parts) > 1:
-        return rel_parts[0]
+def detect_course_id(rel_path: str) -> str:
+    parts = Path(rel_path).parts
+    if len(parts) > 1:
+        return parts[0]
     default_course = courses.get_default_course()
     if default_course:
         return default_course["id"]
-    if rel_parts:
-        return rel_parts[0]
+    if parts:
+        return parts[0]
     return "default"
 
 

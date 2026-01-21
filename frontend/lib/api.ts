@@ -1,3 +1,5 @@
+import { getInstructorToken } from './instructorAuth';
+
 export interface CourseSummary {
   id: string;
   name: string;
@@ -145,7 +147,12 @@ export const fetchFaq = (courseId: string) =>
   request<FAQEntry[]>(`/faq?course_id=${encodeURIComponent(courseId)}`);
 
 export const fetchInsights = (courseId: string) =>
-  request<InsightsSummary>(`/insights?course_id=${encodeURIComponent(courseId)}`);
+  request<InsightsSummary>(`/insights?course_id=${encodeURIComponent(courseId)}`, {
+    headers: (() => {
+      const token = getInstructorToken();
+      return token ? { Authorization: `Bearer ${token}` } : {};
+    })(),
+  });
 
 export type ExportRangeKind = '7d' | '30d' | 'custom' | 'all';
 export type ExportFormat = 'json' | 'csv';
@@ -189,8 +196,10 @@ export async function exportData(payload: {
     params.append('components', component);
   }
 
+  const token = getInstructorToken();
   const response = await fetch(`${API_BASE}/admin/export?${params.toString()}`, {
     cache: 'no-store',
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
 
   if (!response.ok) {

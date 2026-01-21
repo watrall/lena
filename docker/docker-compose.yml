@@ -10,6 +10,7 @@ services:
       LENA_QDRANT_PORT: "6333"
       LENA_DATA_DIR: "/data/input"
       LENA_STORAGE_DIR: "/data/storage"
+      LENA_UPLOADS_DIR: "/data/storage/uploads"
       LENA_CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
       # Demo defaults (no auth): explicitly enable risky endpoints only for local pilot.
       LENA_ENABLE_INGEST_ENDPOINT: "true"

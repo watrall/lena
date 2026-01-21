@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 
 import CoursePickerModal from '../components/CoursePickerModal';
 import Header from '../components/Layout/Header';
@@ -10,6 +11,7 @@ import type { ActiveCourse } from '../lib/course';
 import { getActiveCourse, subscribeToCourse } from '../lib/course';
 
 export default function LENAApp({ Component, pageProps }: AppProps) {
+  const router = useRouter();
   const [activeCourse, setActiveCourse] = useState<ActiveCourse | null>(() => getActiveCourse());
   const [courseModalOpen, setCourseModalOpen] = useState(() => !getActiveCourse());
 
@@ -21,7 +23,8 @@ export default function LENAApp({ Component, pageProps }: AppProps) {
     return unsubscribe;
   }, []);
 
-  const forceSelection = !activeCourse;
+  const allowNoCourse = router.pathname.startsWith('/instructors');
+  const forceSelection = !allowNoCourse && !activeCourse;
 
   const handleCloseModal = () => {
     if (!forceSelection) {

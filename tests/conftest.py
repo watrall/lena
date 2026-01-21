@@ -81,6 +81,9 @@ def ingest_sample_corpus(tmp_path_factory):
         shutil.rmtree(TEST_STORAGE_DIR)
     TEST_STORAGE_DIR.mkdir(exist_ok=True)
     monkey.setattr(settings, "storage_dir", TEST_STORAGE_DIR)
+    uploads_dir = TEST_STORAGE_DIR / "uploads"
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    monkey.setattr(settings, "uploads_dir", uploads_dir)
 
     # Ensure a clean collection for every test session.
     client = get_qdrant_client()

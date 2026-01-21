@@ -9,7 +9,7 @@ import zipfile
 from datetime import datetime
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response, StreamingResponse
 
 from ...services import exports
@@ -18,6 +18,7 @@ from ...services.crypto import is_encryption_enabled
 from ...limiting import limiter
 from ...services import analytics
 from ...services.storage import utc_timestamp
+from ..deps import require_instructor
 
 router = APIRouter(tags=["export"])
 
@@ -55,6 +56,7 @@ def _range_token(kind: str, start_date: str | None, end_date: str | None) -> str
 @limiter.limit("5/minute")
 async def export_data(
     request: Request,
+    _: dict = Depends(require_instructor),
     course_id: str = Query(..., description="Course identifier or 'all'"),
     components: list[str] = Query(..., description="Export component keys (repeatable)"),
     format: str = Query("json", description="Export format (json|csv)"),

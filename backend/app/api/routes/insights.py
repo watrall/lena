@@ -2,17 +2,19 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 
 from ...schemas.insights import InsightsResponse
 from ...services import analytics
 from ..deps import resolve_course
+from ..deps import require_instructor
 
 router = APIRouter(tags=["insights"])
 
 
 @router.get("/insights", response_model=InsightsResponse)
 def get_insights(
+    _: dict = Depends(require_instructor),
     course_id: str = Query(..., description="Course identifier"),
 ) -> InsightsResponse:
     """Retrieve analytics insights for a specific course.

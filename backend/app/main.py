@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from .api.routes import admin, chat, courses, export, feedback, health, ingest, insights
+from .api.routes import admin, chat, courses, export, feedback, health, ingest, insights, instructors
 from .limiting import limiter
 from .services import demo_seed
 from .services import storage
@@ -38,7 +38,10 @@ async def security_headers(request: Request, call_next):
     content_length = request.headers.get("content-length")
     if content_length:
         try:
-            if int(content_length) > settings.max_request_body_bytes:
+            allowed_max = settings.max_request_body_bytes
+            if request.url.path.endswith("/resources/upload"):
+                allowed_max = max(allowed_max, 26_000_000)
+            if int(content_length) > allowed_max:
                 from fastapi.responses import JSONResponse
 
                 return JSONResponse(
@@ -62,8 +65,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
     allow_credentials=False,
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type", "Accept"],
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Content-Type", "Accept", "Authorization"],
     expose_headers=["Content-Disposition"],
 )
 
@@ -78,3 +81,4 @@ app.include_router(feedback.router)
 app.include_router(admin.router)
 app.include_router(insights.router)
 app.include_router(export.router)
+app.include_router(instructors.router)

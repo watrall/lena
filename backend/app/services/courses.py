@@ -28,21 +28,21 @@ DEFAULT_COURSES: list[dict[str, str]] = [
 
 def _coerce_courses(payload: Any) -> list[dict[str, str | None]]:
     """Validate and normalize course data from storage."""
-    if isinstance(payload, list):
-        sanitized: list[dict[str, str | None]] = []
-        for entry in payload:
-            if isinstance(entry, dict) and entry.get("id") and entry.get("name"):
-                sanitized.append(
-                    {
-                        "id": str(entry["id"]),
-                        "name": str(entry["name"]),
-                        "code": str(entry["code"]) if entry.get("code") else None,
-                        "term": str(entry["term"]) if entry.get("term") else None,
-                    }
-                )
-        if sanitized:
-            return sanitized
-    return DEFAULT_COURSES
+    if not isinstance(payload, list):
+        return DEFAULT_COURSES
+
+    sanitized: list[dict[str, str | None]] = []
+    for entry in payload:
+        if isinstance(entry, dict) and entry.get("id") and entry.get("name"):
+            sanitized.append(
+                {
+                    "id": str(entry["id"]),
+                    "name": str(entry["name"]),
+                    "code": str(entry["code"]) if entry.get("code") else None,
+                    "term": str(entry["term"]) if entry.get("term") else None,
+                }
+            )
+    return sanitized
 
 
 def load_courses() -> list[dict[str, str | None]]:

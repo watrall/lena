@@ -91,3 +91,4 @@
 {"type": "feedback", "question_id": "demo_anth204_q2", "helpful": false, "confidence": 0.42, "question": "What is the late policy? (demo seed)", "course_id": "anth204", "timestamp": "2026-01-20T16:58:43.916226Z"}
 {"type": "admin_export", "question_id": "n/a", "course_id": "anth101", "timestamp": "2026-01-21T16:58:55.906082Z"}
 {"type": "admin_export", "question_id": "n/a", "course_id": "anth101", "timestamp": "2026-01-21T16:58:55.924689Z"}
+{"type": "admin_export", "question_id": "n/a", "course_id": "anth101", "timestamp": "2026-01-21T17:00:55.623842Z"}

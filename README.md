@@ -10,11 +10,21 @@ LENA isn’t meant to replace instructors. It handles common questions and point
 
 Students interact through a simple chat interface that works on desktop and mobile. Instructors and course admins can view real-time insights in an analytics dashboard—tracking trends, top questions, and emerging pain points across multiple courses. The pilot version is fully containerized (FastAPI backend + Next.js frontend + Qdrant vector store) and integrates with GitHub Actions for automated testing and builds.
 
-## Demo-mode (no authentication)
+## Demo-mode (no production authentication)
 
-This repo is a pilot/demo build: it ships with demo courses and sample content, and it does not include authentication or role-based access control. That means both the student chat UI and the insights dashboard are publicly accessible to anyone who can reach the running web app.
+This repo is a pilot/demo build: it ships with demo courses and sample content, and it does not include production-ready authentication or role-based access control.
+
+- **Student experience** (Chat + Course FAQ) is intentionally open in the pilot.
+- **Instructor tools** (Insights + Course management + Data export + Ingest) are behind a **demo-only login prompt** to demonstrate a basic authentication flow.
 
 For any real deployment, add authentication (and authorization) in front of the web UI and lock down the API endpoints appropriately.
+
+### Demo instructor credentials
+
+- Username: `demo`
+- Password: `demo`
+
+This is intentionally simple and should never be used for a real deployment.
 
 ## Screenshots
 
@@ -85,7 +95,7 @@ Once the stack is up:
 
 1. Seed content (optional but handy): `curl -X POST http://localhost:8000/ingest/run`
 2. Open the chat: <http://localhost:3000> and ask “When is Assignment 1 due?”
-3. Review metrics: <http://localhost:3000/insights> (graphs fill in after a few `/ask` + `/feedback` events)
+3. Open instructor tools: <http://localhost:3000/instructors> (requires demo instructor login; graphs fill in after a few `/ask` + `/feedback` events)
 4. When prompted, pick one of the sample courses—the backend validates the `course_id` on `/ask`, `/feedback`, `/faq`, `/insights`, and `/escalations/request`.
 
 If you change course data or want a clean slate, stop the stack and remove `storage/` before restarting.
@@ -121,7 +131,7 @@ The course picker reads from `storage/courses.json`. If the file doesn’t exist
 
 Escalation requests initiated from the chat are stored in `storage/escalations.jsonl` so instructor follow-ups can be audited or replayed. FAQ entries and review queue items now record the originating `course_id`, keeping per-course dashboards consistent with the student experience.
 
-> API note: All dashboard endpoints (`/faq`, `/insights`, `/feedback`, `/admin/*`) require an explicit `course_id`. The `/ask` endpoint will fall back to the first configured course if none is provided, which only happens in CLI demos.
+> API note: Dashboard/admin endpoints (e.g. `/insights`, `/admin/*`, `/ingest/run`, `/instructors/*`) require demo instructor login in this pilot build. Course-scoped endpoints also require an explicit `course_id`.
 
 > Ingestion tip: organize course content under `data/<course_id>/...` so each vector chunk carries the proper `course_id`. Files placed directly under `data/` inherit the first course from `storage/courses.json`, making it easy to pilot with a single catalog while still supporting multi-course retrieval later.
 
@@ -129,9 +139,10 @@ Escalation requests initiated from the chat are stored in `storage/escalations.j
 
 - `POST /ask` – body must include `question` and `course_id`. Responses contain a `question_id` you’ll reuse.
 - `POST /feedback` – requires `question_id`, `course_id`, and the user’s helpfulness choice (plus optional transcript context).
-- `GET /faq` / `GET /insights` – require `course_id` query params; the backend rejects empty IDs.
+- `GET /faq` – requires `course_id` query params; the backend rejects empty IDs.
+- `GET /insights` – requires instructor login + `course_id` query params.
 - `POST /escalations/request` – include `course_id`, `student_name`, and `student_email` so instructors can follow up.
-- `GET /admin/review` / `POST /admin/promote` – locked to a single course at a time; a promote call fails if the queue entry belongs to a different course.
+- `GET /admin/review` / `POST /admin/promote` / `GET /admin/export` / `POST /ingest/run` – require instructor login and are locked down via feature flags for the demo.
 
 ### Running without Docker
 

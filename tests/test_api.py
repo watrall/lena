@@ -12,6 +12,12 @@ def _course_id() -> str:
     assert course is not None
     return course["id"]
 
+def _auth_headers(client: TestClient) -> dict[str, str]:
+    login = client.post("/instructors/login", json={"username": "demo", "password": "demo"})
+    assert login.status_code == 200
+    token = login.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
 
 def test_ask_endpoint_returns_answer_with_citations(ingest_sample_corpus):
     client = TestClient(app)
@@ -114,7 +120,7 @@ def test_feedback_review_uses_recorded_answer(ingest_sample_corpus):
 
 def test_insights_endpoint_structure(ingest_sample_corpus):
     client = TestClient(app)
-    response = client.get(f"/insights?course_id={_course_id()}")
+    response = client.get(f"/insights?course_id={_course_id()}", headers=_auth_headers(client))
     assert response.status_code == 200
     payload = response.json()
     assert set(payload.keys()) == {

@@ -9,7 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal, Optional
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -123,11 +123,41 @@ class Settings(BaseSettings):
         description="Seed synthetic interaction logs for demo exports when storage is empty.",
     )
 
-    @field_validator("data_dir", "storage_dir", mode="before")
+    # Demo instructor auth (NOT production authentication)
+    instructor_username: str = Field(default="demo", description="Demo instructor username.")
+    instructor_password: str = Field(default="demo", description="Demo instructor password.")
+    instructor_auth_secret: str = Field(
+        default="demo-secret-change-me",
+        description="HMAC secret for demo bearer tokens (rotate in any real pilot).",
+    )
+    instructor_token_ttl_seconds: int = Field(
+        default=60 * 60 * 8,
+        ge=60,
+        le=60 * 60 * 24 * 7,
+        description="Demo token TTL in seconds.",
+    )
+    enable_instructor_auth: bool = Field(
+        default=True,
+        description="Require demo instructor auth for instructor-only endpoints.",
+    )
+    uploads_dir: Optional[Path] = Field(
+        default=None,
+        description="Writable directory for uploaded course resources and link snapshots (defaults to storage_dir/uploads).",
+    )
+
+    @field_validator("data_dir", "storage_dir", "uploads_dir", mode="before")
     @classmethod
-    def coerce_path(cls, value: str | Path) -> Path:
+    def coerce_path(cls, value: str | Path | None) -> Path | None:
         """Convert string paths to Path objects."""
+        if value is None:
+            return None
         return Path(value) if isinstance(value, str) else value
+
+    @model_validator(mode="after")
+    def default_uploads_dir(self):
+        if self.uploads_dir is None:
+            self.uploads_dir = self.storage_dir / "uploads"
+        return self
 
 
 settings = Settings()

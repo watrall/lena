@@ -7,8 +7,8 @@ import type { ActiveCourse } from '../../lib/course';
 
 const links = [
   { href: '/', label: 'Chat' },
-  { href: '/faq', label: 'FAQ' },
-  { href: '/insights', label: 'Insights' },
+  { href: '/faq', label: 'Course FAQ' },
+  { href: '/instructors', label: 'Instructors' },
 ];
 
 interface HeaderProps {

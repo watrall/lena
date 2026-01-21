@@ -4,7 +4,7 @@ Provides instructor-facing endpoints for reviewing low-confidence answers,
 promoting vetted responses to the FAQ, and managing the review queue.
 """
 
-from fastapi import APIRouter, Body, HTTPException, Query, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request
 
 from ...schemas.admin import FAQEntry, PromoteRequest, ReviewItem
 from ...limiting import limiter
@@ -12,7 +12,7 @@ from ...services import analytics
 from ...services import review
 from ...services.storage import utc_timestamp
 from ...settings import settings
-from ..deps import resolve_course
+from ..deps import resolve_course, require_instructor
 
 router = APIRouter(tags=["admin"])
 
@@ -37,6 +37,7 @@ def get_faq(
 @limiter.limit("30/minute")
 async def get_review_queue(
     request: Request,
+    _: dict = Depends(require_instructor),
     course_id: str = Query(..., description="Course identifier"),
 ) -> list[ReviewItem]:
     """Retrieve the instructor review queue for a course.
@@ -66,7 +67,11 @@ async def get_review_queue(
 
 @router.post("/admin/promote", response_model=FAQEntry)
 @limiter.limit("10/minute")
-async def promote_to_faq(request: Request, payload: PromoteRequest = Body(...)) -> FAQEntry:
+async def promote_to_faq(
+    request: Request,
+    _: dict = Depends(require_instructor),
+    payload: PromoteRequest = Body(...),
+) -> FAQEntry:
     """Promote a review queue item to the FAQ.
 
     Args:
