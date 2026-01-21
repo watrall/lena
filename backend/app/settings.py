@@ -105,6 +105,18 @@ class Settings(BaseSettings):
         description="Maximum number of components per export request.",
     )
 
+    # HTTP hardening
+    trusted_hosts: str = Field(
+        default="localhost,127.0.0.1,testserver",
+        description="Comma-separated hostnames allowed by TrustedHostMiddleware.",
+    )
+    max_request_body_bytes: int = Field(
+        default=1_000_000,
+        ge=10_000,
+        le=50_000_000,
+        description="Max request body size in bytes (best-effort via Content-Length).",
+    )
+
     @field_validator("data_dir", "storage_dir", mode="before")
     @classmethod
     def coerce_path(cls, value: str | Path) -> Path:
