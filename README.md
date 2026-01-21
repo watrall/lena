@@ -24,14 +24,26 @@ For any production environment, the app must be connected to institutional authe
 
 ## Screenshots
 
-<p>
-  <img src="docs/screens/01_course_picker.png" alt="Course picker" width="48%" />
-  <img src="docs/screens/02_chat.png" alt="Chat interface" width="48%" />
-</p>
-<p>
-  <img src="docs/screens/03_faq.png" alt="FAQ page" width="48%" />
-  <img src="docs/screens/04_insights.png" alt="Insights dashboard" width="48%" />
-</p>
+![Course selection modal](docs/screens/course-selection.png)
+Course selection modal (choose the active course).
+
+![Chat interface](docs/screens/chat.png)
+Chat interface (course-scoped Q and A with citations).
+
+![Course FAQ page](docs/screens/course-faq.png)
+Course FAQ page (curated questions and answers).
+
+![Instructor login](docs/screens/instructors-login.png)
+Instructor landing page (demo login prompt).
+
+![Course management](docs/screens/course-management.png)
+Course management page (add or retire courses and manage resources).
+
+![Insights dashboard](docs/screens/insights.png)
+Insights page (course trends, top questions, and escalations).
+
+![Export modal](docs/screens/export-modal.png)
+Export modal (choose course scope, components, time range, and CSV or JSON).
 
 - **Student view** - Ask a question, get a sourced answer.  
   - Each response links back to the syllabus, policy doc, or calendar event it pulled from.  
