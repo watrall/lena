@@ -25,6 +25,10 @@ echo "LENA_ENCRYPTION_KEY=your-generated-key-here" >> .env
 
 **Note:** Without `LENA_ENCRYPTION_KEY`, PII is stored in plaintext with a warning logged.
 
+PII export is disabled by default. To allow PII export, set both:
+- `LENA_ENABLE_PII_EXPORT=true`
+- `LENA_ENCRYPTION_KEY=...`
+
 ### API Documentation
 OpenAPI docs (`/docs`, `/redoc`) are **disabled by default** for security. To enable for development:
 
@@ -36,6 +40,19 @@ export LENA_ENABLE_DOCS=true
 - **No authentication** - The pilot runs in "Pilot Mode - No login". All users share the same experience.
 - **Sample data only** - Course materials in `data/` are synthetic or sanitized for demonstration.
 - **Non-production storage** - Feedback and interactions persist in JSON/JSONL files under `storage/`.
+
+## Endpoint Hardening (No-Auth Pilots)
+Because this pilot intentionally ships without authentication, the backend includes feature flags to
+disable higher-risk endpoints unless explicitly enabled by the operator.
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `LENA_ENABLE_INGEST_ENDPOINT` | Enable `POST /ingest/run` | `false` |
+| `LENA_ENABLE_ADMIN_ENDPOINTS` | Enable `GET /admin/review` + `POST /admin/promote` | `false` |
+| `LENA_ENABLE_EXPORT_ENDPOINT` | Enable `GET /admin/export` | `false` |
+| `LENA_ENABLE_PII_EXPORT` | Allow `include_pii=true` exports (requires encryption key) | `false` |
+
+If you enable these endpoints, use additional deployment controls (VPN, IP allowlists, reverse-proxy gating).
 
 ## Data Handling
 - **No PII in chat logs** - Chat transcripts are not persisted; only aggregated interaction metadata is logged.
@@ -88,6 +105,10 @@ All dependencies have been updated to address known CVEs as of January 2026.
 | Variable | Purpose | Default |
 |----------|---------|---------|
 | `LENA_ENCRYPTION_KEY` | Fernet key for PII encryption | None (plaintext) |
+| `LENA_ENABLE_INGEST_ENDPOINT` | Enable `POST /ingest/run` | `false` |
+| `LENA_ENABLE_ADMIN_ENDPOINTS` | Enable admin endpoints | `false` |
+| `LENA_ENABLE_EXPORT_ENDPOINT` | Enable `GET /admin/export` | `false` |
+| `LENA_ENABLE_PII_EXPORT` | Allow PII export | `false` |
 | `LENA_ENABLE_DOCS` | Enable OpenAPI documentation | `false` |
 | `LENA_CORS_ORIGINS` | Allowed CORS origins | `http://localhost:3000` |
 

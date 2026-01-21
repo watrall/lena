@@ -8,6 +8,7 @@ from fastapi import APIRouter, Body, HTTPException, Query, Request
 
 from ...schemas.admin import FAQEntry, PromoteRequest, ReviewItem
 from ...limiting import limiter
+from ...services import analytics
 from ...services import review
 from ...services.storage import utc_timestamp
 from ...settings import settings
@@ -48,6 +49,14 @@ async def get_review_queue(
     """
     if not settings.enable_admin_endpoints:
         raise HTTPException(status_code=404, detail="Not found")
+    analytics.log_event(
+        {
+            "type": "admin_review_list",
+            "question_id": "n/a",
+            "course_id": course_id,
+            "timestamp": utc_timestamp(),
+        }
+    )
     return [
         ReviewItem(**entry)
         for entry in review.list_review_queue()
@@ -98,5 +107,13 @@ async def promote_to_faq(request: Request, payload: PromoteRequest = Body(...)) 
     }
     faq_entries.append(faq_entry)
     review.save_faq(faq_entries)
+    analytics.log_event(
+        {
+            "type": "admin_promote",
+            "question_id": str(payload.queue_id),
+            "course_id": course["id"],
+            "timestamp": utc_timestamp(),
+        }
+    )
 
     return FAQEntry(**faq_entry)

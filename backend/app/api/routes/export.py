@@ -16,6 +16,8 @@ from ...services import exports
 from ...settings import settings
 from ...services.crypto import is_encryption_enabled
 from ...limiting import limiter
+from ...services import analytics
+from ...services.storage import utc_timestamp
 
 router = APIRouter(tags=["export"])
 
@@ -87,6 +89,14 @@ async def export_data(
             status_code=400,
             detail="PII export requires include_pii_confirm=INCLUDE",
         )
+    analytics.log_event(
+        {
+            "type": "admin_export",
+            "question_id": "n/a",
+            "course_id": course_id,
+            "timestamp": utc_timestamp(),
+        }
+    )
 
     timezone = exports.resolve_timezone(tz)
     try:

@@ -7,6 +7,8 @@ from fastapi import APIRouter, HTTPException, Request
 from ...rag.ingest import IngestResult, run_ingest
 from ...limiting import limiter
 from ...settings import settings
+from ...services import analytics
+from ...services.storage import utc_timestamp
 
 router = APIRouter(tags=["ingest"])
 logger = logging.getLogger(__name__)
@@ -27,6 +29,14 @@ async def ingest_run(request: Request) -> IngestResult:
         raise HTTPException(status_code=404, detail="Not found")
     try:
         result = run_ingest()
+        analytics.log_event(
+            {
+                "type": "ingest_run",
+                "question_id": "n/a",
+                "course_id": None,
+                "timestamp": utc_timestamp(),
+            }
+        )
         logger.info(
             "Ingestion complete: %d docs, %d chunks",
             result.counts.docs,
