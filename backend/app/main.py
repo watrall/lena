@@ -17,7 +17,7 @@ from .settings import settings
 
 app = FastAPI(
     title="LENA Backend",
-    version="0.1.0",
+    version="0.3.0",
     description="Learning Engagement & Navigation Assistant API",
     docs_url="/docs" if os.getenv("LENA_ENABLE_DOCS", "false").lower() == "true" else None,
     redoc_url="/redoc" if os.getenv("LENA_ENABLE_DOCS", "false").lower() == "true" else None,

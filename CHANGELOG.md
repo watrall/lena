@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.3.0] - 2026-01-21
+
+### Added
+- **Instructor tools** - Demo authentication for instructor-only pages, plus an integrated instructors hub for Insights and course management.
+- **Course management** - Add/retire courses, upload course documents, and save link snapshots for ingestion without touching the server filesystem.
+- **Data export** - Instructor-only export modal and backend export endpoints for JSON/CSV, with multi-course ZIP output and optional PII export controls.
+- **Security hardening** - Additional guardrails for uploads and link snapshots (SSRF defenses), plus stronger defaults and rate limits for demo endpoints.
+
+### Changed
+- **UI polish** - Updated typography, surfaces, and visual consistency; improved instructor dashboard styling and chart theming.
+- **Documentation** - Updated docs for demo auth + course_id requirements, refreshed screenshots, and aligned deployment notes.
+
+### Fixed
+- **Export reliability** - Correct file naming, content types, and demo seed data behavior for exports.
+
+## [v0.2.1] - 2026-01-17
+
+### Added
+- **One-click start** - `start.sh` for local Docker startup and a README section describing the flow.
+
 ## [v0.2.0] - 2026-01-16
 
 ### Added
@@ -48,5 +68,7 @@ All notable changes to this project will be documented in this file.
 ### Notes
 - Pilot is shared under MIT License. Chat and Course FAQ are open; instructor tools use demo authentication. Sample data only.
 - See `deploy/DEPLOY_NOTES.md` for Netlify + DigitalOcean deployment guidance.
+[v0.3.0]: https://github.com/watrall/lena/releases/tag/v0.3.0
+[v0.2.1]: https://github.com/watrall/lena/releases/tag/v0.2.1
 [v0.2.0]: https://github.com/watrall/lena/releases/tag/v0.2.0
 [v0.1.0]: https://github.com/watrall/lena/releases/tag/v0.1.0
