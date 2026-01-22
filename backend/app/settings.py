@@ -7,7 +7,11 @@ variables or a .env file in the project root.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal, Optional
+try:  # Python >=3.8
+    from typing import Literal, Optional
+except ImportError:  # Python 3.7 compatibility for local tooling
+    from typing_extensions import Literal  # type: ignore
+    from typing import Optional
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict

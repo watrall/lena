@@ -22,11 +22,6 @@ def _get_fernet() -> Optional[Fernet]:
     """Return a Fernet instance when configured, otherwise None."""
     key = os.getenv(_ENCRYPTION_KEY_ENV)
     if not key:
-        logger.warning(
-            "%s not set - PII will be stored in plaintext. "
-            "Generate a key with: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"",
-            _ENCRYPTION_KEY_ENV,
-        )
         return None
 
     # Ensure key is valid Fernet key (32 url-safe base64-encoded bytes)
@@ -38,10 +33,13 @@ def _get_fernet() -> Optional[Fernet]:
 
 
 def encrypt_pii(plaintext: str) -> str:
-    """Encrypt a PII value when configured; otherwise return plaintext."""
+    """Encrypt a PII value; require encryption to be configured."""
     fernet = _get_fernet()
     if fernet is None:
-        return plaintext
+        raise RuntimeError(
+            f"{_ENCRYPTION_KEY_ENV} is not set; refuse to store PII unencrypted. "
+            "Generate a key: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
+        )
 
     encrypted = fernet.encrypt(plaintext.encode("utf-8"))
     return f"ENC:{encrypted.decode('utf-8')}"

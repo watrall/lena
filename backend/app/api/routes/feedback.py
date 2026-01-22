@@ -68,17 +68,20 @@ async def submit_feedback(request: Request, payload: FeedbackRequest = Body(...)
 async def request_escalation(request: Request, payload: EscalationRequest = Body(...)) -> EscalationResponse:
     """Submit an escalation request for instructor follow-up."""
     course = resolve_course(payload.course_id)
-    record = escalations.append_request(
-        {
-            "question_id": payload.question_id,
-            "question": payload.question,
-            "student_name": payload.student_name,
-            "student_email": payload.student_email,
-            "confidence": payload.confidence,
-            "escalation_reason": payload.escalation_reason,
-            "course_id": course["id"],
-        }
-    )
+    try:
+        record = escalations.append_request(
+            {
+                "question_id": payload.question_id,
+                "question": payload.question,
+                "student_name": payload.student_name,
+                "student_email": payload.student_email,
+                "confidence": payload.confidence,
+                "escalation_reason": payload.escalation_reason,
+                "course_id": course["id"],
+            }
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
     analytics.log_event(
         {
             "type": "escalation",
