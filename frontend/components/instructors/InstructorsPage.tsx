@@ -161,9 +161,12 @@ export default function InstructorsPage({ activeCourse }: Props) {
                 >
                   <span className="flex items-center gap-2">
                     Escalations
-                    {canUseEscalations && escalationCount && escalationCount.unresolved > 0 && (
-                      <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[11px] font-semibold text-white">
-                        {escalationCount.unresolved}
+                    {canUseEscalations && escalationCount && escalationCount.new > 0 && (
+                      <span
+                        className="rounded-full bg-rose-600 px-2 py-0.5 text-[11px] font-semibold text-white"
+                        title={`${escalationCount.new} new escalations`}
+                      >
+                        {escalationCount.new}
                       </span>
                     )}
                   </span>

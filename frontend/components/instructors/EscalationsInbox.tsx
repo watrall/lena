@@ -327,9 +327,13 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
             return (
               <li
                 key={row.id}
-                className={`transition-colors hover:bg-slate-50/70 ${
-                  isExpanded ? 'bg-slate-50' : isNew ? 'bg-lena-secondary/40' : ''
-                }`}
+                className={`transition-all ${
+                  isExpanded
+                    ? 'bg-slate-50 shadow-sm'
+                    : isNew
+                      ? 'bg-amber-50/80'
+                      : 'bg-white'
+                } hover:bg-slate-100/70 hover:shadow-sm`}
               >
                 <div
                   className={`px-4 py-3 transition-all duration-200 ${
@@ -397,8 +401,8 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                 </div>
 
                 <div
-                  className={`overflow-hidden border-t border-slate-100 bg-white transition-[max-height,opacity,padding] duration-300 ease-out ${
-                    isExpanded ? 'max-h-[1600px] px-4 py-4 opacity-100' : 'max-h-0 px-4 py-0 opacity-0'
+                  className={`overflow-hidden border-t border-slate-100 transition-[max-height,opacity,padding,background-color] duration-300 ease-out ${
+                    isExpanded ? 'max-h-[1600px] bg-slate-50 px-4 py-4 opacity-100' : 'max-h-0 bg-white px-4 py-0 opacity-0'
                   }`}
                 >
                   {isExpanded && (
