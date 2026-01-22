@@ -402,172 +402,182 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                   }`}
                 >
                   {isExpanded && (
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-sm font-semibold text-slate-800">Escalation details</h3>
-                        <p className="text-xs text-slate-500">Question, notes, status, and activity</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setExpandedId(null)}
-                        className="lena-button-secondary px-3 py-1 text-xs"
-                      >
-                        Collapse
-                      </button>
-                    </div>
-                    <div className="mt-4 grid gap-4 lg:grid-cols-12">
-                      <div className="lg:col-span-8">
-                        <h3 className="text-sm font-semibold text-slate-800">Question</h3>
-                        <p className="mt-2 whitespace-pre-line rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
-                          {row.question || '—'}
-                        </p>
-
-                        <div className="mt-4">
-                          <h3 className="text-sm font-semibold text-slate-800">Notes</h3>
-                          <textarea
-                            value={row.notes || ''}
-                            onChange={(event) => {
-                              const next = event.target.value;
-                              setRows((current) =>
-                                current.map((r) => (r.id === row.id ? { ...r, notes: next } : r)),
-                              );
-                            }}
-                            className="lena-input mt-2 min-h-[96px]"
-                            placeholder="Add notes about follow-up…"
-                          />
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              onClick={() => void applyUpdate(row.id, { notes: row.notes || '' })}
-                              disabled={savingId === row.id}
-                              className="lena-button-primary px-4 py-2 text-sm"
-                            >
-                              {savingId === row.id ? 'Saving…' : 'Save note'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => void applyUpdate(row.id, { status: 'contacted' })}
-                              disabled={savingId === row.id}
-                              className="lena-button-secondary px-4 py-2 text-sm"
-                            >
-                              Mark contacted
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => void applyUpdate(row.id, { status: 'resolved' })}
-                              disabled={savingId === row.id}
-                              className="lena-button-secondary px-4 py-2 text-sm"
-                            >
-                              Mark resolved
-                            </button>
-                          </div>
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-800">Escalation details</h3>
+                          <p className="text-xs text-slate-500">Question, notes, status, and activity</p>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedId(null)}
+                          className="lena-button-secondary px-3 py-1 text-xs"
+                        >
+                          Collapse
+                        </button>
                       </div>
 
-                      <div className="lg:col-span-4">
-                        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-                          <h3 className="text-sm font-semibold text-slate-800">Details</h3>
-                          <dl className="mt-3 space-y-2 text-sm text-slate-700">
-                            <div className="flex items-start justify-between gap-3">
-                              <dt className="text-xs font-semibold text-slate-500">Course</dt>
-                              <dd className="text-right">{activeCourse.name}</dd>
-                            </div>
-                            <div className="flex items-start justify-between gap-3">
-                              <dt className="text-xs font-semibold text-slate-500">Status</dt>
-                              <dd>
-                                <select
-                                  value={status}
-                                  onChange={(event) =>
-                                    void applyUpdate(row.id, { status: event.target.value as EscalationStatus })
-                                  }
-                                  className="lena-input py-1 text-sm"
-                                  disabled={savingId === row.id}
-                                >
-                                  <option value="new">New</option>
-                                  <option value="in_process">In process</option>
-                                  <option value="contacted">Contacted</option>
-                                  <option value="resolved">Resolved</option>
-                                </select>
-                              </dd>
-                            </div>
-                            <div className="flex flex-wrap items-center justify-start gap-2 pt-2">
-                          <button
-                            type="button"
-                            onClick={() => void applyUpdate(row.id, { status: 'in_process' })}
-                            disabled={savingId === row.id}
-                            className="lena-button-secondary px-3 py-1 text-xs"
-                          >
-                            Mark in process
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void applyUpdate(row.id, { status: 'new' })}
-                            disabled={savingId === row.id}
-                            className="lena-button-secondary px-3 py-1 text-xs"
-                            title="Demo/testing: mark as new to exercise the badge"
-                          >
-                            Mark new
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void applyUpdate(row.id, { status: 'contacted' })}
-                            disabled={savingId === row.id}
-                            className="lena-button-secondary px-3 py-1 text-xs"
-                          >
+                      <div className="grid gap-4 lg:grid-cols-12">
+                        <div className="lg:col-span-8 space-y-4">
+                          <div>
+                            <h3 className="text-sm font-semibold text-slate-800">Question</h3>
+                            <p className="mt-2 whitespace-pre-line rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                              {row.question || '—'}
+                            </p>
+                          </div>
+
+                          <div>
+                            <h3 className="text-sm font-semibold text-slate-800">Notes</h3>
+                            <textarea
+                              value={row.notes || ''}
+                              onChange={(event) => {
+                                const next = event.target.value;
+                                setRows((current) =>
+                                  current.map((r) => (r.id === row.id ? { ...r, notes: next } : r)),
+                                );
+                              }}
+                              className="lena-input mt-2 min-h-[96px]"
+                              placeholder="Add notes about follow-up…"
+                            />
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={() => void applyUpdate(row.id, { notes: row.notes || '' })}
+                                disabled={savingId === row.id}
+                                className="lena-button-primary px-4 py-2 text-sm"
+                              >
+                                {savingId === row.id ? 'Saving…' : 'Save note'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void applyUpdate(row.id, { status: 'contacted' })}
+                                disabled={savingId === row.id}
+                                className="lena-button-secondary px-4 py-2 text-sm"
+                              >
                                 Mark contacted
                               </button>
                               <button
                                 type="button"
                                 onClick={() => void applyUpdate(row.id, { status: 'resolved' })}
                                 disabled={savingId === row.id}
-                                className="lena-button-secondary px-3 py-1 text-xs"
+                                className="lena-button-secondary px-4 py-2 text-sm"
                               >
                                 Mark resolved
                               </button>
                             </div>
-                            <div className="flex items-start justify-between gap-3">
-                              <dt className="text-xs font-semibold text-slate-500">Submitted</dt>
-                              <dd className="text-right">
-                                {row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '—'}
-                              </dd>
-                            </div>
-                            <div className="flex items-start justify-between gap-3">
-                              <dt className="text-xs font-semibold text-slate-500">Age</dt>
-                              <dd className="text-right">{ageLabel(row.submitted_at)}</dd>
-                            </div>
-                            <div className="flex items-start justify-between gap-3">
-                              <dt className="text-xs font-semibold text-slate-500">Contacted</dt>
-                              <dd className="text-right">
-                                {row.contacted_at ? new Date(row.contacted_at).toLocaleString() : '—'}
-                              </dd>
-                            </div>
-                            <div className="flex items-start justify-between gap-3">
-                              <dt className="text-xs font-semibold text-slate-500">Resolved</dt>
-                              <dd className="text-right">
-                                {row.resolved_at ? new Date(row.resolved_at).toLocaleString() : '—'}
-                              </dd>
-                            </div>
-                          </dl>
+                          </div>
+                        </div>
 
-                          <div className="mt-4">
-                            <h3 className="text-sm font-semibold text-slate-800">Activity</h3>
-                            <div className="mt-2 space-y-2 text-xs text-slate-600">
-                              {(eventsById[row.id] || []).length === 0 ? (
-                                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-                                  No activity yet.
-                                </div>
-                              ) : (
-                                <ul className="space-y-2">
-                                  {(eventsById[row.id] || []).slice(0, 8).map((event) => (
-                                    <li key={event.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-                                      <div className="flex items-center justify-between gap-3">
-                                        <span className="font-semibold text-slate-700">{event.type.replace(/_/g, ' ')}</span>
-                                        <span className="text-slate-500">{new Date(event.at).toLocaleString()}</span>
-                                      </div>
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
+                        <div className="lg:col-span-4">
+                          <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+                            <h3 className="text-sm font-semibold text-slate-800">Details</h3>
+                            <dl className="mt-3 space-y-2 text-sm text-slate-700">
+                              <div className="flex items-start justify-between gap-3">
+                                <dt className="text-xs font-semibold text-slate-500">Course</dt>
+                                <dd className="text-right">{activeCourse.name}</dd>
+                              </div>
+                              <div className="flex items-start justify-between gap-3">
+                                <dt className="text-xs font-semibold text-slate-500">Status</dt>
+                                <dd>
+                                  <select
+                                    value={status}
+                                    onChange={(event) =>
+                                      void applyUpdate(row.id, { status: event.target.value as EscalationStatus })
+                                    }
+                                    className="lena-input py-1 text-sm"
+                                    disabled={savingId === row.id}
+                                  >
+                                    <option value="new">New</option>
+                                    <option value="in_process">In process</option>
+                                    <option value="contacted">Contacted</option>
+                                    <option value="resolved">Resolved</option>
+                                  </select>
+                                </dd>
+                              </div>
+                              <div className="flex items-start justify-between gap-3">
+                                <dt className="text-xs font-semibold text-slate-500">Actions</dt>
+                                <dd>
+                                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => void applyUpdate(row.id, { status: 'in_process' })}
+                                      disabled={savingId === row.id}
+                                      className="lena-button-secondary px-3 py-1 text-xs"
+                                    >
+                                      Mark in process
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => void applyUpdate(row.id, { status: 'new' })}
+                                      disabled={savingId === row.id}
+                                      className="lena-button-secondary px-3 py-1 text-xs"
+                                      title="Demo/testing: mark as new to exercise the badge"
+                                    >
+                                      Mark new
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => void applyUpdate(row.id, { status: 'contacted' })}
+                                      disabled={savingId === row.id}
+                                      className="lena-button-secondary px-3 py-1 text-xs"
+                                    >
+                                      Mark contacted
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => void applyUpdate(row.id, { status: 'resolved' })}
+                                      disabled={savingId === row.id}
+                                      className="lena-button-secondary px-3 py-1 text-xs"
+                                    >
+                                      Mark resolved
+                                    </button>
+                                  </div>
+                                </dd>
+                              </div>
+                              <div className="flex items-start justify-between gap-3">
+                                <dt className="text-xs font-semibold text-slate-500">Submitted</dt>
+                                <dd className="text-right">
+                                  {row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '—'}
+                                </dd>
+                              </div>
+                              <div className="flex items-start justify-between gap-3">
+                                <dt className="text-xs font-semibold text-slate-500">Age</dt>
+                                <dd className="text-right">{ageLabel(row.submitted_at)}</dd>
+                              </div>
+                              <div className="flex items-start justify-between gap-3">
+                                <dt className="text-xs font-semibold text-slate-500">Contacted</dt>
+                                <dd className="text-right">
+                                  {row.contacted_at ? new Date(row.contacted_at).toLocaleString() : '—'}
+                                </dd>
+                              </div>
+                              <div className="flex items-start justify-between gap-3">
+                                <dt className="text-xs font-semibold text-slate-500">Resolved</dt>
+                                <dd className="text-right">
+                                  {row.resolved_at ? new Date(row.resolved_at).toLocaleString() : '—'}
+                                </dd>
+                              </div>
+                            </dl>
+
+                            <div className="mt-4">
+                              <h3 className="text-sm font-semibold text-slate-800">Activity</h3>
+                              <div className="mt-2 space-y-2 text-xs text-slate-600">
+                                {(eventsById[row.id] || []).length === 0 ? (
+                                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
+                                    No activity yet.
+                                  </div>
+                                ) : (
+                                  <ul className="space-y-2">
+                                    {(eventsById[row.id] || []).slice(0, 8).map((event) => (
+                                      <li key={event.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+                                        <div className="flex items-center justify-between gap-3">
+                                          <span className="font-semibold text-slate-700">{event.type.replace(/_/g, ' ')}</span>
+                                          <span className="text-slate-500">{new Date(event.at).toLocaleString()}</span>
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
