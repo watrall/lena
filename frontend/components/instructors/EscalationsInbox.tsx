@@ -170,7 +170,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
 
     try {
       const updated = await markEscalationViewed(activeCourse.id, nextId);
-      setRows((current) => current.map((r) => (r.id === nextId ? updated : r)));
+      setRows((current) => current.map((r) => (r.id === nextId ? { ...r, ...updated } : r)));
       onCountsChange?.();
     } catch {
       // ignore view marking failures
@@ -189,7 +189,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
     setError(null);
     try {
       const updated = await updateEscalation(activeCourse.id, id, patch);
-      setRows((current) => current.map((row) => (row.id === id ? updated : row)));
+      setRows((current) => current.map((row) => (row.id === id ? { ...row, ...updated } : row)));
       onCountsChange?.();
       const events = await listEscalationEvents(activeCourse.id, id);
       setEventsById((current) => ({ ...current, [id]: events }));
