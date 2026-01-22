@@ -145,9 +145,6 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
     });
 
     base.sort((a, b) => {
-      const aNew = !a.last_viewed_at;
-      const bNew = !b.last_viewed_at;
-      if (aNew !== bNew) return aNew ? -1 : 1;
       const aTs = Date.parse(a.submitted_at || '') || 0;
       const bTs = Date.parse(b.submitted_at || '') || 0;
       return bTs - aTs;

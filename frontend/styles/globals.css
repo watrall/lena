@@ -66,7 +66,7 @@ main {
 
   .lena-button {
     @apply inline-flex items-center justify-center px-4 py-2 text-xs font-semibold transition;
-    border-radius: 12px;
+    border-radius: 8px;
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-lena-ring/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white;
     @apply disabled:cursor-not-allowed disabled:opacity-60;
   }
