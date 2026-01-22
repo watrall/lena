@@ -208,6 +208,8 @@ const ChatPage: NextPage<PageProps> = ({ activeCourse }) => {
         question: target.questionText,
         student_name: name,
         student_email: email,
+        confidence: target.response.confidence,
+        escalation_reason: 'low_confidence',
         courseId: activeCourse.id,
       });
 

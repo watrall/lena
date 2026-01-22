@@ -130,6 +130,8 @@ export const requestEscalation = (payload: {
   question: string;
   student_name: string;
   student_email: string;
+  confidence?: number;
+  escalation_reason?: string;
   courseId: string;
 }) =>
   request('/escalations/request', {
@@ -139,6 +141,8 @@ export const requestEscalation = (payload: {
       question: payload.question,
       student_name: payload.student_name,
       student_email: payload.student_email,
+      confidence: payload.confidence,
+      escalation_reason: payload.escalation_reason,
       course_id: payload.courseId,
     }),
   });

@@ -4,21 +4,23 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { ActiveCourse } from '../../lib/course';
 import { getInstructorToken } from '../../lib/instructorAuth';
-import { instructorLogin, instructorLogout, runIngest } from '../../lib/instructors';
+import { fetchEscalationSummary, instructorLogin, instructorLogout, runIngest } from '../../lib/instructors';
 import ExportDataModal from '../insights/ExportDataModal';
 import CourseAdminPanel from './CourseAdminPanel';
 import InstructorLoginModal from './InstructorLoginModal';
 import InsightsDashboard from '../insights/InsightsDashboard';
+import EscalationsInbox from './EscalationsInbox';
 
 type Props = {
   activeCourse: ActiveCourse | null;
 };
 
-type Tab = 'insights' | 'admin';
+type Tab = 'insights' | 'escalations' | 'admin';
 
 export default function InstructorsPage({ activeCourse }: Props) {
   const [tab, setTab] = useState<Tab>('insights');
   const [token, setToken] = useState<string | null>(null);
+  const [escalationCount, setEscalationCount] = useState<{ unresolved: number; new: number } | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginSubmitting, setLoginSubmitting] = useState(false);
@@ -33,6 +35,24 @@ export default function InstructorsPage({ activeCourse }: Props) {
   }, []);
 
   const canUseInsights = Boolean(activeCourse?.id);
+  const canUseEscalations = Boolean(activeCourse?.id);
+
+  const refreshEscalationCounts = async (courseId: string) => {
+    try {
+      const summary = await fetchEscalationSummary(courseId);
+      setEscalationCount({ unresolved: summary.unresolved, new: summary.new });
+    } catch {
+      setEscalationCount(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!token || !activeCourse?.id) {
+      setEscalationCount(null);
+      return;
+    }
+    void refreshEscalationCounts(activeCourse.id);
+  }, [activeCourse?.id, token]);
 
   const subtitle = useMemo(() => {
     if (!token) return 'Sign in to view insights and manage courses.';
@@ -136,6 +156,20 @@ export default function InstructorsPage({ activeCourse }: Props) {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setTab('escalations')}
+                  className={`lena-tab ${tab === 'escalations' ? 'lena-tab-active' : 'lena-tab-inactive'}`}
+                >
+                  <span className="flex items-center gap-2">
+                    Escalations
+                    {canUseEscalations && escalationCount && escalationCount.unresolved > 0 && (
+                      <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[11px] font-semibold text-white">
+                        {escalationCount.unresolved}
+                      </span>
+                    )}
+                  </span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setTab('admin')}
                   className={`lena-tab ${tab === 'admin' ? 'lena-tab-active' : 'lena-tab-inactive'}`}
                 >
@@ -188,6 +222,21 @@ export default function InstructorsPage({ activeCourse }: Props) {
               </div>
             ) : (
               <InsightsDashboard activeCourse={activeCourse} />
+            )}
+          </>
+        )}
+
+        {token && tab === 'escalations' && (
+          <>
+            {!activeCourse ? (
+              <div className="lena-callout">
+                Choose a course in the header to load its escalation inbox.
+              </div>
+            ) : (
+              <EscalationsInbox
+                activeCourse={activeCourse}
+                onCountsChange={() => void refreshEscalationCounts(activeCourse.id)}
+              />
             )}
           </>
         )}

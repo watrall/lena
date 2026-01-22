@@ -135,3 +135,83 @@ export async function runIngest() {
   return parseJsonOrThrow(response);
 }
 
+export type EscalationSummary = {
+  total: number;
+  unresolved: number;
+  new: number;
+};
+
+export type EscalationStatus = 'new' | 'in_process' | 'contacted' | 'resolved';
+
+export type EscalationRow = {
+  id: string;
+  student_name?: string | null;
+  student_email?: string | null;
+  question?: string | null;
+  submitted_at?: string | null;
+  last_viewed_at?: string | null;
+  updated_at?: string | null;
+  status?: EscalationStatus | null;
+  notes?: string | null;
+  contacted_at?: string | null;
+  resolved_at?: string | null;
+  confidence?: number | null;
+  escalation_reason?: string | null;
+};
+
+export type EscalationEvent = {
+  id: string;
+  escalation_id: string;
+  course_id: string;
+  type: string;
+  actor: string;
+  at: string;
+  meta?: Record<string, unknown>;
+};
+
+export async function fetchEscalationSummary(courseId: string): Promise<EscalationSummary> {
+  const response = await authFetch(`/instructors/escalations/summary?course_id=${encodeURIComponent(courseId)}`);
+  return (await parseJsonOrThrow(response)) as EscalationSummary;
+}
+
+export async function listEscalations(courseId: string): Promise<EscalationRow[]> {
+  const response = await authFetch(`/instructors/escalations?course_id=${encodeURIComponent(courseId)}`);
+  return (await parseJsonOrThrow(response)) as EscalationRow[];
+}
+
+export async function markEscalationViewed(courseId: string, escalationId: string): Promise<EscalationRow> {
+  const response = await authFetch(
+    `/instructors/escalations/${encodeURIComponent(escalationId)}/viewed?course_id=${encodeURIComponent(courseId)}`,
+    { method: 'POST' },
+  );
+  return (await parseJsonOrThrow(response)) as EscalationRow;
+}
+
+export async function updateEscalation(
+  courseId: string,
+  escalationId: string,
+  payload: { status?: EscalationStatus; notes?: string },
+): Promise<EscalationRow> {
+  const response = await authFetch(`/instructors/escalations/${encodeURIComponent(escalationId)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ course_id: courseId, status: payload.status, notes: payload.notes }),
+  });
+  return (await parseJsonOrThrow(response)) as EscalationRow;
+}
+
+export async function logEscalationReplyInitiated(courseId: string, escalationId: string) {
+  const response = await authFetch(
+    `/instructors/escalations/${encodeURIComponent(escalationId)}/reply_initiated?course_id=${encodeURIComponent(courseId)}`,
+    { method: 'POST' },
+  );
+  return parseJsonOrThrow(response);
+}
+
+export async function listEscalationEvents(courseId: string, escalationId: string): Promise<EscalationEvent[]> {
+  const response = await authFetch(
+    `/instructors/escalations/${encodeURIComponent(escalationId)}/events?course_id=${encodeURIComponent(courseId)}`,
+  );
+  const payload = (await parseJsonOrThrow(response)) as { events: EscalationEvent[] };
+  return payload.events || [];
+}

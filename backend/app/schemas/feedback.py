@@ -43,6 +43,8 @@ class EscalationRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
     student_name: str = Field(..., min_length=1, max_length=200)
     student_email: EmailStr
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    escalation_reason: Optional[str] = Field(default=None, max_length=64)
     course_id: str = Field(..., max_length=64, pattern=r"^[a-zA-Z0-9_-]+$")
 
 

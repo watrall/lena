@@ -10,7 +10,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field, HttpUrl
 
 from ...limiting import limiter
-from ...services import courses
+from ...services import courses, escalations
 from ...services import resources
 from ...services.instructor_auth import check_credentials, issue_token
 from ...settings import settings
@@ -203,7 +203,7 @@ def delete_course_resource(course_id: str, resource_id: str, _: dict = Depends(r
     # Delete vectors by doc_id (doc_id is sha1 of source_path used during ingestion).
     source_path = removed.get("source_path")
     if isinstance(source_path, str):
-        doc_id = hashlib.sha1(source_path.encode("utf-8")).hexdigest()  # nosec B324
+        doc_id = hashlib.sha256(source_path.encode("utf-8")).hexdigest()
         try:
             from ...rag.qdrant_utils import get_qdrant_client
             from ...rag.ingest import delete_document_chunks
@@ -213,3 +213,168 @@ def delete_course_resource(course_id: str, resource_id: str, _: dict = Depends(r
             logger.debug("Unable to delete vectors for %s: %s", doc_id, exc)
 
     return {"ok": True}
+
+
+class EscalationSummaryResponse(BaseModel):
+    total: int
+    unresolved: int
+    new: int
+
+
+class EscalationRowResponse(BaseModel):
+    id: str
+    student_name: str | None = None
+    student_email: str | None = None
+    question: str | None = None
+    submitted_at: str | None = None
+    last_viewed_at: str | None = None
+    updated_at: str | None = None
+    status: str | None = None
+    notes: str | None = None
+    contacted_at: str | None = None
+    resolved_at: str | None = None
+    confidence: float | None = None
+    escalation_reason: str | None = None
+
+
+class EscalationUpdateRequest(BaseModel):
+    course_id: str = Field(..., max_length=64, pattern=r"^[a-zA-Z0-9_-]+$")
+    status: str | None = None
+    notes: str | None = Field(default=None, max_length=4000)
+
+
+@router.get("/escalations/summary", response_model=EscalationSummaryResponse)
+def escalation_summary(course_id: str, _: dict = Depends(require_instructor)) -> EscalationSummaryResponse:
+    course = courses.get_course(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    rows = escalations.list_requests(course_id=course_id)
+    unresolved = sum(1 for row in rows if row.get("status") != "resolved")
+    new_count = sum(1 for row in rows if not row.get("last_viewed_at"))
+    return EscalationSummaryResponse(total=len(rows), unresolved=unresolved, new=new_count)
+
+
+@router.get("/escalations", response_model=list[EscalationRowResponse])
+def list_escalations(course_id: str, _: dict = Depends(require_instructor)) -> list[EscalationRowResponse]:
+    course = courses.get_course(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    rows = escalations.list_requests(course_id=course_id)
+    return [
+        EscalationRowResponse(
+            id=str(row.get("id") or ""),
+            student_name=row.get("student"),
+            student_email=row.get("student_email"),
+            question=row.get("question"),
+            submitted_at=row.get("submitted_at"),
+            last_viewed_at=row.get("last_viewed_at"),
+            updated_at=row.get("updated_at"),
+            status=row.get("status"),
+            notes=row.get("notes"),
+            contacted_at=row.get("contacted_at"),
+            resolved_at=row.get("resolved_at"),
+            confidence=row.get("confidence"),
+            escalation_reason=row.get("escalation_reason"),
+        )
+        for row in rows
+        if row.get("id")
+    ]
+
+
+@router.post("/escalations/{escalation_id}/viewed", response_model=EscalationRowResponse)
+def mark_escalation_viewed(
+    escalation_id: str,
+    course_id: str,
+    _: dict = Depends(require_instructor),
+) -> EscalationRowResponse:
+    course = courses.get_course(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    updated = escalations.mark_viewed(escalation_id=escalation_id, course_id=course_id)
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Escalation not found")
+    return EscalationRowResponse(
+        id=str(updated.get("id") or ""),
+        student_name=updated.get("student"),
+        student_email=updated.get("student_email"),
+        question=updated.get("question"),
+        submitted_at=updated.get("submitted_at"),
+        last_viewed_at=updated.get("last_viewed_at"),
+        updated_at=updated.get("updated_at"),
+        status=updated.get("status"),
+        notes=updated.get("notes"),
+        contacted_at=updated.get("contacted_at"),
+        resolved_at=updated.get("resolved_at"),
+        confidence=updated.get("confidence"),
+        escalation_reason=updated.get("escalation_reason"),
+    )
+
+
+@router.patch("/escalations/{escalation_id}", response_model=EscalationRowResponse)
+def update_escalation(
+    escalation_id: str,
+    payload: EscalationUpdateRequest,
+    _: dict = Depends(require_instructor),
+) -> EscalationRowResponse:
+    course = courses.get_course(payload.course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    status_value = payload.status
+    if status_value is not None and status_value not in {"new", "in_process", "contacted", "resolved"}:
+        raise HTTPException(status_code=400, detail="Invalid status")
+
+    updated = escalations.update_request(
+        escalation_id=escalation_id,
+        course_id=payload.course_id,
+        status=status_value,  # type: ignore[arg-type]
+        notes=payload.notes,
+    )
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Escalation not found")
+    return EscalationRowResponse(
+        id=str(updated.get("id") or ""),
+        student_name=updated.get("student"),
+        student_email=updated.get("student_email"),
+        question=updated.get("question"),
+        submitted_at=updated.get("submitted_at"),
+        last_viewed_at=updated.get("last_viewed_at"),
+        updated_at=updated.get("updated_at"),
+        status=updated.get("status"),
+        notes=updated.get("notes"),
+        contacted_at=updated.get("contacted_at"),
+        resolved_at=updated.get("resolved_at"),
+        confidence=updated.get("confidence"),
+        escalation_reason=updated.get("escalation_reason"),
+    )
+
+
+@router.post("/escalations/{escalation_id}/reply_initiated")
+def log_reply_initiated(
+    escalation_id: str,
+    course_id: str,
+    _: dict = Depends(require_instructor),
+):
+    course = courses.get_course(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    row = escalations.get_request(escalation_id)
+    if not row or str(row.get("course_id") or "") != course_id:
+        raise HTTPException(status_code=404, detail="Escalation not found")
+    escalations.log_reply_initiated(escalation_id=escalation_id, course_id=course_id)
+    return {"ok": True}
+
+
+@router.get("/escalations/{escalation_id}/events")
+def list_escalation_events(
+    escalation_id: str,
+    course_id: str,
+    _: dict = Depends(require_instructor),
+):
+    course = courses.get_course(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    row = escalations.get_request(escalation_id)
+    if not row or str(row.get("course_id") or "") != course_id:
+        raise HTTPException(status_code=404, detail="Escalation not found")
+    return {"events": escalations.list_events(escalation_id=escalation_id, course_id=course_id)}

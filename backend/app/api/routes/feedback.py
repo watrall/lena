@@ -74,6 +74,8 @@ async def request_escalation(request: Request, payload: EscalationRequest = Body
             "question": payload.question,
             "student_name": payload.student_name,
             "student_email": payload.student_email,
+            "confidence": payload.confidence,
+            "escalation_reason": payload.escalation_reason,
             "course_id": course["id"],
         }
     )
