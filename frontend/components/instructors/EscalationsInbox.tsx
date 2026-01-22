@@ -318,6 +318,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
             const preview = truncate(row.question || '', 80);
             const confidencePct =
               typeof row.confidence === 'number' ? `${Math.round(row.confidence * 100)}%` : null;
+            const isExpanded = expandedId === row.id;
 
             return (
               <li key={row.id} className={isNew ? 'bg-lena-secondary/40' : undefined}>
@@ -382,8 +383,12 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                   </div>
                 </div>
 
-                {expandedId === row.id && (
-                  <div className="border-t border-slate-100 bg-white px-4 py-4 transition-all duration-200 ease-out">
+                <div
+                  className={`overflow-hidden border-t border-slate-100 bg-white transition-all duration-300 ease-out ${
+                    isExpanded ? 'max-h-[1600px] px-4 py-4' : 'max-h-0 px-4 py-0'
+                  }`}
+                >
+                  {isExpanded && (
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="text-sm font-semibold text-slate-800">Escalation details</h3>
@@ -546,8 +551,8 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </li>
             );
           })}
