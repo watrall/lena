@@ -104,7 +104,8 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
     setError(null);
     try {
       const data = await listEscalations(activeCourse.id);
-      setRows(data);
+      const ordered = data.map((row, idx) => ({ ...row, __order: idx }));
+      setRows(ordered);
       onCountsChange?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load escalations');
@@ -145,6 +146,9 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
     });
 
     base.sort((a, b) => {
+      const aOrder = (a as any).__order ?? 0;
+      const bOrder = (b as any).__order ?? 0;
+      if (aOrder !== bOrder) return aOrder - bOrder;
       const aTs = Date.parse(a.submitted_at || '') || 0;
       const bTs = Date.parse(b.submitted_at || '') || 0;
       return bTs - aTs;
@@ -321,12 +325,21 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
             const isExpanded = expandedId === row.id;
 
             return (
-              <li key={row.id} className={isNew ? 'bg-lena-secondary/40' : undefined}>
-                <div className="px-4 py-3">
+              <li
+                key={row.id}
+                className={`transition-colors hover:bg-slate-50/70 ${
+                  isExpanded ? 'bg-slate-50' : isNew ? 'bg-lena-secondary/40' : ''
+                }`}
+              >
+                <div
+                  className={`px-4 py-3 transition-all duration-200 ${
+                    isExpanded ? 'border-l-4 border-l-lena-primary/60 bg-slate-50' : ''
+                  }`}
+                >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <button
                       type="button"
-                      className="min-w-0 flex-1 text-left"
+                      className="group min-w-0 flex-1 text-left"
                       onClick={() => void openRow(row)}
                       aria-expanded={expandedId === row.id}
                     >
@@ -337,7 +350,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           {STATUS_LABELS[status]}
                         </span>
                         {isNew && (
-                          <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+                          <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white animate-pulse">
                             New
                           </span>
                         )}
@@ -384,8 +397,8 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                 </div>
 
                 <div
-                  className={`overflow-hidden border-t border-slate-100 bg-white transition-all duration-300 ease-out ${
-                    isExpanded ? 'max-h-[1600px] px-4 py-4' : 'max-h-0 px-4 py-0'
+                  className={`overflow-hidden border-t border-slate-100 bg-white transition-[max-height,opacity,padding] duration-300 ease-out ${
+                    isExpanded ? 'max-h-[1600px] px-4 py-4 opacity-100' : 'max-h-0 px-4 py-0 opacity-0'
                   }`}
                 >
                   {isExpanded && (
@@ -478,20 +491,29 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                               </dd>
                             </div>
                             <div className="flex flex-wrap items-center justify-start gap-2 pt-2">
-                              <button
-                                type="button"
-                                onClick={() => void applyUpdate(row.id, { status: 'in_process' })}
-                                disabled={savingId === row.id}
-                                className="lena-button-secondary px-3 py-1 text-xs"
-                              >
-                                Mark in process
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => void applyUpdate(row.id, { status: 'contacted' })}
-                                disabled={savingId === row.id}
-                                className="lena-button-secondary px-3 py-1 text-xs"
-                              >
+                          <button
+                            type="button"
+                            onClick={() => void applyUpdate(row.id, { status: 'in_process' })}
+                            disabled={savingId === row.id}
+                            className="lena-button-secondary px-3 py-1 text-xs"
+                          >
+                            Mark in process
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void applyUpdate(row.id, { status: 'new' })}
+                            disabled={savingId === row.id}
+                            className="lena-button-secondary px-3 py-1 text-xs"
+                            title="Demo/testing: mark as new to exercise the badge"
+                          >
+                            Mark new
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void applyUpdate(row.id, { status: 'contacted' })}
+                            disabled={savingId === row.id}
+                            className="lena-button-secondary px-3 py-1 text-xs"
+                          >
                                 Mark contacted
                               </button>
                               <button

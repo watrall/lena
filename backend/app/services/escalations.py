@@ -199,6 +199,8 @@ def update_request(
 
         if status is not None:
             next_record["status"] = status
+            if status == "new":
+                next_record["last_viewed_at"] = None
             if status == "contacted" and not normalized.get("contacted_at"):
                 next_record["contacted_at"] = now
             if status == "resolved":
