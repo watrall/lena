@@ -16,6 +16,7 @@ type Props = {
 };
 
 type Tab = 'insights' | 'escalations' | 'admin';
+type EscalationDelta = { new?: number; unresolved?: number };
 
 export default function InstructorsPage({ activeCourse }: Props) {
   const [tab, setTab] = useState<Tab>('insights');
@@ -53,6 +54,20 @@ export default function InstructorsPage({ activeCourse }: Props) {
     }
     void refreshEscalationCounts(activeCourse.id);
   }, [activeCourse?.id, token]);
+
+  const applyEscalationDelta = (delta?: EscalationDelta) => {
+    if (!delta) {
+      if (activeCourse?.id) void refreshEscalationCounts(activeCourse.id);
+      return;
+    }
+    setEscalationCount((prev) => {
+      if (!prev) return prev;
+      return {
+        unresolved: Math.max(0, prev.unresolved + (delta.unresolved ?? 0)),
+        new: Math.max(0, prev.new + (delta.new ?? 0)),
+      };
+    });
+  };
 
   const subtitle = useMemo(() => {
     if (!token) return 'Sign in to view insights and manage courses.';
@@ -238,7 +253,7 @@ export default function InstructorsPage({ activeCourse }: Props) {
             ) : (
               <EscalationsInbox
                 activeCourse={activeCourse}
-                onCountsChange={() => void refreshEscalationCounts(activeCourse.id)}
+                onCountsChange={(delta) => applyEscalationDelta(delta)}
               />
             )}
           </>

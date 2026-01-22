@@ -14,7 +14,7 @@ import {
 
 type Props = {
   activeCourse: ActiveCourse;
-  onCountsChange?: () => void;
+  onCountsChange?: (delta?: { new?: number; unresolved?: number }) => void;
 };
 
 const STATUS_LABELS: Record<EscalationStatus, string> = {
@@ -169,13 +169,18 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
     if (!row.id) return;
     const nextId = row.id;
     const willOpen = expandedId !== nextId;
+    const wasNew = !row.last_viewed_at;
     setExpandedId(willOpen ? nextId : null);
     if (!willOpen) return;
 
     try {
       const updated = await markEscalationViewed(activeCourse.id, nextId);
       setRows((current) => current.map((r) => (r.id === nextId ? { ...r, ...updated } : r)));
-      onCountsChange?.();
+      if (wasNew && updated.last_viewed_at) {
+        onCountsChange?.({ new: -1 });
+      } else {
+        onCountsChange?.();
+      }
     } catch {
       // ignore view marking failures
     }
@@ -191,10 +196,18 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
   const applyUpdate = async (id: string, patch: { status?: EscalationStatus; notes?: string }) => {
     setSavingId(id);
     setError(null);
+    const before = rows.find((r) => r.id === id);
+    const wasNew = !before?.last_viewed_at;
     try {
       const updated = await updateEscalation(activeCourse.id, id, patch);
       setRows((current) => current.map((row) => (row.id === id ? { ...row, ...updated } : row)));
-      onCountsChange?.();
+      const nowNew = !updated.last_viewed_at;
+      const deltaNew = (nowNew ? 1 : 0) - (wasNew ? 1 : 0);
+      if (deltaNew !== 0) {
+        onCountsChange?.({ new: deltaNew });
+      } else {
+        onCountsChange?.();
+      }
       const events = await listEscalationEvents(activeCourse.id, id);
       setEventsById((current) => ({ ...current, [id]: events }));
     } catch (err) {
