@@ -92,7 +92,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | EscalationStatus>('all');
   const [showOverdueOnly, setShowOverdueOnly] = useState(false);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -135,6 +135,9 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
         row.student_name || '',
         row.student_email || '',
         row.question || '',
+        row.notes || '',
+        row.status || '',
+        row.escalation_reason || '',
       ]
         .join(' ')
         .toLowerCase();
@@ -204,12 +207,17 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
     const studentName = row.student_name || 'there';
     const question = row.question || '';
     const subject = `LENA follow-up: ${activeCourse.name} - ${truncate(question, 60)}`;
-    const body =
-      `Hello, ${studentName},\n\n` +
-      `You recently escalated a question in LENA. I just wanted to take the time to respond and address your question.\n\n` +
-      `Your question:\n` +
-      `${question}\n\n` +
-      `—\n`;
+    const body = [
+      `Hello, ${studentName},`,
+      ``,
+      `You recently escalated a question in LENA. I just wanted to take the time to respond and address your question.`,
+      ``,
+      `Your question:`,
+      `> ${question}`,
+      ``,
+      `—`,
+      ``,
+    ].join('\n');
     const to = row.student_email || '';
     return { to, subject, body };
   };
@@ -358,55 +366,41 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                       <div className="text-xs text-slate-500">
                         {row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '—'} · {ageLabel(row.submitted_at)}
                       </div>
-
-                      <div className="flex flex-wrap justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => void applyUpdate(row.id, { status: 'in_process' })}
-                          disabled={savingId === row.id}
-                          className="lena-button-secondary px-3 py-1 text-xs"
-                        >
-                          In process
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void applyUpdate(row.id, { status: 'contacted' })}
-                          disabled={savingId === row.id}
-                          className="lena-button-secondary px-3 py-1 text-xs"
-                        >
-                          Contacted
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void applyUpdate(row.id, { status: 'resolved' })}
-                          disabled={savingId === row.id}
-                          className="lena-button-secondary px-3 py-1 text-xs"
-                        >
-                          Close
-                        </button>
-                        <a
-                          href={row.student_email ? mailtoLink(buildReply(row)) : undefined}
-                          onClick={(event) => {
-                            if (!row.student_email) {
-                              event.preventDefault();
-                              return;
-                            }
-                            void logEscalationReplyInitiated(activeCourse.id, row.id).catch(() => undefined);
-                          }}
-                          className={`lena-button-primary px-3 py-1 text-xs ${
-                            !row.student_email ? 'pointer-events-none opacity-50' : ''
-                          }`}
-                        >
-                          Reply
-                        </a>
-                      </div>
+                      <a
+                        href={row.student_email ? mailtoLink(buildReply(row)) : undefined}
+                        onClick={(event) => {
+                          if (!row.student_email) {
+                            event.preventDefault();
+                            return;
+                          }
+                          void logEscalationReplyInitiated(activeCourse.id, row.id).catch(() => undefined);
+                        }}
+                        className={`lena-button-primary px-3 py-1 text-xs ${
+                          !row.student_email ? 'pointer-events-none opacity-50' : ''
+                        }`}
+                      >
+                        Reply
+                      </a>
                     </div>
                   </div>
                 </div>
 
                 {expandedId === row.id && (
-                  <div className="border-t border-slate-100 bg-white px-4 py-4">
-                    <div className="grid gap-4 lg:grid-cols-12">
+                  <div className="border-t border-slate-100 bg-white px-4 py-4 transition-all duration-200 ease-out">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-800">Escalation details</h3>
+                        <p className="text-xs text-slate-500">Question, notes, status, and activity</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setExpandedId(null)}
+                        className="lena-button-secondary px-3 py-1 text-xs"
+                      >
+                        Collapse
+                      </button>
+                    </div>
+                    <div className="mt-4 grid gap-4 lg:grid-cols-12">
                       <div className="lg:col-span-8">
                         <h3 className="text-sm font-semibold text-slate-800">Question</h3>
                         <p className="mt-2 whitespace-pre-line rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
@@ -480,6 +474,32 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                                   <option value="resolved">Resolved</option>
                                 </select>
                               </dd>
+                            </div>
+                            <div className="flex flex-wrap items-center justify-start gap-2 pt-2">
+                              <button
+                                type="button"
+                                onClick={() => void applyUpdate(row.id, { status: 'in_process' })}
+                                disabled={savingId === row.id}
+                                className="lena-button-secondary px-3 py-1 text-xs"
+                              >
+                                Mark in process
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void applyUpdate(row.id, { status: 'contacted' })}
+                                disabled={savingId === row.id}
+                                className="lena-button-secondary px-3 py-1 text-xs"
+                              >
+                                Mark contacted
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void applyUpdate(row.id, { status: 'resolved' })}
+                                disabled={savingId === row.id}
+                                className="lena-button-secondary px-3 py-1 text-xs"
+                              >
+                                Mark resolved
+                              </button>
                             </div>
                             <div className="flex items-start justify-between gap-3">
                               <dt className="text-xs font-semibold text-slate-500">Submitted</dt>

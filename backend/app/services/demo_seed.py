@@ -37,14 +37,21 @@ def _already_seeded() -> bool:
         return True
 
 
+def _demo_escalation_count() -> int:
+    try:
+        entries = escalations.list_requests()
+    except Exception:
+        return 0
+    return sum(1 for e in entries if "demo_escalation" in str(e.get("question_id") or ""))
+
+
 def maybe_seed() -> None:
     """Seed demo logs if enabled and storage is empty."""
     if not getattr(settings, "demo_seed_data", False):
         return
 
-    # Only seed once per storage directory (explicitly enabled in demo environments).
-    if _already_seeded():
-        return
+    seeded_marker = _already_seeded()
+    need_escalations = _demo_escalation_count() < 20
 
     now = datetime.now(timezone.utc)
     course_list = courses.load_courses()
@@ -54,122 +61,139 @@ def maybe_seed() -> None:
     def ts(days_ago: int) -> str:
         return (now - timedelta(days=days_ago)).isoformat().replace("+00:00", "Z")
 
-    # Create a few synthetic Q&A records per course.
-    for idx, course in enumerate(course_list, start=1):
-        course_id = str(course.get("id") or f"course{idx}")
+    # Create a few synthetic Q&A records per course (only once).
+    if not seeded_marker:
+        for idx, course in enumerate(course_list, start=1):
+            course_id = str(course.get("id") or f"course{idx}")
 
-        qid1 = f"demo_{course_id}_q1"
-        qid2 = f"demo_{course_id}_q2"
+            qid1 = f"demo_{course_id}_q1"
+            qid2 = f"demo_{course_id}_q2"
 
-        log_event(
-            {
-                "type": "ask",
-                "question_id": qid1,
-                "question": "When is Assignment 1 due? (demo seed)",
-                "confidence": 0.82,
-                "course_id": course_id,
-                "timestamp": ts(2),
-            }
-        )
-        questions.record_answer(
-            {
-                "question_id": qid1,
-                "course_id": course_id,
-                "question": "When is Assignment 1 due? (demo seed)",
-                "answer": "Demo answer: Assignment 1 is due on the date listed in the course schedule.",
-                "citations": [
+            log_event(
+                {
+                    "type": "ask",
+                    "question_id": qid1,
+                    "question": "When is Assignment 1 due? (demo seed)",
+                    "confidence": 0.82,
+                    "course_id": course_id,
+                    "timestamp": ts(2),
+                }
+            )
+            questions.record_answer(
+                {
+                    "question_id": qid1,
+                    "course_id": course_id,
+                    "question": "When is Assignment 1 due? (demo seed)",
+                    "answer": "Demo answer: Assignment 1 is due on the date listed in the course schedule.",
+                    "citations": [
+                        {
+                            "title": "Assignments",
+                            "section": "Assignment 1",
+                            "source_path": f"{course_id}/assignments.md",
+                        }
+                    ],
+                    "confidence": 0.82,
+                    "timestamp": ts(2),
+                }
+            )
+
+            log_event(
+                {
+                    "type": "feedback",
+                    "question_id": qid1,
+                    "helpful": True,
+                    "confidence": 0.82,
+                    "question": "When is Assignment 1 due? (demo seed)",
+                    "course_id": course_id,
+                    "timestamp": ts(2),
+                }
+            )
+
+            log_event(
+                {
+                    "type": "ask",
+                    "question_id": qid2,
+                    "question": "What is the late policy? (demo seed)",
+                    "confidence": 0.42,
+                    "course_id": course_id,
+                    "timestamp": ts(1),
+                }
+            )
+            questions.record_answer(
+                {
+                    "question_id": qid2,
+                    "course_id": course_id,
+                    "question": "What is the late policy? (demo seed)",
+                    "answer": "Demo answer: Late work may be accepted with a penalty; consult the syllabus policy section.",
+                    "citations": [
+                        {
+                            "title": "Course Policy",
+                            "section": "Late work",
+                            "source_path": f"{course_id}/policy.md",
+                        }
+                    ],
+                    "confidence": 0.42,
+                    "timestamp": ts(1),
+                }
+            )
+
+            log_event(
+                {
+                    "type": "feedback",
+                    "question_id": qid2,
+                    "helpful": False,
+                    "confidence": 0.42,
+                    "question": "What is the late policy? (demo seed)",
+                    "course_id": course_id,
+                    "timestamp": ts(1),
+                }
+            )
+
+            # Seed a review queue item (mirrors what happens for not helpful feedback).
+            review.append_review_item(
+                {
+                    "question_id": qid2,
+                    "question": "What is the late policy? (demo seed)",
+                    "answer": "Demo answer: Late work may be accepted with a penalty; consult the syllabus policy section.",
+                    "citations": [
+                        {
+                            "title": "Course Policy",
+                            "section": "Late work",
+                            "source_path": f"{course_id}/policy.md",
+                        }
+                    ],
+                    "comment": "Demo feedback: clarify penalty percentage and grace period.",
+                    "helpful": False,
+                    "course_id": course_id,
+                }
+            )
+
+    # Seed or top-up escalation requests to at least 20 entries (PII encrypted when key configured).
+    if need_escalations:
+        try:
+            existing = _demo_escalation_count()
+            start = existing + 1
+            target = 20
+            for idx in range(start, target + 1):
+                course_id = str(course_list[0].get("id") or "demo")
+                if len(course_list) > 1 and idx > 10:
+                    course_id = str(course_list[1].get("id"))
+                escalations.append_request(
                     {
-                        "title": "Assignments",
-                        "section": "Assignment 1",
-                        "source_path": f"{course_id}/assignments.md",
+                        "question_id": f"{course_id}_demo_escalation_{idx}",
+                        "question": f"Demo escalation #{idx}: I have a question about assignment {idx}.",
+                        "student_name": f"Demo Student {idx}",
+                        "student_email": f"student{idx:02d}@example.edu",
+                        "course_id": course_id,
+                        "submitted_at": utc_timestamp(),
+                        "status": "new" if idx <= 6 else ("in_process" if idx <= 12 else "contacted"),
+                        "notes": "" if idx <= 12 else "Awaiting student reply",
+                        "delivered": idx > 12,
                     }
-                ],
-                "confidence": 0.82,
-                "timestamp": ts(2),
-            }
-        )
-
-        log_event(
-            {
-                "type": "feedback",
-                "question_id": qid1,
-                "helpful": True,
-                "confidence": 0.82,
-                "question": "When is Assignment 1 due? (demo seed)",
-                "course_id": course_id,
-                "timestamp": ts(2),
-            }
-        )
-
-        log_event(
-            {
-                "type": "ask",
-                "question_id": qid2,
-                "question": "What is the late policy? (demo seed)",
-                "confidence": 0.42,
-                "course_id": course_id,
-                "timestamp": ts(1),
-            }
-        )
-        questions.record_answer(
-            {
-                "question_id": qid2,
-                "course_id": course_id,
-                "question": "What is the late policy? (demo seed)",
-                "answer": "Demo answer: Late work may be accepted with a penalty; consult the syllabus policy section.",
-                "citations": [
-                    {
-                        "title": "Course Policy",
-                        "section": "Late work",
-                        "source_path": f"{course_id}/policy.md",
-                    }
-                ],
-                "confidence": 0.42,
-                "timestamp": ts(1),
-            }
-        )
-
-        log_event(
-            {
-                "type": "feedback",
-                "question_id": qid2,
-                "helpful": False,
-                "confidence": 0.42,
-                "question": "What is the late policy? (demo seed)",
-                "course_id": course_id,
-                "timestamp": ts(1),
-            }
-        )
-
-        # Seed a review queue item (mirrors what happens for not helpful feedback).
-        review.append_review_item(
-            {
-                "question_id": qid2,
-                "question": "What is the late policy? (demo seed)",
-                "answer": "Demo answer: Late work may be accepted with a penalty; consult the syllabus policy section.",
-                "citations": [
-                    {
-                        "title": "Course Policy",
-                        "section": "Late work",
-                        "source_path": f"{course_id}/policy.md",
-                    }
-                ],
-                "comment": "Demo feedback: clarify penalty percentage and grace period.",
-                "helpful": False,
-                "course_id": course_id,
-            }
-        )
-
-        # Seed one escalation request (PII fields are handled by the escalations service).
-        escalations.append_request(
-            {
-                "question_id": qid2,
-                "question": "What is the late policy? (demo seed)",
-                "student_name": "Demo Student",
-                "student_email": "demo.student@example.edu",
-                "course_id": course_id,
-            }
-        )
+                )
+        except RuntimeError:
+            # Encryption key missing; skip seeding escalations to avoid plaintext PII.
+            pass
 
     # Seed a tiny FAQ so the FAQ page shows structure immediately.
     faq_path = storage_path("faq.json")
