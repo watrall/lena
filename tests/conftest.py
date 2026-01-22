@@ -21,6 +21,8 @@ TEST_STORAGE_DIR.mkdir(exist_ok=True)
 os.environ.setdefault("LENA_QDRANT_LOCATION", ":memory:")
 os.environ.setdefault("LENA_LLM_MODE", "off")
 os.environ.setdefault("LENA_STORAGE_DIR", str(TEST_STORAGE_DIR))
+# Ensure PII encryption is enabled during tests.
+os.environ.setdefault("LENA_ENCRYPTION_KEY", "kO7arE5Wdl66iRS0LlwM651c01qmPvvrLpzjAU6Yews=")
 
 from backend.app.models import embeddings  # noqa: E402
 from backend.app.rag.ingest import run_ingest  # noqa: E402

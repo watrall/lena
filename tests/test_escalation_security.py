@@ -1,11 +1,10 @@
-import os
 from pathlib import Path
 
 import pytest
 from cryptography.fernet import Fernet
 
 from backend.app.services import crypto, escalations
-from backend.app import settings as app_settings
+from backend.app.settings import settings as app_settings
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +22,7 @@ def test_encrypt_pii_requires_key(monkeypatch):
 
 def test_escalation_append_requires_encryption(monkeypatch, tmp_path: Path):
     monkeypatch.delenv("LENA_ENCRYPTION_KEY", raising=False)
-    monkeypatch.setattr(app_settings.settings, "storage_dir", tmp_path)
+    monkeypatch.setattr(app_settings, "storage_dir", tmp_path)
     with pytest.raises(RuntimeError):
         escalations.append_request(
             {
@@ -39,7 +38,7 @@ def test_escalation_append_requires_encryption(monkeypatch, tmp_path: Path):
 def test_escalation_append_with_encryption(monkeypatch, tmp_path: Path):
     key = Fernet.generate_key().decode()
     monkeypatch.setenv("LENA_ENCRYPTION_KEY", key)
-    monkeypatch.setattr(app_settings.settings, "storage_dir", tmp_path)
+    monkeypatch.setattr(app_settings, "storage_dir", tmp_path)
     record = escalations.append_request(
         {
             "question_id": "q2",
