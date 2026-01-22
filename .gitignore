@@ -1,6 +1,8 @@
 # Node / Next.js
 node_modules/
 .next/
+.turbo/
+.vercel/
 out/
 npm-debug.log*
 yarn-debug.log*
