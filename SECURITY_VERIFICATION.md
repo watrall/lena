@@ -2,7 +2,7 @@
 
 ## Commands Executed (this pass)
 1. `git status` — PASS — Baseline capture (dirty tree expected).
-2. `python3 -m pip-audit -r backend/requirements.txt` — Pending CI re-run — protobuf dependency removed (unused) to address GHSA-7gcm-g887-7qv7; pip-audit should clear once rerun in CI.
+2. `python3 -m pip-audit -r backend/requirements.txt` — Pending CI re-run — Pinned protobuf to 5.29.3 to bypass vulnerable 6.33.4 resolution; rerun pip-audit in CI to confirm.
 3. `pytest -q` — PASS — All backend tests pass; warnings about missing optional deps (expected with fallbacks) and Python 3.7 deprecation.
 
 ## Not Run / Blocked

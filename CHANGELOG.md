@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Stability
 - Hardened escalation storage: validate required fields/course existence, coerce invalid statuses, and deduplicate duplicate escalation submissions.
 - Documented current quality posture and command results in QUALITY_AUDIT; backend container pytest without tests remains noted.
-- Removed unused protobuf dependency to eliminate GHSA-7gcm-g887-7qv7 flagged by pip-audit.
+- Pinned protobuf to 5.29.3 to prevent CI from pulling vulnerable 6.33.4 (GHSA-7gcm-g887-7qv7).
 - Added runtime fallbacks for missing optional dependencies (pydantic-settings, slowapi, transformers, sentence-transformers, email-validator, qdrant-client) and Python 3.7 compatibility to prevent startup crashes and empty responses.
 - Fixed export endpoint compatibility by removing `.removesuffix` usage on Python 3.7 and guarding rate-limit stubs when SlowAPI is absent.
 
