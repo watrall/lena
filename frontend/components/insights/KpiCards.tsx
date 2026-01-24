@@ -33,11 +33,11 @@ export default function KpiCards({ metrics, onRefresh, refreshing }: KpiCardsPro
         {metrics.map((metric) => (
           <article
             key={metric.id}
-            className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-5 text-sm text-slate-700 shadow-sm"
+            className="rounded-2xl bg-lena-primary px-4 py-5 text-sm text-white shadow-sm"
           >
-            <p className="lena-label tracking-widest">{metric.label}</p>
-            <div className="mt-3 text-2xl font-semibold text-slate-900">{metric.value}</div>
-            {metric.description && <p className="mt-2 text-xs text-slate-500">{metric.description}</p>}
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/80">{metric.label}</p>
+            <div className="mt-3 text-3xl font-semibold">{metric.value}</div>
+            {metric.description && <p className="mt-2 text-xs text-white/80">{metric.description}</p>}
           </article>
         ))}
       </div>

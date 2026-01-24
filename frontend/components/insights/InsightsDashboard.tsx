@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import KpiCards from './KpiCards';
 import ConfidenceChart from './ConfidenceChart';
 import DailyVolumeChart from './DailyVolumeChart';
-import EscalationsTable from './EscalationsTable';
+import EscalationsChart from './EscalationsChart';
 import PainPointsList from './PainPointsList';
 import TopQuestions from './TopQuestions';
 import type { InsightsSummary } from '../../lib/api';
@@ -77,6 +77,19 @@ export default function InsightsDashboard({ activeCourse }: Props) {
 
   const confidenceLabels = useMemo(() => (insights ? insights.confidence_trend.map((item) => item.date) : []), [insights]);
   const confidenceValues = useMemo(() => (insights ? insights.confidence_trend.map((item) => item.confidence) : []), [insights]);
+
+  const escalationDayBuckets = useMemo(() => {
+    if (!insights) return { labels: [] as string[], values: [] as number[] };
+    const counts: Record<string, number> = {};
+    for (const entry of insights.escalations) {
+      const day = (entry.submitted_at || '').slice(0, 10);
+      if (!day) continue;
+      counts[day] = (counts[day] || 0) + 1;
+    }
+    const labels = Object.keys(counts).sort();
+    const values = labels.map((day) => counts[day]);
+    return { labels, values };
+  }, [insights]);
 
   const handleRefresh = () => {
     if (!activeCourse) return;
@@ -172,10 +185,16 @@ export default function InsightsDashboard({ activeCourse }: Props) {
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-slate-800">Escalations</h2>
-              <p className="mt-1 text-xs text-slate-500">Track which questions turned into instructor follow-up.</p>
-              <div className="mt-4">
-                <EscalationsTable rows={insights?.escalations ?? []} />
-              </div>
+              <p className="mt-1 text-xs text-slate-500">Escalations by day.</p>
+              {escalationDayBuckets.labels.length > 0 ? (
+                <div className="mt-4">
+                  <EscalationsChart labels={escalationDayBuckets.labels} values={escalationDayBuckets.values} />
+                </div>
+              ) : (
+                <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+                  No escalations yet.
+                </div>
+              )}
             </div>
           </div>
 

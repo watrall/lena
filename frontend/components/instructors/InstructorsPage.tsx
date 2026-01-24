@@ -16,7 +16,7 @@ type Props = {
 };
 
 type Tab = 'insights' | 'escalations' | 'admin';
-type EscalationDelta = { new?: number; unresolved?: number };
+type EscalationDelta = { newDelta?: number; unresolvedDelta?: number; newAbsolute?: number; unresolvedAbsolute?: number };
 
 export default function InstructorsPage({ activeCourse }: Props) {
   const [tab, setTab] = useState<Tab>('insights');
@@ -61,11 +61,14 @@ export default function InstructorsPage({ activeCourse }: Props) {
       return;
     }
     setEscalationCount((prev) => {
-      if (!prev) return prev;
-      return {
-        unresolved: Math.max(0, prev.unresolved + (delta.unresolved ?? 0)),
-        new: Math.max(0, prev.new + (delta.new ?? 0)),
-      };
+      const current = prev ?? { unresolved: 0, new: 0 };
+      let nextNew = current.new;
+      let nextUnresolved = current.unresolved;
+      if (typeof delta.newAbsolute === 'number') nextNew = delta.newAbsolute;
+      else if (typeof delta.newDelta === 'number') nextNew = Math.max(0, nextNew + delta.newDelta);
+      if (typeof delta.unresolvedAbsolute === 'number') nextUnresolved = delta.unresolvedAbsolute;
+      else if (typeof delta.unresolvedDelta === 'number') nextUnresolved = Math.max(0, nextUnresolved + delta.unresolvedDelta);
+      return { new: nextNew, unresolved: nextUnresolved };
     });
   };
 

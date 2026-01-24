@@ -14,7 +14,7 @@ import {
 
 type Props = {
   activeCourse: ActiveCourse;
-  onCountsChange?: (delta?: { new?: number; unresolved?: number }) => void;
+  onCountsChange?: (delta?: { newDelta?: number; unresolvedDelta?: number; newAbsolute?: number; unresolvedAbsolute?: number }) => void;
 };
 
 const STATUS_LABELS: Record<EscalationStatus, string> = {
@@ -99,6 +99,12 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
   const [eventsById, setEventsById] = useState<Record<string, EscalationEvent[]>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
 
+  const computeCounts = (list: EscalationRow[]) => {
+    const newCount = list.filter((r) => !r.last_viewed_at).length;
+    const unresolvedCount = list.filter((r) => (r.status || 'new') !== 'resolved').length;
+    return { newCount, unresolvedCount };
+  };
+
   const load = async () => {
     setLoading(true);
     setError(null);
@@ -106,7 +112,8 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
       const data = await listEscalations(activeCourse.id);
       const ordered = data.map((row, idx) => ({ ...row, __order: idx }));
       setRows(ordered);
-      onCountsChange?.();
+      const counts = computeCounts(ordered);
+      onCountsChange?.({ newAbsolute: counts.newCount, unresolvedAbsolute: counts.unresolvedCount });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load escalations');
     } finally {
@@ -177,7 +184,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
       const updated = await markEscalationViewed(activeCourse.id, nextId);
       setRows((current) => current.map((r) => (r.id === nextId ? { ...r, ...updated } : r)));
       if (wasNew && updated.last_viewed_at) {
-        onCountsChange?.({ new: -1 });
+        onCountsChange?.({ newDelta: -1 });
       } else {
         onCountsChange?.();
       }
@@ -198,13 +205,16 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
     setError(null);
     const before = rows.find((r) => r.id === id);
     const wasNew = !before?.last_viewed_at;
+    const wasUnresolved = (before?.status || 'new') !== 'resolved';
     try {
       const updated = await updateEscalation(activeCourse.id, id, patch);
       setRows((current) => current.map((row) => (row.id === id ? { ...row, ...updated } : row)));
       const nowNew = !updated.last_viewed_at;
+      const nowUnresolved = (updated.status || 'new') !== 'resolved';
       const deltaNew = (nowNew ? 1 : 0) - (wasNew ? 1 : 0);
-      if (deltaNew !== 0) {
-        onCountsChange?.({ new: deltaNew });
+      const deltaUnresolved = (nowUnresolved ? 1 : 0) - (wasUnresolved ? 1 : 0);
+      if (deltaNew !== 0 || deltaUnresolved !== 0) {
+        onCountsChange?.({ newDelta: deltaNew, unresolvedDelta: deltaUnresolved });
       } else {
         onCountsChange?.();
       }
@@ -433,7 +443,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           }
                           void logEscalationReplyInitiated(activeCourse.id, row.id).catch(() => undefined);
                         }}
-                        className={`lena-button-primary px-3 py-1 text-xs ${
+                        className={`lena-button-primary px-3 py-1 text-xs hover:text-white ${
                           !row.student_email ? 'pointer-events-none opacity-50' : ''
                         }`}
                       >
@@ -444,7 +454,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                 </div>
 
                 <div
-                  className={`overflow-hidden border-t border-slate-100 transition-[max-height,opacity,padding,background-color] duration-300 ease-out ${
+                  className={`overflow-hidden border-t border-slate-100 transition-[max-height,opacity,padding,background-color] duration-400 ease-in-out ${
                     isExpanded ? 'max-h-[1600px] bg-slate-50 px-4 py-4 opacity-100' : 'max-h-0 bg-white px-4 py-0 opacity-0'
                   }`}
                 >
@@ -458,9 +468,10 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                         <button
                           type="button"
                           onClick={() => setExpandedId(null)}
-                          className="lena-button-secondary px-3 py-1 text-xs"
+                          className="lena-button-secondary px-2 py-1 text-xs"
+                          aria-label="Collapse escalation"
                         >
-                          Collapse
+                          ▼
                         </button>
                       </div>
 
@@ -533,14 +544,14 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                                     }
                                     className="lena-input py-1 text-sm"
                                     disabled={savingId === row.id}
-                                  >
-                                    <option value="new">New</option>
-                                    <option value="in_process">In process</option>
-                                    <option value="contacted">Contacted</option>
-                                    <option value="resolved">Resolved</option>
-                                  </select>
-                                </dd>
-                              </div>
+                                >
+                                  <option value="new">New</option>
+                                  <option value="contacted">Contacted</option>
+                                  <option value="in_process">In process</option>
+                                  <option value="resolved">Resolved</option>
+                                </select>
+                              </dd>
+                            </div>
                               <div className="flex items-start justify-between gap-3">
                                 <dt className="text-xs font-semibold text-slate-500">Actions</dt>
                                 <dd>
