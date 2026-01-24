@@ -63,4 +63,4 @@ Stop-the-line issues: None observed in app runtime; however pytest-in-container 
 - Added resilient embedding/generation loaders with dummy encoders, extractive fallback, and safer summarization (backend/app/models/embeddings.py, backend/app/models/generate.py).
 - Rebuilt in-memory Qdrant stub to retain points, honor filters, and supply course-aware fallback retrieval plus dataset sync (backend/app/rag/qdrant_utils.py, backend/app/rag/retrieve.py, backend/app/rag/ingest.py).
 - Made test fixtures and API cleanup Py3.7-safe (tests/conftest.py, tests/test_api.py, tests/test_escalation_security.py, tests/test_retrieval.py, tests/test_generate.py).
-- Pinned protobuf to 6.33.3 in backend/requirements.txt to avoid GHSA-7gcm-g887-7qv7 that CI resolved to 6.33.4.
+- Removed unused protobuf dependency from backend/requirements.txt to eliminate GHSA-7gcm-g887-7qv7 exposure flagged by pip-audit.

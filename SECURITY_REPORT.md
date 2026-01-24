@@ -16,7 +16,7 @@
 | Command | Purpose | Result | Key findings |
 | --- | --- | --- | --- |
 | git status | Baseline snapshot | Pass | Working tree dirty (expected) |
-| python3 -m pip-audit -r backend/requirements.txt | Supply-chain scan | Fail | Tool not installed in env; prior CI output flagged protobuf 6.33.4 (GHSA-7gcm-g887-7qv7); pinned to 6.33.3 to avoid vulnerable release |
+| python3 -m pip-audit -r backend/requirements.txt | Supply-chain scan | Pending re-run in CI | protobuf removed (unused) to remediate GHSA-7gcm-g887-7qv7; rerun pip-audit in CI expected to pass |
 | pytest -q | Backend test+security regression | Pass | All tests now pass; warnings: missing pydantic-settings, python3.7 deprecation |
 
 ## Findings & Remediation (Phase 3 & 5)
