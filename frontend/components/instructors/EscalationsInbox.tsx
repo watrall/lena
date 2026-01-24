@@ -363,6 +363,9 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-semibold text-slate-900">{row.student_name || 'Student'}</span>
                         {row.student_email && <span className="text-xs text-slate-500">{row.student_email}</span>}
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                          {activeCourse.name}
+                        </span>
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                           {STATUS_LABELS[status]}
                         </span>
@@ -393,6 +396,33 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                     <div className="flex shrink-0 flex-col items-end gap-2">
                       <div className="text-xs text-slate-500">
                         {row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '—'} · {ageLabel(row.submitted_at)}
+                      </div>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void applyUpdate(row.id, { status: 'in_process' })}
+                          disabled={savingId === row.id}
+                          className="lena-button-secondary px-3 py-1 text-[11px]"
+                        >
+                          In process
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void applyUpdate(row.id, { status: 'resolved' })}
+                          disabled={savingId === row.id}
+                          className="lena-button-secondary px-3 py-1 text-[11px]"
+                        >
+                          Close
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void applyUpdate(row.id, { status: 'new' })}
+                          disabled={savingId === row.id}
+                          className="lena-button-secondary px-3 py-1 text-[11px]"
+                          title="Mark as new (demo/testing)"
+                        >
+                          Mark new
+                        </button>
                       </div>
                       <a
                         href={row.student_email ? mailtoLink(buildReply(row)) : undefined}
@@ -584,16 +614,19 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                                   </div>
                                 ) : (
                                   <ul className="space-y-2">
-                                    {(eventsById[row.id] || []).slice(0, 8).map((event) => (
-                                      <li key={event.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-                                        <div className="flex items-center justify-between gap-3">
-                                          <span className="font-semibold text-slate-700">{event.type.replace(/_/g, ' ')}</span>
-                                          <span className="text-slate-500">{new Date(event.at).toLocaleString()}</span>
-                                        </div>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
+                                  {(eventsById[row.id] || []).slice(0, 8).map((event) => (
+                                    <li key={event.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+                                      <div className="flex items-center justify-between gap-3">
+                                        <span className="font-semibold text-slate-700">{event.type.replace(/_/g, ' ')}</span>
+                                        <span className="text-slate-500 flex flex-col items-end">
+                                          <span>{new Date(event.at).toLocaleString()}</span>
+                                          {event.actor && <span className="text-[11px] text-slate-500">by {event.actor}</span>}
+                                        </span>
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
                               </div>
                             </div>
                           </div>
