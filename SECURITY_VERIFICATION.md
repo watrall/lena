@@ -2,7 +2,7 @@
 
 ## Commands Executed (this pass)
 1. `git status` — PASS — Baseline capture (dirty tree expected).
-2. `python3 -m pip-audit -r backend/requirements.txt` — FAIL — Tool not installed in env; prior run reported protobuf 6.33.4 (GHSA-7gcm-g887-7qv7). Pinned to 6.34.0; rerun in CI once pip-audit is available.
+2. `python3 -m pip-audit -r backend/requirements.txt` — FAIL — Tool not installed in env; prior run reported protobuf 6.33.4 (GHSA-7gcm-g887-7qv7). protobuf was unused and removed from requirements; rerun in CI once pip-audit is available.
 3. `pytest -q` — PASS — All backend tests pass; warnings about missing optional deps (expected with fallbacks) and Python 3.7 deprecation.
 
 ## Not Run / Blocked
