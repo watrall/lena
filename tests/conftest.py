@@ -35,7 +35,12 @@ def ingest_sample_corpus(tmp_path_factory):
     """Load the sample data set into an in-memory Qdrant instance."""
     data_src = TEST_ROOT / "data"
     temp_dir = tmp_path_factory.mktemp("data")
-    shutil.copytree(data_src, temp_dir, dirs_exist_ok=True)
+    try:
+        shutil.copytree(data_src, temp_dir, dirs_exist_ok=True)
+    except TypeError:
+        # Python <3.8 compatibility: recreate destination and copy without dirs_exist_ok.
+        shutil.rmtree(temp_dir, ignore_errors=True)
+        shutil.copytree(data_src, temp_dir)
     course_dir = temp_dir / "anth101"
     course_dir.mkdir(exist_ok=True)
     for item in list(temp_dir.iterdir()):
@@ -53,7 +58,7 @@ def ingest_sample_corpus(tmp_path_factory):
         def __init__(self, *_, **__):
             self._dim = 16
 
-        def encode(self, text: Union[str, list[str]]):
+        def encode(self, text: Union[str, list]):
             if isinstance(text, list):
                 return np.array([self.encode(t) for t in text])
             seed = abs(hash(text)) % (10**6)

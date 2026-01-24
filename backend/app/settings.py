@@ -6,6 +6,7 @@ variables or a .env file in the project root.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 try:  # Python >=3.8
     from typing import Literal, Optional
@@ -13,8 +14,45 @@ except ImportError:  # Python 3.7 compatibility for local tooling
     from typing_extensions import Literal  # type: ignore
     from typing import Optional
 
-from pydantic import Field, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+try:
+    from pydantic_settings import BaseSettings, SettingsConfigDict
+except ImportError:  # pragma: no cover - exercised via fallback tests
+    import warnings
+
+    warnings.warn(
+        "pydantic-settings is not installed; using limited inline fallback. "
+        "Install backend/requirements.txt for full functionality.",
+        RuntimeWarning,
+    )
+
+    def SettingsConfigDict(**kwargs):  # type: ignore[misc]
+        return kwargs
+
+    class BaseSettings(BaseModel):
+        """Minimal BaseSettings fallback that reads environment variables.
+
+        Uses pydantic BaseModel; respects env_prefix from model_config to keep
+        behavior close to pydantic-settings for local and test runs where the
+        dependency may be absent.
+        """
+
+        model_config = ConfigDict(extra="ignore")
+
+        def __init__(self, **values):
+            prefix = ""
+            cfg = getattr(self, "model_config", {}) or {}
+            if isinstance(cfg, dict):
+                prefix = cfg.get("env_prefix", "")
+
+            env_values = {}
+            for name in getattr(self, "model_fields", {}).keys():
+                env_key = f"{prefix}{name}".upper()
+                if env_key in os.environ:
+                    env_values[name] = os.environ[env_key]
+
+            merged = {**env_values, **values}
+            super().__init__(**merged)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 

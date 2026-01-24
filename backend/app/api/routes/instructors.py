@@ -1,9 +1,12 @@
 """Demo instructor authentication and course management endpoints."""
 
+from __future__ import annotations
+
 import hashlib
 import logging
 import re
 from pathlib import Path
+from typing import List, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, UploadFile
@@ -34,8 +37,8 @@ class LoginResponse(BaseModel):
 class CourseCreateRequest(BaseModel):
     id: str = Field(..., min_length=2, max_length=64, pattern=r"^[a-zA-Z0-9_-]+$")
     name: str = Field(..., min_length=2, max_length=200)
-    code: str | None = Field(default=None, max_length=64)
-    term: str | None = Field(default=None, max_length=64)
+    code: Optional[str] = Field(default=None, max_length=64)
+    term: Optional[str] = Field(default=None, max_length=64)
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -104,7 +107,7 @@ def delete_course(course_id: str, _: dict = Depends(require_instructor)):
 
 class LinkCreateRequest(BaseModel):
     url: HttpUrl
-    title: str | None = Field(default=None, max_length=200)
+    title: Optional[str] = Field(default=None, max_length=200)
 
 
 @router.get("/courses/{course_id}/resources")
@@ -223,24 +226,24 @@ class EscalationSummaryResponse(BaseModel):
 
 class EscalationRowResponse(BaseModel):
     id: str
-    student_name: str | None = None
-    student_email: str | None = None
-    question: str | None = None
-    submitted_at: str | None = None
-    last_viewed_at: str | None = None
-    updated_at: str | None = None
-    status: str | None = None
-    notes: str | None = None
-    contacted_at: str | None = None
-    resolved_at: str | None = None
-    confidence: float | None = None
-    escalation_reason: str | None = None
+    student_name: Optional[str] = None
+    student_email: Optional[str] = None
+    question: Optional[str] = None
+    submitted_at: Optional[str] = None
+    last_viewed_at: Optional[str] = None
+    updated_at: Optional[str] = None
+    status: Optional[str] = None
+    notes: Optional[str] = None
+    contacted_at: Optional[str] = None
+    resolved_at: Optional[str] = None
+    confidence: Optional[float] = None
+    escalation_reason: Optional[str] = None
 
 
 class EscalationUpdateRequest(BaseModel):
     course_id: str = Field(..., max_length=64, pattern=r"^[a-zA-Z0-9_-]+$")
-    status: str | None = None
-    notes: str | None = Field(default=None, max_length=4000)
+    status: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=4000)
 
 
 @router.get("/escalations/summary", response_model=EscalationSummaryResponse)
@@ -254,8 +257,8 @@ def escalation_summary(course_id: str, _: dict = Depends(require_instructor)) ->
     return EscalationSummaryResponse(total=len(rows), unresolved=unresolved, new=new_count)
 
 
-@router.get("/escalations", response_model=list[EscalationRowResponse])
-def list_escalations(course_id: str, _: dict = Depends(require_instructor)) -> list[EscalationRowResponse]:
+@router.get("/escalations", response_model=List[EscalationRowResponse])
+def list_escalations(course_id: str, _: dict = Depends(require_instructor)) -> List[EscalationRowResponse]:
     course = courses.get_course(course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")

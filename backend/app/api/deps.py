@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from fastapi import HTTPException, Request
 from fastapi.security.utils import get_authorization_scheme_param
+from typing import Dict, Optional
 
 from ..services import courses
 from ..services.instructor_auth import verify_token
 from ..settings import settings
 
 
-def resolve_course(course_id: str | None) -> dict[str, str | None]:
+def resolve_course(course_id: Optional[str]) -> Dict[str, Optional[str]]:
     """Resolve and validate a course identifier."""
     available = courses.load_courses()
     if not available:

@@ -6,8 +6,22 @@ per-endpoint limits can be applied without circular imports.
 
 from __future__ import annotations
 
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+try:
+    from slowapi import Limiter
+    from slowapi.util import get_remote_address
+except ImportError:  # pragma: no cover - offline/test fallback
+    def get_remote_address(_request):
+        return "0.0.0.0"
+
+    class Limiter:
+        def __init__(self, *_, **__):
+            pass
+
+        def limit(self, *_args, **_kwargs):
+            def decorator(func):
+                return func
+
+            return decorator
 
 # Global limiter configuration - uses client IP address.
 limiter = Limiter(
@@ -15,4 +29,3 @@ limiter = Limiter(
     default_limits=["100/minute"],
     application_limits=["200/minute"],
 )
-

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 
 from fastapi.testclient import TestClient
@@ -87,7 +89,8 @@ def test_escalation_request_is_logged(ingest_sample_corpus):
     path = storage_path("escalations.jsonl")
     records = path.read_text(encoding="utf-8").strip().splitlines()
     assert any(question_id in line for line in records)
-    path.unlink(missing_ok=True)
+    if path.exists():
+        path.unlink()
 
 
 def test_feedback_review_uses_recorded_answer(ingest_sample_corpus):
@@ -115,7 +118,8 @@ def test_feedback_review_uses_recorded_answer(ingest_sample_corpus):
     assert latest["question"] == "What is the late policy?"
     assert latest["answer"] == ask_response.json()["answer"]
     assert latest["citations"], "Expected citations sourced from stored answer."
-    queue_path.unlink(missing_ok=True)
+    if queue_path.exists():
+        queue_path.unlink()
 
 
 def test_insights_endpoint_structure(ingest_sample_corpus):

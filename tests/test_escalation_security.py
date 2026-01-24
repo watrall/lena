@@ -23,6 +23,7 @@ def test_encrypt_pii_requires_key(monkeypatch):
 def test_escalation_append_requires_encryption(monkeypatch, tmp_path: Path):
     monkeypatch.delenv("LENA_ENCRYPTION_KEY", raising=False)
     monkeypatch.setattr(app_settings, "storage_dir", tmp_path)
+    (tmp_path / "courses.json").write_text('[{"id": "c1", "name": "Course 1"}]', encoding="utf-8")
     with pytest.raises(RuntimeError):
         escalations.append_request(
             {
@@ -39,6 +40,7 @@ def test_escalation_append_with_encryption(monkeypatch, tmp_path: Path):
     key = Fernet.generate_key().decode()
     monkeypatch.setenv("LENA_ENCRYPTION_KEY", key)
     monkeypatch.setattr(app_settings, "storage_dir", tmp_path)
+    (tmp_path / "courses.json").write_text('[{"id": "c1", "name": "Course 1"}]', encoding="utf-8")
     record = escalations.append_request(
         {
             "question_id": "q2",

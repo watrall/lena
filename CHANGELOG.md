@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Stability
+- Hardened escalation storage: validate required fields/course existence, coerce invalid statuses, and deduplicate duplicate escalation submissions.
+- Documented current quality posture and command results in QUALITY_AUDIT; backend container pytest without tests remains noted.
+- Added runtime fallbacks for missing optional dependencies (pydantic-settings, slowapi, transformers, sentence-transformers, email-validator, qdrant-client) and Python 3.7 compatibility to prevent startup crashes and empty responses.
+- Fixed export endpoint compatibility by removing `.removesuffix` usage on Python 3.7 and guarding rate-limit stubs when SlowAPI is absent.
+
+### Maintainability
+- Added QUALITY_AUDIT with repo profile, findings, and scorecard to guide future hardening.
+- Escalation input handling simplified and guarded, reducing bad data in storage/insights.
+- In-memory Qdrant stub now appends points (no data loss) and retrieval includes course-aware fallbacks with keyword bias; ingestion syncs settings.data_dir for downstream fallbacks.
+- Retrieval summarization now surfaces meaningful lines from chunks; generation fallback returns extractive answers when pipelines fail.
+
+### Architecture
+- Highlighted demo-only flags and secrets in compose as risks to address before non-demo deployments.
+
+### Testing
+- Added pytest coverage for escalation validation/dedup paths (runs via docker compose bind-mount).
+- Added tests for embedding/generation fallbacks and py3.7-safe fixtures; cleanup helpers avoid missing_ok on older Python.
+- Recorded existing test gap in containerized pytest run for follow-up (no toolchain changes applied).
+
 ## [v0.3.0] - 2026-01-21
 
 ### Added

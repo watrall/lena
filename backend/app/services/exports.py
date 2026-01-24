@@ -12,8 +12,32 @@ import io
 import json
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import Any, Iterable, Literal, Mapping
-from zoneinfo import ZoneInfo
+try:
+    from typing import Any, Iterable, Literal, Mapping
+except ImportError:  # pragma: no cover - Python 3.7 compatibility
+    from typing import Any, Iterable, Mapping
+    try:
+        from typing_extensions import Literal  # type: ignore
+    except ImportError:
+        Literal = str  # type: ignore[assignment]
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # pragma: no cover - Python 3.7 compatibility
+    try:
+        from backports.zoneinfo import ZoneInfo  # type: ignore
+    except ImportError:
+        class ZoneInfo(datetime.tzinfo):  # type: ignore[misc,override]
+            def __init__(self, key: str = "UTC"):
+                self.key = key
+
+            def utcoffset(self, _dt):  # type: ignore[override]
+                return timedelta(0)
+
+            def tzname(self, _dt):  # type: ignore[override]
+                return self.key
+
+            def dst(self, _dt):  # type: ignore[override]
+                return timedelta(0)
 
 from . import courses
 from .crypto import decrypt_pii

@@ -4,6 +4,8 @@ Stores metadata about uploaded files and link snapshots in storage/resources.jso
 Actual files live under settings.uploads_dir/<course_id>/...
 """
 
+from __future__ import annotations
+
 import json
 import os
 import re

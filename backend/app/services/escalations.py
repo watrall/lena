@@ -3,7 +3,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, List, Literal, Optional
+try:
+    from typing import Any, List, Literal, Optional
+except ImportError:  # pragma: no cover - Python 3.7 compatibility
+    from typing import Any, List, Optional
+    try:
+        from typing_extensions import Literal  # type: ignore
+    except ImportError:
+        Literal = str  # type: ignore[assignment]
 from uuid import uuid4
 
 from .crypto import decrypt_pii, encrypt_pii
@@ -20,11 +27,13 @@ def _events_path() -> Path:
 
 
 EscalationStatus = Literal["new", "in_process", "contacted", "resolved"]
+VALID_STATUS: set[str] = {"new", "in_process", "contacted", "resolved"}
 
 
 def _normalize_record(entry: dict[str, Any]) -> dict[str, Any]:
     submitted_at = entry.get("submitted_at") or utc_timestamp()
-    status = entry.get("status") or ("resolved" if bool(entry.get("delivered")) else "new")
+    raw_status = str(entry.get("status") or "")
+    status = raw_status if raw_status in VALID_STATUS else ("resolved" if bool(entry.get("delivered")) else "new")
 
     confidence = entry.get("confidence")
     try:
@@ -36,7 +45,7 @@ def _normalize_record(entry: dict[str, Any]) -> dict[str, Any]:
         **entry,
         "submitted_at": submitted_at,
         "status": status,
-        "notes": entry.get("notes") or "",
+        "notes": (entry.get("notes") or "").strip(),
         "last_viewed_at": entry.get("last_viewed_at"),
         "updated_at": entry.get("updated_at") or submitted_at,
         "contacted_at": entry.get("contacted_at"),
@@ -75,19 +84,45 @@ def _append_event(*, escalation_id: str, course_id: str, event_type: str, meta: 
 
 def append_request(payload: dict[str, Any]) -> dict[str, Any]:
     """Persist a learner escalation request for instructor follow-up."""
+    from . import courses  # local import to avoid circular dependency
+
+    course_id = str(payload.get("course_id") or "").strip()
+    question_id = str(payload.get("question_id") or "").strip()
+    question = (payload.get("question") or "").strip()
+    if not course_id:
+        raise ValueError("course_id is required")
+    if not question_id:
+        raise ValueError("question_id is required")
+    if not question:
+        raise ValueError("question is required")
+    if courses.get_course(course_id) is None:
+        raise ValueError("course_id is not recognized")
+
+    # Deduplicate on (course_id, question_id) to avoid duplicate rows and skewed analytics.
+    existing = [
+        rec
+        for rec in read_jsonl(_records_path())
+        if str(rec.get("course_id") or "") == course_id and str(rec.get("question_id") or "") == question_id
+    ]
+    if existing:
+        return _normalize_record(existing[0])
+
     # Encrypt PII fields before storage
     student_name = payload.get("student_name") or ""
     student_email = payload.get("student_email") or ""
 
+    requested_status = payload.get("status") or "new"
+    status = requested_status if str(requested_status) in VALID_STATUS else "new"
+
     record = {
         "id": payload.get("id") or uuid4().hex,
-        "question_id": payload.get("question_id"),
-        "question": payload.get("question"),
+        "question_id": question_id,
+        "question": question,
         "student": encrypt_pii(student_name),
         "student_email": encrypt_pii(student_email),
-        "course_id": payload.get("course_id"),
+        "course_id": course_id,
         "submitted_at": payload.get("submitted_at") or utc_timestamp(),
-        "status": payload.get("status") or "new",
+        "status": status,
         "notes": payload.get("notes") or "",
         "last_viewed_at": payload.get("last_viewed_at"),
         "updated_at": payload.get("updated_at"),

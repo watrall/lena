@@ -1,4 +1,9 @@
+import sys
+
+import numpy as np
+
 from backend.app.rag.retrieve import retrieve
+from backend.app.models import embeddings as embeddings_module
 from backend.app.services import courses
 
 
@@ -30,3 +35,24 @@ def test_course_filter_excludes_other_materials(ingest_sample_corpus):
     anth101_chunks = retrieve("Unique Anth204 fact", course_id="anth101")
     assert anth101_chunks, "Expected some results from Anth101 even if irrelevant."
     assert not any("Unique Anth204 fact" in chunk.text for chunk in anth101_chunks), "Should not retrieve Anth204 content in Anth101 context."
+
+
+def test_embedding_fallback_dummy_encoder(monkeypatch):
+    """Ensure we still embed when the primary model class fails to load."""
+    embeddings_module.get_embedder.cache_clear()
+
+    class FailingTransformer:
+        def __init__(self, *_args, **_kwargs):
+            raise RuntimeError("boom")
+
+    def failing_import(_path: str):
+        raise RuntimeError("import fail")
+
+    monkeypatch.setattr(embeddings_module, "SentenceTransformer", FailingTransformer)
+    monkeypatch.setattr(embeddings_module, "import_from_string", failing_import)
+
+    embedder = embeddings_module.get_embedder()
+    vec = embedder.encode("hello world")
+    assert hasattr(embedder, "get_sentence_embedding_dimension")
+    assert len(vec) == embedder.get_sentence_embedding_dimension()
+    assert isinstance(vec, np.ndarray)

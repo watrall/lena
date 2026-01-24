@@ -1,6 +1,7 @@
 """Learner chat endpoints (primarily `/ask`)."""
 
 from uuid import uuid4
+from typing import List
 
 from fastapi import APIRouter, Body, Request
 
@@ -16,10 +17,10 @@ from ..deps import resolve_course
 router = APIRouter(tags=["chat"])
 
 
-def _build_citations(chunks: list[RetrievedChunk]) -> list[Citation]:
+def _build_citations(chunks: List[RetrievedChunk]) -> List[Citation]:
     """Extract unique citations from retrieved chunks."""
     seen: set[str] = set()
-    citations: list[Citation] = []
+    citations: List[Citation] = []
     for idx, chunk in enumerate(chunks, start=1):
         source_path = chunk.metadata.get("source_path")
         if not source_path or source_path in seen:
@@ -42,7 +43,7 @@ def _normalize(value: float, lower: float, upper: float) -> float:
     return max(0.0, min(1.0, (value - lower) / (upper - lower)))
 
 
-def _compute_confidence(chunks: list[RetrievedChunk]) -> float:
+def _compute_confidence(chunks: List[RetrievedChunk]) -> float:
     """Compute a heuristic confidence score from retrieval results."""
     if not chunks:
         return 0.0

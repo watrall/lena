@@ -1,5 +1,9 @@
 """Instructor/admin endpoints for review queue and FAQ curation."""
 
+from __future__ import annotations
+
+from typing import List
+
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request
 
 from ...schemas.admin import FAQEntry, PromoteRequest, ReviewItem
@@ -13,22 +17,22 @@ from ..deps import resolve_course, require_instructor
 router = APIRouter(tags=["admin"])
 
 
-@router.get("/faq", response_model=list[FAQEntry])
+@router.get("/faq", response_model=List[FAQEntry])
 def get_faq(
     course_id: str = Query(..., description="Course identifier"),
-) -> list[FAQEntry]:
+) -> List[FAQEntry]:
     """Return FAQ entries for a course."""
     course = resolve_course(course_id)
     return [FAQEntry(**entry) for entry in review.load_faq(course_id=course["id"])]
 
 
-@router.get("/admin/review", response_model=list[ReviewItem])
+@router.get("/admin/review", response_model=List[ReviewItem])
 @limiter.limit("30/minute")
 async def get_review_queue(
     request: Request,
     _: dict = Depends(require_instructor),
     course_id: str = Query(..., description="Course identifier"),
-) -> list[ReviewItem]:
+) -> List[ReviewItem]:
     """Return the instructor review queue for a course."""
     if not settings.enable_admin_endpoints:
         raise HTTPException(status_code=404, detail="Not found")

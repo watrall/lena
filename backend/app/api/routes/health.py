@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Dict
 
 from fastapi import APIRouter
 
@@ -12,6 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("/healthz")
-def healthcheck() -> dict[str, Any]:
+def healthcheck() -> Dict[str, Any]:
     """Basic readiness probe for infrastructure integrations."""
     return {"ok": True, "service": "lena-backend"}

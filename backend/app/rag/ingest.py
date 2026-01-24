@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import hashlib
+import logging
 import re
 import uuid
 from dataclasses import dataclass
@@ -9,20 +12,21 @@ from typing import TYPE_CHECKING, Iterable
 if TYPE_CHECKING:
     from arrow import Arrow
 
-from ics import Calendar
+try:
+    from ics import Calendar
+except ImportError:  # pragma: no cover - exercised when optional dep missing
+    Calendar = None  # type: ignore[assignment]
+
 from markdown import markdown
 from pydantic import BaseModel
-from qdrant_client import QdrantClient
-from qdrant_client.http import models as qmodels
-from qdrant_client.http.exceptions import UnexpectedResponse
-
 from ..models.embeddings import get_embedder
 from ..settings import settings
 from ..services import courses
-from .qdrant_utils import ensure_collection, get_qdrant_client
+from .qdrant_utils import UnexpectedResponse, ensure_collection, get_qdrant_client, qmodels
 
 MAX_TOKENS = 700
 OVERLAP = 120
+logger = logging.getLogger(__name__)
 
 
 class IngestCounts(BaseModel):
@@ -56,6 +60,11 @@ def run_ingest(data_dir: Path | None = None) -> IngestResult:
     """Main ingestion entry point for FastAPI endpoint and CLI usage."""
     data_path = data_dir or settings.data_dir
     uploads_path = settings.uploads_dir
+    # Keep settings in sync so downstream fallback retrieval uses the ingested corpus.
+    try:
+        settings.data_dir = data_path  # type: ignore[attr-defined]
+    except Exception:
+        pass
     docs_processed = 0
     chunk_count = 0
 
@@ -110,6 +119,9 @@ def iter_documents(roots: list[tuple[Path, str]]) -> Iterable[ParsedDocument]:
             if suffix in {".md", ".markdown"}:
                 yield parse_markdown(path, root, prefix)
             elif suffix == ".ics":
+                if Calendar is None:
+                    logger.warning("Skipping calendar file %s because ics is not installed", path)
+                    continue
                 yield parse_calendar(path, root, prefix)
             elif suffix in {".txt"}:
                 yield parse_text(path, root, prefix)

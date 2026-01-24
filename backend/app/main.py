@@ -4,9 +4,25 @@ import os
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
+try:
+    from slowapi import _rate_limit_exceeded_handler  # type: ignore
+    from slowapi.errors import RateLimitExceeded  # type: ignore
+    from slowapi.middleware import SlowAPIMiddleware  # type: ignore
+except ImportError:  # pragma: no cover - offline/test fallback
+    from fastapi.responses import JSONResponse
+
+    class RateLimitExceeded(Exception):
+        pass
+
+    def _rate_limit_exceeded_handler(request, exc):  # type: ignore
+        return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded"})
+
+    class SlowAPIMiddleware:
+        def __init__(self, app, *_, **__):
+            self.app = app
+
+        async def __call__(self, scope, receive, send):
+            await self.app(scope, receive, send)
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .api.routes import admin, chat, courses, export, feedback, health, ingest, insights, instructors

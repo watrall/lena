@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -43,6 +43,6 @@ class AskResponse(BaseModel):
 
     question_id: str = Field(..., description="Unique identifier for this Q&A interaction.")
     answer: str = Field(..., description="Generated or extracted answer text.")
-    citations: list[Citation] = Field(default_factory=list, description="Sources supporting the answer.")
+    citations: List[Citation] = Field(default_factory=list, description="Sources supporting the answer.")
     confidence: float = Field(..., ge=0.0, le=1.0, description="Model confidence score (0-1).")
     escalation_suggested: bool = Field(..., description="Whether instructor follow-up is recommended.")

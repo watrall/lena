@@ -4,6 +4,8 @@ This is intentionally simple and intended ONLY for demoing authentication and
 role-based access flows. It is not a production auth system.
 """
 
+from __future__ import annotations
+
 import base64
 import hashlib
 import hmac

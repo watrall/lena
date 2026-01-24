@@ -4,10 +4,19 @@ These endpoints support JSON/CSV exports of raw logs and insights components.
 They are intentionally lightweight for pilot workflows (no auth in demo mode).
 """
 
+from __future__ import annotations
+
 import io
 import zipfile
 from datetime import datetime
-from typing import Literal
+try:
+    from typing import List, Literal, Optional
+except ImportError:  # pragma: no cover - Python 3.7 compatibility
+    try:
+        from typing_extensions import Literal, Optional  # type: ignore
+    except ImportError:
+        Literal = str  # type: ignore[assignment]
+        Optional = type(None)  # type: ignore[assignment]
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response, StreamingResponse
@@ -44,7 +53,7 @@ def _timestamp_suffix() -> str:
     return datetime.utcnow().strftime("%Y%m%d-%H%M%SZ")
 
 
-def _range_token(kind: str, start_date: str | None, end_date: str | None) -> str:
+def _range_token(kind: str, start_date: Optional[str], end_date: Optional[str]) -> str:
     if kind in {"7d", "30d", "all"}:
         return f"range-{kind}"
     start = start_date or "custom"
@@ -58,14 +67,14 @@ async def export_data(
     request: Request,
     _: dict = Depends(require_instructor),
     course_id: str = Query(..., description="Course identifier or 'all'"),
-    components: list[str] = Query(..., description="Export component keys (repeatable)"),
+    components: List[str] = Query(..., description="Export component keys (repeatable)"),
     format: str = Query("json", description="Export format (json|csv)"),
     range: str = Query("30d", description="Date range selector (7d|30d|custom|all)"),
-    start_date: str | None = Query(None, description="Custom range start (YYYY-MM-DD)"),
-    end_date: str | None = Query(None, description="Custom range end (YYYY-MM-DD)"),
-    tz: str | None = Query(None, description="IANA timezone name (e.g., America/Detroit)"),
+    start_date: Optional[str] = Query(None, description="Custom range start (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="Custom range end (YYYY-MM-DD)"),
+    tz: Optional[str] = Query(None, description="IANA timezone name (e.g., America/Detroit)"),
     include_pii: bool = Query(False, description="Include student PII fields (explicit opt-in)"),
-    include_pii_confirm: str | None = Query(None, description="Must equal 'INCLUDE' when include_pii=true"),
+    include_pii_confirm: Optional[str] = Query(None, description="Must equal 'INCLUDE' when include_pii=true"),
 ) -> Response:
     if not settings.enable_export_endpoint:
         raise HTTPException(status_code=404, detail="Not found")
@@ -151,7 +160,7 @@ async def export_data(
 
     zip_buffer = io.BytesIO()
     zip_name = f"lena_export-course-{course_id}-{range_token}-{pii_token}-multi-{ts}.zip"
-    root_folder = zip_name.removesuffix(".zip")
+    root_folder = zip_name[:-4] if zip_name.endswith(".zip") else zip_name
 
     with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
         manifest = {
