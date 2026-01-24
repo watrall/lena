@@ -22,7 +22,7 @@ Security hardening focused on resilience to missing dependencies/Python 3.7, str
 - SECURITY_CHANGES.md — This changelog.
 - QUALITY_AUDIT.md — Repo profile, findings, fixes applied.
 - CHANGELOG.md — Notes on stability/maintainability/testing improvements.
-- backend/requirements.txt — Pinned protobuf to 5.29.3 to prevent CI from pulling vulnerable 6.33.4 (GHSA-7gcm-g887-7qv7).
+- backend/requirements.txt — Pinned protobuf to 5.29.5 to address GHSA-7gcm-g887-7qv7 and GHSA-8qvm-5x2c-j2w7 flagged by pip-audit.
 - backend/app/settings.py — Fallback BaseSettings when pydantic-settings missing (A02/A10).
 - backend/app/limiting.py — SlowAPI stubs to avoid startup crash (A10).
 - backend/app/main.py — Safe rate-limit handler fallback (A10).
