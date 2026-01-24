@@ -11,6 +11,17 @@ import {
   markEscalationViewed,
   updateEscalation,
 } from '../../lib/instructors';
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  CheckIcon,
+  ClockIcon,
+  FilterIcon,
+  MailIcon,
+  RefreshIcon,
+  SearchIcon,
+  TagIcon,
+} from '../ui/icons';
 
 type Props = {
   activeCourse: ActiveCourse;
@@ -104,6 +115,13 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
     const unresolvedCount = list.filter((r) => (r.status || 'new') !== 'resolved').length;
     return { newCount, unresolvedCount };
   };
+
+  // Keep parent badge counts in sync any time the local rows change.
+  useEffect(() => {
+    if (!rows.length) return;
+    const counts = computeCounts(rows);
+    onCountsChange?.({ newAbsolute: counts.newCount, unresolvedAbsolute: counts.unresolvedCount });
+  }, [rows, onCountsChange]);
 
   const load = async () => {
     setLoading(true);
@@ -253,7 +271,8 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
           <h1 className="lena-title">Escalations</h1>
           <p className="lena-subtitle">Follow up on questions students asked to route to an instructor.</p>
         </div>
-        <button type="button" onClick={load} disabled={loading} className="lena-button-primary">
+        <button type="button" onClick={load} disabled={loading} className="lena-button-primary inline-flex items-center gap-2">
+          <RefreshIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           {loading ? 'Refreshing…' : 'Refresh'}
         </button>
       </header>
@@ -261,7 +280,10 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
       <div className="grid gap-3 lg:grid-cols-12">
         <div className="lg:col-span-6">
           <label className="text-xs font-semibold text-slate-600" htmlFor="escalation-search">
-            Search
+            <span className="inline-flex items-center gap-1">
+              <SearchIcon className="h-3.5 w-3.5" />
+              Search
+            </span>
           </label>
           <input
             id="escalation-search"
@@ -277,7 +299,10 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
 
         <div className="lg:col-span-3">
           <label className="text-xs font-semibold text-slate-600" htmlFor="escalation-status">
-            Status
+            <span className="inline-flex items-center gap-1">
+              <FilterIcon className="h-3.5 w-3.5" />
+              Status
+            </span>
           </label>
           <select
             id="escalation-status"
@@ -376,7 +401,8 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                         <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
                           {activeCourse.name}
                         </span>
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                          <TagIcon className="h-3.5 w-3.5" />
                           {STATUS_LABELS[status]}
                         </span>
                         {isNew && (
@@ -399,6 +425,9 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                             {row.escalation_reason === 'low_confidence' ? 'Low confidence' : row.escalation_reason}
                           </span>
                         )}
+                        <ChevronDownIcon
+                          className={`ml-1 h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        />
                       </div>
                       <p className="mt-2 text-sm text-slate-700">{preview || '—'}</p>
                     </button>
@@ -412,25 +441,28 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           type="button"
                           onClick={() => void applyUpdate(row.id, { status: 'in_process' })}
                           disabled={savingId === row.id}
-                          className="lena-button-secondary px-3 py-1 text-[11px]"
+                          className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-[11px]"
                         >
+                          <ClockIcon className="h-3.5 w-3.5" />
                           In process
                         </button>
                         <button
                           type="button"
                           onClick={() => void applyUpdate(row.id, { status: 'resolved' })}
                           disabled={savingId === row.id}
-                          className="lena-button-secondary px-3 py-1 text-[11px]"
+                          className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-[11px]"
                         >
+                          <CheckIcon className="h-3.5 w-3.5" />
                           Close
                         </button>
                         <button
                           type="button"
                           onClick={() => void applyUpdate(row.id, { status: 'new' })}
                           disabled={savingId === row.id}
-                          className="lena-button-secondary px-3 py-1 text-[11px]"
+                          className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-[11px]"
                           title="Mark as new (demo/testing)"
                         >
+                          <TagIcon className="h-3.5 w-3.5" />
                           Mark new
                         </button>
                       </div>
@@ -443,10 +475,11 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           }
                           void logEscalationReplyInitiated(activeCourse.id, row.id).catch(() => undefined);
                         }}
-                        className={`lena-button-primary px-3 py-1 text-xs hover:text-white ${
+                        className={`lena-button-primary inline-flex items-center gap-2 px-3 py-1 text-xs hover:text-white ${
                           !row.student_email ? 'pointer-events-none opacity-50' : ''
                         }`}
                       >
+                        <MailIcon className="h-3.5 w-3.5" />
                         Reply
                       </a>
                     </div>
@@ -468,10 +501,10 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                         <button
                           type="button"
                           onClick={() => setExpandedId(null)}
-                          className="lena-button-secondary px-2 py-1 text-xs"
+                          className="lena-button-secondary inline-flex items-center gap-1 px-2 py-1 text-xs"
                           aria-label="Collapse escalation"
                         >
-                          ▼
+                          <ChevronUpIcon className="h-4 w-4" />
                         </button>
                       </div>
 
@@ -560,33 +593,37 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                                       type="button"
                                       onClick={() => void applyUpdate(row.id, { status: 'in_process' })}
                                       disabled={savingId === row.id}
-                                      className="lena-button-secondary px-3 py-1 text-xs"
+                                      className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-xs"
                                     >
+                                      <ClockIcon className="h-3.5 w-3.5" />
                                       Mark in process
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => void applyUpdate(row.id, { status: 'new' })}
                                       disabled={savingId === row.id}
-                                      className="lena-button-secondary px-3 py-1 text-xs"
+                                      className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-xs"
                                       title="Demo/testing: mark as new to exercise the badge"
                                     >
+                                      <TagIcon className="h-3.5 w-3.5" />
                                       Mark new
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => void applyUpdate(row.id, { status: 'contacted' })}
                                       disabled={savingId === row.id}
-                                      className="lena-button-secondary px-3 py-1 text-xs"
+                                      className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-xs"
                                     >
+                                      <MailIcon className="h-3.5 w-3.5" />
                                       Mark contacted
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => void applyUpdate(row.id, { status: 'resolved' })}
                                       disabled={savingId === row.id}
-                                      className="lena-button-secondary px-3 py-1 text-xs"
+                                      className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-xs"
                                     >
+                                      <CheckIcon className="h-3.5 w-3.5" />
                                       Mark resolved
                                     </button>
                                   </div>

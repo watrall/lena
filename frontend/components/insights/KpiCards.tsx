@@ -5,6 +5,7 @@ interface KpiMetric {
   label: string;
   value: ReactNode;
   description?: string;
+  icon?: ReactNode;
 }
 
 interface KpiCardsProps {
@@ -35,7 +36,10 @@ export default function KpiCards({ metrics, onRefresh, refreshing }: KpiCardsPro
             key={metric.id}
             className="rounded-2xl bg-lena-primary px-4 py-5 text-sm text-white shadow-sm"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/80">{metric.label}</p>
+            <div className="flex items-start justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-white/80">{metric.label}</p>
+              {metric.icon && <span className="text-white/70">{metric.icon}</span>}
+            </div>
             <div className="mt-3 text-3xl font-semibold">{metric.value}</div>
             {metric.description && <p className="mt-2 text-xs text-white/80">{metric.description}</p>}
           </article>
