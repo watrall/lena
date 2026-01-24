@@ -10,6 +10,7 @@ import CourseAdminPanel from './CourseAdminPanel';
 import InstructorLoginModal from './InstructorLoginModal';
 import InsightsDashboard from '../insights/InsightsDashboard';
 import EscalationsInbox from './EscalationsInbox';
+import { BarChart3, Inbox, Settings } from 'lucide-react';
 
 type Props = {
   activeCourse: ActiveCourse | null;
@@ -170,7 +171,10 @@ export default function InstructorsPage({ activeCourse }: Props) {
                   onClick={() => setTab('insights')}
                   className={`lena-tab ${tab === 'insights' ? 'lena-tab-active' : 'lena-tab-inactive'}`}
                 >
-                  Insights
+                  <span className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Insights
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -178,6 +182,7 @@ export default function InstructorsPage({ activeCourse }: Props) {
                   className={`lena-tab ${tab === 'escalations' ? 'lena-tab-active' : 'lena-tab-inactive'}`}
                 >
                   <span className="flex items-center gap-2">
+                    <Inbox className="h-4 w-4" />
                     Escalations
                     {canUseEscalations && escalationCount && escalationCount.new > 0 && (
                       <span
@@ -194,7 +199,10 @@ export default function InstructorsPage({ activeCourse }: Props) {
                   onClick={() => setTab('admin')}
                   className={`lena-tab ${tab === 'admin' ? 'lena-tab-active' : 'lena-tab-inactive'}`}
                 >
-                  Course admin
+                  <span className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Course admin
+                  </span>
                 </button>
               </div>
 

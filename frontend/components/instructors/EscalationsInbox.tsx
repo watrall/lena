@@ -1,6 +1,25 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import {
+  AlertCircle,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Clock3,
+  Eye,
+  Filter,
+  Inbox,
+  Info,
+  Mail,
+  RefreshCw,
+  Reply,
+  Search,
+  StickyNote,
+  Tag,
+} from 'lucide-react';
 
 import type { ActiveCourse } from '../../lib/course';
 import type { EscalationEvent, EscalationRow, EscalationStatus } from '../../lib/instructors';
@@ -11,18 +30,6 @@ import {
   markEscalationViewed,
   updateEscalation,
 } from '../../lib/instructors';
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  CheckIcon,
-  ClockIcon,
-  FilterIcon,
-  MailIcon,
-  RefreshIcon,
-  SearchIcon,
-  TagIcon,
-} from '../ui/icons';
-
 type Props = {
   activeCourse: ActiveCourse;
   onCountsChange?: (delta?: { newDelta?: number; unresolvedDelta?: number; newAbsolute?: number; unresolvedAbsolute?: number }) => void;
@@ -272,7 +279,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
           <p className="lena-subtitle">Follow up on questions students asked to route to an instructor.</p>
         </div>
         <button type="button" onClick={load} disabled={loading} className="lena-button-primary inline-flex items-center gap-2">
-          <RefreshIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           {loading ? 'Refreshing…' : 'Refresh'}
         </button>
       </header>
@@ -281,7 +288,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
         <div className="lg:col-span-6">
           <label className="text-xs font-semibold text-slate-600" htmlFor="escalation-search">
             <span className="inline-flex items-center gap-1">
-              <SearchIcon className="h-3.5 w-3.5" />
+              <Search className="h-3.5 w-3.5" />
               Search
             </span>
           </label>
@@ -300,7 +307,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
         <div className="lg:col-span-3">
           <label className="text-xs font-semibold text-slate-600" htmlFor="escalation-status">
             <span className="inline-flex items-center gap-1">
-              <FilterIcon className="h-3.5 w-3.5" />
+              <Filter className="h-3.5 w-3.5" />
               Status
             </span>
           </label>
@@ -356,8 +363,9 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
       {error && <div className="lena-alert-error">{error}</div>}
 
       {paged.length === 0 && !loading && (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
-          No escalations match your filters.
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
+          <Inbox className="h-5 w-5 text-slate-400" />
+          <span>No escalations match your filters.</span>
         </div>
       )}
 
@@ -402,7 +410,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           {activeCourse.name}
                         </span>
                         <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                          <TagIcon className="h-3.5 w-3.5" />
+                          <Tag className="h-3.5 w-3.5" />
                           {STATUS_LABELS[status]}
                         </span>
                         {isNew && (
@@ -411,7 +419,8 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           </span>
                         )}
                         {isOverdue && (
-                          <span className="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">
+                            <AlertCircle className="h-3.5 w-3.5" />
                             Overdue
                           </span>
                         )}
@@ -425,7 +434,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                             {row.escalation_reason === 'low_confidence' ? 'Low confidence' : row.escalation_reason}
                           </span>
                         )}
-                        <ChevronDownIcon
+                        <ChevronDown
                           className={`ml-1 h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                         />
                       </div>
@@ -443,7 +452,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           disabled={savingId === row.id}
                           className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-[11px]"
                         >
-                          <ClockIcon className="h-3.5 w-3.5" />
+                          <Clock3 className="h-3.5 w-3.5" />
                           In process
                         </button>
                         <button
@@ -452,7 +461,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           disabled={savingId === row.id}
                           className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-[11px]"
                         >
-                          <CheckIcon className="h-3.5 w-3.5" />
+                          <Check className="h-3.5 w-3.5" />
                           Close
                         </button>
                         <button
@@ -462,7 +471,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-[11px]"
                           title="Mark as new (demo/testing)"
                         >
-                          <TagIcon className="h-3.5 w-3.5" />
+                          <Tag className="h-3.5 w-3.5" />
                           Mark new
                         </button>
                       </div>
@@ -479,7 +488,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           !row.student_email ? 'pointer-events-none opacity-50' : ''
                         }`}
                       >
-                        <MailIcon className="h-3.5 w-3.5" />
+                        <Mail className="h-3.5 w-3.5" />
                         Reply
                       </a>
                     </div>
@@ -504,7 +513,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                           className="lena-button-secondary inline-flex items-center gap-1 px-2 py-1 text-xs"
                           aria-label="Collapse escalation"
                         >
-                          <ChevronUpIcon className="h-4 w-4" />
+                          <ChevronUp className="h-4 w-4" />
                         </button>
                       </div>
 
@@ -595,7 +604,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                                       disabled={savingId === row.id}
                                       className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-xs"
                                     >
-                                      <ClockIcon className="h-3.5 w-3.5" />
+                                      <Clock3 className="h-3.5 w-3.5" />
                                       Mark in process
                                     </button>
                                     <button
@@ -605,7 +614,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                                       className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-xs"
                                       title="Demo/testing: mark as new to exercise the badge"
                                     >
-                                      <TagIcon className="h-3.5 w-3.5" />
+                                      <Tag className="h-3.5 w-3.5" />
                                       Mark new
                                     </button>
                                     <button
@@ -614,7 +623,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                                       disabled={savingId === row.id}
                                       className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-xs"
                                     >
-                                      <MailIcon className="h-3.5 w-3.5" />
+                                      <Mail className="h-3.5 w-3.5" />
                                       Mark contacted
                                     </button>
                                     <button
@@ -623,7 +632,7 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                                       disabled={savingId === row.id}
                                       className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-xs"
                                     >
-                                      <CheckIcon className="h-3.5 w-3.5" />
+                                      <Check className="h-3.5 w-3.5" />
                                       Mark resolved
                                     </button>
                                   </div>
@@ -662,17 +671,32 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
                                   </div>
                                 ) : (
                                   <ul className="space-y-2">
-                                  {(eventsById[row.id] || []).slice(0, 8).map((event) => (
-                                    <li key={event.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-                                      <div className="flex items-center justify-between gap-3">
-                                        <span className="font-semibold text-slate-700">{event.type.replace(/_/g, ' ')}</span>
-                                        <span className="text-slate-500 flex flex-col items-end">
-                                          <span>{new Date(event.at).toLocaleString()}</span>
-                                          {event.actor && <span className="text-[11px] text-slate-500">by {event.actor}</span>}
-                                        </span>
-                                      </div>
-                                    </li>
-                                  ))}
+                                  {(eventsById[row.id] || []).slice(0, 8).map((event) => {
+                                    const icon =
+                                      event.type === 'viewed'
+                                        ? <Eye className="h-4 w-4 text-slate-500" />
+                                        : event.type === 'reply_initiated'
+                                          ? <Reply className="h-4 w-4 text-blue-500" />
+                                          : event.type === 'note_saved'
+                                            ? <StickyNote className="h-4 w-4 text-amber-500" />
+                                            : event.type === 'status_changed'
+                                              ? <Check className="h-4 w-4 text-emerald-600" />
+                                              : <Info className="h-4 w-4 text-slate-500" />;
+                                    return (
+                                      <li key={event.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+                                        <div className="flex items-center justify-between gap-3">
+                                          <span className="flex items-center gap-2 font-semibold text-slate-700">
+                                            {icon}
+                                            {event.type.replace(/_/g, ' ')}
+                                          </span>
+                                          <span className="flex flex-col items-end text-slate-500">
+                                            <span>{new Date(event.at).toLocaleString()}</span>
+                                            {event.actor && <span className="text-[11px] text-slate-500">by {event.actor}</span>}
+                                          </span>
+                                        </div>
+                                      </li>
+                                    );
+                                  })}
                                 </ul>
                               )}
                               </div>
@@ -699,8 +723,9 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={clampedPage <= 1}
-            className="lena-button-secondary px-3 py-1 text-xs"
+            className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-xs"
           >
+            <ChevronLeft className="h-3.5 w-3.5" />
             Prev
           </button>
           <span className="text-xs text-slate-500">
@@ -710,9 +735,10 @@ export default function EscalationsInbox({ activeCourse, onCountsChange }: Props
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={clampedPage >= totalPages}
-            className="lena-button-secondary px-3 py-1 text-xs"
+            className="lena-button-secondary inline-flex items-center gap-1 px-3 py-1 text-xs"
           >
             Next
+            <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

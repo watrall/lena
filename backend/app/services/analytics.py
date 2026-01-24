@@ -193,7 +193,7 @@ def summarize(course_id: str | None = None) -> dict[str, Any]:
         change = round(0.5 - helpful_share, 2)
         pain_points.append({"label": question, "change": change})
     pain_points.sort(key=lambda entry: entry["change"], reverse=True)
-    pain_points = pain_points[:5]
+    pain_points = pain_points[:10]
 
     escalation_rows = escalation_service.list_requests(course_id)
     last_updated = state["last_updated"] or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")

@@ -1,0 +1,52 @@
+{
+  "faqs": [
+    { "question": "How do I ask LENA about assignment dates?", "answer": "Ask natural questions like “When is Assignment 1 due?” and LENA will cite the schedule.", "source_path": "syllabus.md" },
+    { "question": "Where can I find office hours and contact info?", "answer": "Office hours and email are listed in the syllabus and weekly announcements.", "source_path": "syllabus.md" },
+    { "question": "What is the late work policy?", "answer": "Late submissions incur the penalty noted in the syllabus; request extensions before deadlines.", "source_path": "policy.md" },
+    { "question": "How do I submit assignments?", "answer": "Upload PDFs to the LMS Assignments page unless otherwise noted.", "source_path": "assignments.md" },
+    { "question": "Can I resubmit homework?", "answer": "Resubmissions are allowed only if enabled per assignment; check the assignment description.", "source_path": "assignments.md" },
+    { "question": "How is participation graded?", "answer": "Weekly participation is based on discussions and in-class engagement per the grading section.", "source_path": "grading.md" },
+    { "question": "How do I cite course readings?", "answer": "Use the required style (APA). Include author, year, and page for quotes.", "source_path": "citation-guide.md" },
+    { "question": "Where are lecture slides posted?", "answer": "Slides are posted to the LMS within 24 hours of each class.", "source_path": "lectures.md" },
+    { "question": "Who do I contact for accommodations?", "answer": "Contact the accessibility office and copy the instructor with your letter.", "source_path": "policy.md" },
+    { "question": "Can I collaborate on homework?", "answer": "Follow the collaboration rules in the syllabus; ask when unsure.", "source_path": "policy.md" },
+    { "question": "How do I reach the TA?", "answer": "TA email and office hours are on the syllabus and LMS staff page.", "source_path": "staff.md" },
+    { "question": "What goes in field notes?", "answer": "Separate observation from interpretation, include timestamps, keep entries concise.", "source_path": "field-notes.md" },
+    { "question": "How are grades curved?", "answer": "Grades are not curved by default; any adjustments will be announced.", "source_path": "grading.md" },
+    { "question": "Where is the reading list?", "answer": "All required and optional readings are in LMS modules by week.", "source_path": "readings.md" },
+    { "question": "How do I prepare for the exam?", "answer": "Review lecture summaries, key terms, and practice questions in the study guide.", "source_path": "exams.md" }
+  ],
+  "interactions": [
+    { "week": 1, "question": "When is Assignment 1 due?", "confidence": 0.82, "helpful": true, "source_path": "assignments.md" },
+    { "week": 2, "question": "What is the late policy?", "confidence": 0.42, "helpful": false, "source_path": "policy.md" },
+    { "week": 3, "question": "Where do I submit assignments?", "confidence": 0.73, "helpful": true, "source_path": "syllabus.md" },
+    { "week": 4, "question": "How do I cite readings?", "confidence": 0.61, "helpful": true, "source_path": "citation-guide.md" },
+    { "week": 5, "question": "How many sources do I need?", "confidence": 0.55, "helpful": false, "source_path": "assignments.md" },
+    { "week": 6, "question": "Is participation graded?", "confidence": 0.65, "helpful": true, "source_path": "grading.md" },
+    { "week": 7, "question": "Can I resubmit homework?", "confidence": 0.48, "helpful": false, "source_path": "assignments.md" },
+    { "week": 8, "question": "Do I need a textbook?", "confidence": 0.6, "helpful": true, "source_path": "readings.md" },
+    { "week": 9, "question": "How are presentations graded?", "confidence": 0.52, "helpful": false, "source_path": "grading.md" },
+    { "week": 10, "question": "How to contact the TA?", "confidence": 0.58, "helpful": true, "source_path": "staff.md" },
+    { "week": 11, "question": "Are extensions allowed?", "confidence": 0.41, "helpful": false, "source_path": "policy.md" },
+    { "week": 12, "question": "What counts as participation?", "confidence": 0.57, "helpful": false, "source_path": "grading.md" },
+    { "week": 13, "question": "Where are lecture slides?", "confidence": 0.64, "helpful": true, "source_path": "lectures.md" },
+    { "week": 14, "question": "How to study for the exam?", "confidence": 0.63, "helpful": true, "source_path": "exams.md" }
+  ],
+  "escalations": [
+    { "week": 1, "question": "I can't find Assignment 1 instructions.", "status": "new" },
+    { "week": 1, "question": "Late policy clarification for labs?", "status": "new" },
+    { "week": 2, "question": "Office hours conflict with work.", "status": "contacted" },
+    { "week": 3, "question": "Need citation style example.", "status": "in_process" },
+    { "week": 4, "question": "How to submit group work?", "status": "new" },
+    { "week": 5, "question": "Participation grading seems unclear.", "status": "contacted" },
+    { "week": 6, "question": "Requesting extension for Assignment 2.", "status": "new" },
+    { "week": 7, "question": "Resubmission policy question.", "status": "resolved" },
+    { "week": 8, "question": "Need TA contact confirmed.", "status": "resolved" },
+    { "week": 9, "question": "Slides missing for Week 5.", "status": "in_process" },
+    { "week": 10, "question": "Can I use figures from textbook?", "status": "contacted" },
+    { "week": 11, "question": "How to cite interviews?", "status": "in_process" },
+    { "week": 12, "question": "Confused about participation rubric.", "status": "new" },
+    { "week": 13, "question": "Exam format details?", "status": "new" },
+    { "week": 14, "question": "Schedule change for finals?", "status": "resolved" }
+  ]
+}

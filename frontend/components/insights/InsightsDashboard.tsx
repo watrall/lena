@@ -8,7 +8,7 @@ import DailyVolumeChart from './DailyVolumeChart';
 import EscalationsChart from './EscalationsChart';
 import PainPointsList from './PainPointsList';
 import TopQuestions from './TopQuestions';
-import { CheckIcon, InfoIcon, MailIcon, RefreshIcon, SearchIcon } from '../ui/icons';
+import { CheckCircle2, Info, Mail, RefreshCw, Search } from 'lucide-react';
 import type { InsightsSummary } from '../../lib/api';
 import { fetchInsights } from '../../lib/api';
 import type { ActiveCourse } from '../../lib/course';
@@ -48,27 +48,27 @@ export default function InsightsDashboard({ activeCourse }: Props) {
   const kpiMetrics = useMemo(() => {
     if (!insights) return [];
     return [
-      { id: 'total-questions', label: 'Total Questions', value: insights.totals.questions.toLocaleString(), icon: <SearchIcon className="h-4 w-4" /> },
+      { id: 'total-questions', label: 'Total Questions', value: insights.totals.questions.toLocaleString(), icon: <Search className="h-4 w-4" /> },
       {
         id: 'helpful-rate',
         label: 'Helpful %',
         value: `${Math.round(insights.totals.helpful_rate * 100)}%`,
         description: 'Share of feedback marked helpful.',
-        icon: <CheckIcon className="h-4 w-4" />,
+        icon: <CheckCircle2 className="h-4 w-4" />,
       },
       {
         id: 'avg-confidence',
         label: 'Avg Confidence',
         value: `${Math.round(insights.totals.average_confidence * 100)}%`,
         description: 'Model self-rated accuracy last 7 days.',
-        icon: <InfoIcon className="h-4 w-4" />,
+        icon: <Info className="h-4 w-4" />,
       },
       {
         id: 'escalations',
         label: 'Escalations',
         value: insights.totals.escalations.toLocaleString(),
         description: 'Instructor follow-up requests this term.',
-        icon: <MailIcon className="h-4 w-4" />,
+        icon: <Mail className="h-4 w-4" />,
       },
     ];
   }, [insights]);
@@ -118,7 +118,7 @@ export default function InsightsDashboard({ activeCourse }: Props) {
           disabled={courseLocked || loading}
           className="lena-button-primary inline-flex items-center gap-2"
         >
-          <RefreshIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           {loading ? 'Refreshing…' : 'Refresh data'}
         </button>
       </header>

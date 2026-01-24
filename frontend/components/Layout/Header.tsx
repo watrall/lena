@@ -24,7 +24,7 @@ export default function Header({ activeCourse, onSwitchCourse }: HeaderProps) {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-8">
         <div className="flex flex-col gap-1">
           <div className="flex flex-col gap-0.5 leading-tight">
-            <span className="text-lg font-semibold tracking-tight text-slate-900">LENA</span>
+            <span className="text-2xl font-extrabold tracking-tight text-slate-900 md:text-3xl">LENA</span>
             <span className="text-sm font-medium text-slate-600">
               Learning Engagement &amp; Navigation Assistant
             </span>

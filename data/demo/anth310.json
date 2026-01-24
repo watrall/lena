@@ -1,0 +1,52 @@
+{
+  "faqs": [
+    { "question": "What is digital ethnography?", "answer": "Studying online cultures and practices using ethnographic methods adapted to digital spaces.", "source_path": "lectures/week1.md" },
+    { "question": "Can I use AI tools in assignments?", "answer": "AI assistance is allowed only for brainstorming; all analysis must be your own and disclosed.", "source_path": "policy.md" },
+    { "question": "How to anonymize participants?", "answer": "Remove usernames, blur avatars, and store raw data securely as outlined in the ethics guide.", "source_path": "ethics.md" },
+    { "question": "What platforms are in scope?", "answer": "Focus on the platforms listed in the syllabus; request approval for new ones.", "source_path": "syllabus.md" },
+    { "question": "Do we need IRB approval?", "answer": "This course operates under classroom protocols; for publishable work, consult IRB early.", "source_path": "ethics.md" },
+    { "question": "How to submit screen captures?", "answer": "Upload redacted captures to the LMS assignment with captions and timestamps.", "source_path": "assignments.md" },
+    { "question": "Group project expectations?", "answer": "Teams submit a shared report, individual reflection, and a 10-minute presentation.", "source_path": "projects.md" },
+    { "question": "How is participation tracked online?", "answer": "Participation is logged via weekly discussion posts and peer replies in the LMS.", "source_path": "grading.md" },
+    { "question": "Where to find API keys for data pulls?", "answer": "See the resources/APIs page; use demo keys only for class exercises.", "source_path": "resources/apis.md" },
+    { "question": "What counts as a digital field note?", "answer": "Time-stamped observations of interactions, interface changes, and user behaviors.", "source_path": "field-notes.md" },
+    { "question": "How to handle consent screenshots?", "answer": "Capture consent messages, store separately, and mask identifiers before sharing.", "source_path": "ethics.md" },
+    { "question": "Do we present live or recorded?", "answer": "Present live in Week 14; a recorded backup is recommended.", "source_path": "presentations.md" },
+    { "question": "How long should weekly memos be?", "answer": "Aim for 350–450 words with a concrete observation and an analytic question.", "source_path": "assignments.md" },
+    { "question": "What visualization formats are allowed?", "answer": "PNG or SVG only; include alt text and citation of data sources.", "source_path": "visuals.md" },
+    { "question": "Can we reuse datasets from other classes?", "answer": "Only with instructor approval and clear provenance documentation.", "source_path": "policy.md" }
+  ],
+  "interactions": [
+    { "week": 1, "question": "What is digital ethnography?", "confidence": 0.72, "helpful": true, "source_path": "lectures/week1.md" },
+    { "week": 2, "question": "Can I use AI tools in assignments?", "confidence": 0.47, "helpful": false, "source_path": "policy.md" },
+    { "week": 3, "question": "How to anonymize participants?", "confidence": 0.6, "helpful": true, "source_path": "ethics.md" },
+    { "week": 4, "question": "What platforms are in scope?", "confidence": 0.55, "helpful": false, "source_path": "syllabus.md" },
+    { "week": 5, "question": "Do we need IRB approval?", "confidence": 0.43, "helpful": false, "source_path": "ethics.md" },
+    { "week": 6, "question": "How to submit screen captures?", "confidence": 0.58, "helpful": true, "source_path": "assignments.md" },
+    { "week": 7, "question": "Group project expectations?", "confidence": 0.52, "helpful": false, "source_path": "projects.md" },
+    { "week": 8, "question": "How is participation tracked online?", "confidence": 0.49, "helpful": false, "source_path": "grading.md" },
+    { "week": 9, "question": "Where to find API keys for data pulls?", "confidence": 0.46, "helpful": false, "source_path": "resources/apis.md" },
+    { "week": 10, "question": "What counts as a digital field note?", "confidence": 0.61, "helpful": true, "source_path": "field-notes.md" },
+    { "week": 11, "question": "How to handle consent screenshots?", "confidence": 0.45, "helpful": false, "source_path": "ethics.md" },
+    { "week": 12, "question": "Do we present live or recorded?", "confidence": 0.57, "helpful": true, "source_path": "presentations.md" },
+    { "week": 13, "question": "How long should weekly memos be?", "confidence": 0.59, "helpful": true, "source_path": "assignments.md" },
+    { "week": 14, "question": "What visualization formats are allowed?", "confidence": 0.55, "helpful": true, "source_path": "visuals.md" }
+  ],
+  "escalations": [
+    { "week": 1, "question": "Need scope clarification for platforms.", "status": "new" },
+    { "week": 1, "question": "Unsure about AI tool disclosure.", "status": "new" },
+    { "week": 2, "question": "Consent template link missing.", "status": "contacted" },
+    { "week": 3, "question": "API keys not working.", "status": "in_process" },
+    { "week": 4, "question": "Group project rubric request.", "status": "new" },
+    { "week": 5, "question": "IRB classroom protocol question.", "status": "contacted" },
+    { "week": 6, "question": "Screen capture upload limits?", "status": "new" },
+    { "week": 7, "question": "Participation tracking details?", "status": "resolved" },
+    { "week": 8, "question": "Field note example for Discord?", "status": "resolved" },
+    { "week": 9, "question": "Visualization tool allowed?", "status": "in_process" },
+    { "week": 10, "question": "Data reuse policy?", "status": "contacted" },
+    { "week": 11, "question": "Presentation format options?", "status": "in_process" },
+    { "week": 12, "question": "Anonymization for screenshots?", "status": "new" },
+    { "week": 13, "question": "Memos word count enforcement?", "status": "new" },
+    { "week": 14, "question": "Final submission channels?", "status": "resolved" }
+  ]
+}

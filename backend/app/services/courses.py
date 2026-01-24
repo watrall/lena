@@ -19,6 +19,12 @@ DEFAULT_COURSES: list[dict[str, str]] = [
         "code": "ANTH 204",
         "term": "Fall 2024",
     },
+    {
+        "id": "anth310",
+        "name": "ANTH 310 · Digital Anthropology",
+        "code": "ANTH 310",
+        "term": "Fall 2024",
+    },
 ]
 
 

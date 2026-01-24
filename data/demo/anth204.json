@@ -1,0 +1,52 @@
+{
+  "faqs": [
+    { "question": "How to prep for field notes?", "answer": "Bring a notebook, timestamp observations, separate description from interpretation.", "source_path": "assignments/field-notes.md" },
+    { "question": "When is the site report due?", "answer": "See the assignments schedule; site reports are due Sunday 11:59pm of the assigned week.", "source_path": "assignments.md" },
+    { "question": "Can I work with a partner?", "answer": "Partner work is allowed only when specified; otherwise individual submissions are required.", "source_path": "policy.md" },
+    { "question": "What materials do I bring to digs?", "answer": "Closed-toe shoes, notebook, pencils, measuring tape, and gloves; see gear checklist.", "source_path": "gear.md" },
+    { "question": "How long should reflections be?", "answer": "Aim for 400–500 words with one cited course reading.", "source_path": "assignments.md" },
+    { "question": "How are artifacts cataloged?", "answer": "Follow the catalog template; include provenience, description, material, and condition.", "source_path": "protocols.md" },
+    { "question": "Late policy for site visits?", "answer": "Arrive on time; late arrivals may forfeit participation credit for the session.", "source_path": "policy.md" },
+    { "question": "Is there extra credit?", "answer": "No standing extra credit; occasional optional activities may be announced.", "source_path": "grading.md" },
+    { "question": "Where to upload photos?", "answer": "Upload to the LMS 'Field Photos' folder with location and date metadata.", "source_path": "uploads.md" },
+    { "question": "How to cite field interviews?", "answer": "Use pseudonyms, include interview date/time, and follow the ethics handout.", "source_path": "citation-guide.md" },
+    { "question": "Are drones allowed on sites?", "answer": "Drone use requires prior approval; follow the policy in the syllabus.", "source_path": "policy.md" },
+    { "question": "What is expected in lab sessions?", "answer": "Complete the lab worksheet and photo-document your steps; submit within 24 hours.", "source_path": "labs.md" },
+    { "question": "How to handle fragile artifacts?", "answer": "Use gloves, support from below, and place items on padded trays only.", "source_path": "protocols.md" },
+    { "question": "Where is the map of the dig site?", "answer": "See the 'Site Maps' folder in LMS; week-specific maps are posted each Monday.", "source_path": "maps.md" },
+    { "question": "How is field safety handled?", "answer": "Safety briefing in Week 1 and daily tailgate talks; follow the checklist posted in LMS.", "source_path": "safety.md" }
+  ],
+  "interactions": [
+    { "week": 1, "question": "How to prep for field notes?", "confidence": 0.7, "helpful": true, "source_path": "assignments/field-notes.md" },
+    { "week": 2, "question": "When is the site report due?", "confidence": 0.62, "helpful": true, "source_path": "assignments.md" },
+    { "week": 3, "question": "Can I work with a partner?", "confidence": 0.5, "helpful": false, "source_path": "policy.md" },
+    { "week": 4, "question": "What materials do I bring to digs?", "confidence": 0.55, "helpful": false, "source_path": "gear.md" },
+    { "week": 5, "question": "How long should reflections be?", "confidence": 0.6, "helpful": true, "source_path": "assignments.md" },
+    { "week": 6, "question": "How are artifacts cataloged?", "confidence": 0.48, "helpful": false, "source_path": "protocols.md" },
+    { "week": 7, "question": "Late policy for site visits?", "confidence": 0.42, "helpful": false, "source_path": "policy.md" },
+    { "week": 8, "question": "Is there extra credit?", "confidence": 0.5, "helpful": false, "source_path": "grading.md" },
+    { "week": 9, "question": "Where to upload photos?", "confidence": 0.58, "helpful": true, "source_path": "uploads.md" },
+    { "week": 10, "question": "How to cite field interviews?", "confidence": 0.52, "helpful": false, "source_path": "citation-guide.md" },
+    { "week": 11, "question": "Are drones allowed on sites?", "confidence": 0.44, "helpful": false, "source_path": "policy.md" },
+    { "week": 12, "question": "What is expected in lab sessions?", "confidence": 0.61, "helpful": true, "source_path": "labs.md" },
+    { "week": 13, "question": "How to handle fragile artifacts?", "confidence": 0.53, "helpful": true, "source_path": "protocols.md" },
+    { "week": 14, "question": "Where is the map of the dig site?", "confidence": 0.56, "helpful": true, "source_path": "maps.md" }
+  ],
+  "escalations": [
+    { "week": 1, "question": "Need clarification on field notes format.", "status": "new" },
+    { "week": 1, "question": "Gear checklist missing sizes.", "status": "new" },
+    { "week": 2, "question": "Partner request approval timing.", "status": "contacted" },
+    { "week": 3, "question": "Site report rubric question.", "status": "in_process" },
+    { "week": 4, "question": "Uploading photos failing.", "status": "new" },
+    { "week": 5, "question": "Reflection length confirmation.", "status": "contacted" },
+    { "week": 6, "question": "Catalog template access issue.", "status": "new" },
+    { "week": 7, "question": "Late to site visit policy.", "status": "resolved" },
+    { "week": 8, "question": "Extra credit opportunities?", "status": "resolved" },
+    { "week": 9, "question": "Interview citation example needed.", "status": "in_process" },
+    { "week": 10, "question": "Drone usage approval process.", "status": "contacted" },
+    { "week": 11, "question": "Lab expectations unclear.", "status": "in_process" },
+    { "week": 12, "question": "Safety checklist link broken.", "status": "new" },
+    { "week": 13, "question": "Map layers not loading.", "status": "new" },
+    { "week": 14, "question": "Final reflection requirements?", "status": "resolved" }
+  ]
+}
