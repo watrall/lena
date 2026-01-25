@@ -70,3 +70,6 @@ scripts/capture_screenshots.py
 storage/*
 !storage/.gitkeep
 !storage/README.md
+AI_HALLMARK_AUDIT.md
+QUALITY_AUDIT.md
+QUALITY_AUDIT.md

@@ -9,7 +9,7 @@
 - **Data flows**: Questions logged to `interactions.jsonl`; answers stored for feedback/escalations; exports aggregate from storage; resources uploads + link snapshots per course.
 - **Notable risks**: Heavy HF model downloads on first request, missing dependency guard for pydantic-settings, and containerized pytest omission; storage is single-host JSON without locking.
 
-# Phase 1 — Automated Signal Collection (existing tools only)
+# Phase 1 - Automated Signal Collection (existing tools only)
 | Tool/Command | Result | Notes |
 | --- | --- | --- |
 | `npm run lint` | Pass | No ESLint errors. |
@@ -19,7 +19,7 @@
 
 Stop-the-line issues: None observed in app runtime; however pytest-in-container is ineffective (no tests), which leaves backend unverified.
 
-# Phase 2 — Findings
+# Phase 2 - Findings
 | ID | Severity | Location | Description & Risk | Recommendation |
 | --- | --- | --- | --- | --- |
 | F1 | P1 (High) | backend/app/services/escalations.py | append_request accepted missing/unknown course and malformed data, storing orphaned records and bad statuses. | Validate course/question fields and course existence; coerce status to allowed set (FIXED). |
@@ -31,6 +31,7 @@ Stop-the-line issues: None observed in app runtime; however pytest-in-container 
 | F7 | P1 (High) | Vector storage stub | In-memory Qdrant stub overwrote prior points on upsert, breaking course filtering and citations. | Append points instead of replacing; add course-aware fallbacks for retrieval (FIXED). |
 | F8 | P1 (High) | Export endpoint compatibility | Use of `.removesuffix` and union types broke `/admin/export` on Python 3.7 runtimes. | Replace with compatible string handling and Optional typing (FIXED). |
 | F9 | P1 (High) | backend/app/services/resources.py | Course resource deletion accepted unsanitized course_id and could traverse outside uploads_root during recursive delete. | Validate course_id, guard deletes to uploads_dir, and reuse validation across API/routes (FIXED). |
+| F10 | P1 (High) | backend/app/services/instructor_auth.py | Demo instructor auth used a predictable default secret and default credentials were accepted, enabling token forgery and trivial login. | Persist a random secret when defaults are present and block default creds unless explicitly allowed (FIXED). |
 
 # Quality Scorecard (0–5)
 - Stability: 3.0 (demo mode stable; missing test execution in container)
@@ -46,6 +47,7 @@ Stop-the-line issues: None observed in app runtime; however pytest-in-container 
 - Fixed export/instructor routes and tests for Python 3.7 compatibility (no `removesuffix`, Optional/List typing).
 - Added coverage for model fallbacks and ensured fixtures/cleanup are Py3.7-safe.
 - Added course_id validation helper reused by resource APIs; resource deletion now rejects traversal and enforces uploads root containment; fallback retrieval ignores invalid course ids.
+- Persisted instructor HMAC secret when defaults are present and require explicit opt-in for default demo credentials.
 
 # Validation (existing commands)
 - `npm run lint` (pass)
@@ -54,6 +56,7 @@ Stop-the-line issues: None observed in app runtime; however pytest-in-container 
 - `docker compose -f docker/docker-compose.yml run --rm api pytest` (fails: no tests in image; see F3)
 - `docker compose -f docker/docker-compose.yml up -d` (pass; web/api/qdrant healthy)
 - `pytest -q` (pass; added resource security regression tests)
+- `pytest -q` (pass; added instructor auth secret/credential guard tests)
 
 # Optional Refactors (not implemented)
 - Package backend tests into the docker api image and chown /app to the non-root user so pytest can run in CI; document as migration note once approved.

@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Added runtime fallbacks for missing optional dependencies (pydantic-settings, slowapi, transformers, sentence-transformers, email-validator, qdrant-client) and Python 3.7 compatibility to prevent startup crashes and empty responses.
 - Fixed export endpoint compatibility by removing `.removesuffix` usage on Python 3.7 and guarding rate-limit stubs when SlowAPI is absent.
 - Validated course IDs consistently and constrained resource deletion to the uploads root; instructor course delete now tolerates missing qdrant_client without failing.
+- Demo instructor auth now persists a random secret when the default is present and blocks default credentials unless explicitly allowed.
 
 ### Maintainability
 - Added QUALITY_AUDIT with repo profile, findings, and scorecard to guide future hardening.
@@ -18,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - In-memory Qdrant stub now appends points (no data loss) and retrieval includes course-aware fallbacks with keyword bias; ingestion syncs settings.data_dir for downstream fallbacks.
 - Retrieval summarization now surfaces meaningful lines from chunks; generation fallback returns extractive answers when pipelines fail.
 - Centralized course_id validation helper reused across resource services, routes, and fallback retrieval to avoid duplication and inconsistent checks.
+- Instructor auth code now loads/persists secrets via a helper to avoid predictable defaults.
 
 ### Architecture
 - Highlighted demo-only flags and secrets in compose as risks to address before non-demo deployments.
@@ -27,6 +29,7 @@ All notable changes to this project will be documented in this file.
 - Added tests for embedding/generation fallbacks and py3.7-safe fixtures; cleanup helpers avoid missing_ok on older Python.
 - Recorded existing test gap in containerized pytest run for follow-up (no toolchain changes applied).
 - Added resource security regression tests to block course_id traversal, guard delete_course path, and ensure fallback retrieval ignores invalid course IDs.
+- Added instructor auth tests covering default-credential blocking and secret persistence.
 
 ## [v0.3.0] - 2026-01-21
 

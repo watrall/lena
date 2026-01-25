@@ -28,6 +28,7 @@
 - **S6 (Med, A02/A04)**: PII encryption optional; lack of validation could store plaintext. *Remediation*: Email validation, explicit warning path, and doc updates in `docs/security.md`.
 - **Deferred**: Containerized pytest still excludes tests (would require toolchain/image change). Supply-chain scans (`pip-audit`, `npm audit`) not runnable in current env; propose CI additions.
 - **S9 (High, A01/A10)**: Course resource deletion accepted unsanitized course IDs and recursive delete could target paths outside uploads root; fallback retrieval honored unvalidated course IDs. *Remediation*: Centralized course_id validator, enforced in resource services and instructor routes; delete guard ensures uploads_dir containment; fallback retrieval returns empty on invalid IDs. Files: `backend/app/services/resources.py`, `backend/app/api/routes/instructors.py`, `backend/app/rag/retrieve.py`, tests added.
+- **S10 (High, A02/A07)**: Demo instructor authentication shipped with a predictable default secret and accepted default credentials, enabling easy token forgery. *Remediation*: Persist a random secret when the default is present and require explicit opt-in for default credentials. Files: `backend/app/services/instructor_auth.py`, `backend/app/settings.py`, `tests/test_instructor_auth_security.py`, `tests/conftest.py`.
 
 ## OWASP Top 10:2025 Matrix (Phase 4)
 | Item | Applicable | Status | Evidence | Findings | Remediation |

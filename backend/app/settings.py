@@ -172,6 +172,10 @@ class Settings(BaseSettings):
         default="demo-secret-change-me",
         description="HMAC secret for demo bearer tokens (rotate in any real pilot).",
     )
+    allow_default_instructor_creds: bool = Field(
+        default=False,
+        description="Allow default demo instructor credentials (set true only in sandboxes/tests).",
+    )
     instructor_token_ttl_seconds: int = Field(
         default=60 * 60 * 8,
         ge=60,
