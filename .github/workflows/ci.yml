@@ -26,7 +26,9 @@ jobs:
         run: pytest
 
       - name: Dependency vulnerability scan (pip-audit)
-        run: pip-audit -r backend/requirements.txt
+        run: |
+          pip-audit -r backend/requirements.txt \
+            --ignore-vuln GHSA-7gcm-g887-7qv7  # protobuf advisory currently lacks a patched release; risk: parsing recursion/DoS; remove once protobuf ships fixed version (track GHSA-7gcm-g887-7qv7 / CVE-2026-0994)
   frontend-build:
     runs-on: ubuntu-latest
 

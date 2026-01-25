@@ -17,7 +17,7 @@
 ## Recommended CI Gates
 1. `npm run lint && npm run build` (frontend)
 2. `pytest` (backend) — ensure tests are present in the container or mounted in CI.
-3. Dependency audits: `npm audit --production`, `pip-audit` (install tool in CI runner)
+3. Dependency audits: `npm audit --production`, `pip-audit` (CI runs `pip-audit -r backend/requirements.txt` with GHSA-7gcm-g887-7qv7 temporarily ignored until protobuf ships a fix; review monthly)
 4. Secrets scan (e.g., gitleaks)
 
 ## Operational Checklist (Prod)
