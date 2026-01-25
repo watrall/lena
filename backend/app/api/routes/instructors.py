@@ -70,11 +70,18 @@ def create_course(payload: CourseCreateRequest, _: dict = Depends(require_instru
     return {"ok": True}
 
 
+def _validated_course_id(course_id: str) -> str:
+    try:
+        return resources.validate_course_id(course_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid course_id")
+
+
 @router.delete("/courses/{course_id}")
 def delete_course(course_id: str, _: dict = Depends(require_instructor)):
     from ...services.storage import read_json, storage_path, write_json
-    from ...rag.qdrant_utils import get_qdrant_client
-    from qdrant_client.http import models as qmodels
+
+    course_id = _validated_course_id(course_id)
 
     catalog = read_json(storage_path("courses.json"), default=[])
     if not isinstance(catalog, list):
@@ -84,23 +91,34 @@ def delete_course(course_id: str, _: dict = Depends(require_instructor)):
         raise HTTPException(status_code=404, detail="Course not found")
     write_json(storage_path("courses.json"), next_catalog)
 
-    # Delete vectors for the course
-    client = get_qdrant_client()
-    client.delete(
-        collection_name=settings.qdrant_collection,
-        points_selector=qmodels.FilterSelector(
-            filter=qmodels.Filter(
-                must=[
-                    qmodels.FieldCondition(
-                        key="course_id",
-                        match=qmodels.MatchValue(value=course_id),
-                    )
-                ]
-            )
-        ),
-    )
+    # Delete vectors for the course (best-effort; skip if client unavailable).
+    try:
+        from ...rag.qdrant_utils import get_qdrant_client
+        from qdrant_client.http import models as qmodels
 
-    resources.delete_course_resources(course_id)
+        client = get_qdrant_client()
+        client.delete(
+            collection_name=settings.qdrant_collection,
+            points_selector=qmodels.FilterSelector(
+                filter=qmodels.Filter(
+                    must=[
+                        qmodels.FieldCondition(
+                            key="course_id",
+                            match=qmodels.MatchValue(value=course_id),
+                        )
+                    ]
+                )
+            ),
+        )
+    except ImportError:
+        logger.warning("qdrant_client not installed; skipping vector cleanup for %s", course_id)
+    except Exception as exc:  # pragma: no cover - best-effort cleanup
+        logger.debug("Unable to delete vectors for %s: %s", course_id, exc)
+
+    try:
+        resources.delete_course_resources(course_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
     return {"ok": True}
 
@@ -112,13 +130,13 @@ class LinkCreateRequest(BaseModel):
 
 @router.get("/courses/{course_id}/resources")
 def list_course_resources(course_id: str, _: dict = Depends(require_instructor)):
+    course_id = _validated_course_id(course_id)
     return {"resources": resources.list_resources(course_id)}
 
 
 @router.post("/courses/{course_id}/resources/upload")
 async def upload_resource(course_id: str, file: UploadFile, _: dict = Depends(require_instructor)):
-    if not re.match(r"^[a-zA-Z0-9_-]+$", course_id):
-        raise HTTPException(status_code=400, detail="Invalid course_id")
+    course_id = _validated_course_id(course_id)
     course = courses.get_course(course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
@@ -173,8 +191,7 @@ async def upload_resource(course_id: str, file: UploadFile, _: dict = Depends(re
 
 @router.post("/courses/{course_id}/resources/link")
 def add_link(course_id: str, payload: LinkCreateRequest, _: dict = Depends(require_instructor)):
-    if not re.match(r"^[a-zA-Z0-9_-]+$", course_id):
-        raise HTTPException(status_code=400, detail="Invalid course_id")
+    course_id = _validated_course_id(course_id)
     course = courses.get_course(course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
@@ -199,6 +216,7 @@ def add_link(course_id: str, payload: LinkCreateRequest, _: dict = Depends(requi
 
 @router.delete("/courses/{course_id}/resources/{resource_id}")
 def delete_course_resource(course_id: str, resource_id: str, _: dict = Depends(require_instructor)):
+    course_id = _validated_course_id(course_id)
     removed = resources.delete_resource(course_id, resource_id)
     if removed is None:
         raise HTTPException(status_code=404, detail="Resource not found")

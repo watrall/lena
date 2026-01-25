@@ -34,7 +34,20 @@ def _save_all(items: list[dict[str, Any]]) -> None:
     write_json(storage_path(RESOURCE_FILENAME), items)
 
 
+def _assert_safe_course_id(course_id: str) -> None:
+    """Validate course identifiers to prevent path traversal/unsafe names."""
+    if not re.match(r"^[a-zA-Z0-9_-]+$", course_id):
+        raise ValueError("Invalid course_id")
+
+
+def validate_course_id(course_id: str) -> str:
+    """Public helper to validate course identifiers consistently across API layers."""
+    _assert_safe_course_id(course_id)
+    return course_id
+
+
 def ensure_course_dir(course_id: str) -> Path:
+    _assert_safe_course_id(course_id)
     root = settings.uploads_dir / course_id
     root.mkdir(parents=True, exist_ok=True)
     (root / "files").mkdir(parents=True, exist_ok=True)
@@ -43,10 +56,12 @@ def ensure_course_dir(course_id: str) -> Path:
 
 
 def list_resources(course_id: str) -> list[dict[str, Any]]:
+    _assert_safe_course_id(course_id)
     return [r for r in _load_all() if r.get("course_id") == course_id]
 
 
 def add_file_resource(course_id: str, resource_id: str, original_name: str, stored_path: str) -> dict[str, Any]:
+    _assert_safe_course_id(course_id)
     items = _load_all()
     record = {
         "id": resource_id,
@@ -62,6 +77,7 @@ def add_file_resource(course_id: str, resource_id: str, original_name: str, stor
 
 
 def add_link_resource(course_id: str, resource_id: str, url: str, title: str | None, stored_path: str) -> dict[str, Any]:
+    _assert_safe_course_id(course_id)
     items = _load_all()
     record = {
         "id": resource_id,
@@ -78,6 +94,7 @@ def add_link_resource(course_id: str, resource_id: str, url: str, title: str | N
 
 
 def delete_resource(course_id: str, resource_id: str) -> dict[str, Any] | None:
+    _assert_safe_course_id(course_id)
     items = _load_all()
     remaining: list[dict[str, Any]] = []
     removed: dict[str, Any] | None = None
@@ -107,12 +124,17 @@ def delete_resource(course_id: str, resource_id: str) -> dict[str, Any] | None:
 
 
 def delete_course_resources(course_id: str) -> None:
+    _assert_safe_course_id(course_id)
     items = _load_all()
     remaining = [item for item in items if item.get("course_id") != course_id]
     _save_all(remaining)
     course_root = settings.uploads_dir / course_id
     if course_root.exists():
-        shutil.rmtree(course_root, ignore_errors=True)
+        resolved_root = course_root.resolve()
+        uploads_root = settings.uploads_dir.resolve()
+        if not str(resolved_root).startswith(str(uploads_root)):
+            raise ValueError("Unsafe course path")
+        shutil.rmtree(resolved_root, ignore_errors=True)
 
 
 def _is_private_host(hostname: str) -> bool:

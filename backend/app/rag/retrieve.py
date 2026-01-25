@@ -174,6 +174,11 @@ def _fallback_local_chunks(query: str, course_id: str | None) -> List[RetrievedC
     """Lightweight fallback retrieval using raw files when Qdrant is unavailable."""
     root = Path(settings.data_dir)
     if course_id:
+        try:
+            resources.validate_course_id(course_id)
+        except Exception:
+            # Invalid course identifiers should not influence filesystem traversal.
+            return []
         candidate_root = root / course_id
         if candidate_root.exists():
             root = candidate_root

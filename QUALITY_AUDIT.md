@@ -30,6 +30,7 @@ Stop-the-line issues: None observed in app runtime; however pytest-in-container 
 | F6 | P1 (High) | Cross-environment dependency handling | Missing optional deps (pydantic-settings, slowapi, transformers, sentence-transformers, email-validator, qdrant-client) and Python 3.7 built-ins caused import-time crashes and empty responses. | Add graceful fallbacks for settings, rate limiting, embeddings/generation, Qdrant client, email validation, and py3.7-safe annotations (FIXED). |
 | F7 | P1 (High) | Vector storage stub | In-memory Qdrant stub overwrote prior points on upsert, breaking course filtering and citations. | Append points instead of replacing; add course-aware fallbacks for retrieval (FIXED). |
 | F8 | P1 (High) | Export endpoint compatibility | Use of `.removesuffix` and union types broke `/admin/export` on Python 3.7 runtimes. | Replace with compatible string handling and Optional typing (FIXED). |
+| F9 | P1 (High) | backend/app/services/resources.py | Course resource deletion accepted unsanitized course_id and could traverse outside uploads_root during recursive delete. | Validate course_id, guard deletes to uploads_dir, and reuse validation across API/routes (FIXED). |
 
 # Quality Scorecard (0–5)
 - Stability: 3.0 (demo mode stable; missing test execution in container)
@@ -44,6 +45,7 @@ Stop-the-line issues: None observed in app runtime; however pytest-in-container 
 - Repaired retrieval pipeline for missing Qdrant by adding robust in-memory client, keyword-aware fallback chunks, and course-specific guardrails.
 - Fixed export/instructor routes and tests for Python 3.7 compatibility (no `removesuffix`, Optional/List typing).
 - Added coverage for model fallbacks and ensured fixtures/cleanup are Py3.7-safe.
+- Added course_id validation helper reused by resource APIs; resource deletion now rejects traversal and enforces uploads root containment; fallback retrieval ignores invalid course ids.
 
 # Validation (existing commands)
 - `npm run lint` (pass)
@@ -51,6 +53,7 @@ Stop-the-line issues: None observed in app runtime; however pytest-in-container 
 - `pytest` (pass in host environment with fallbacks)
 - `docker compose -f docker/docker-compose.yml run --rm api pytest` (fails: no tests in image; see F3)
 - `docker compose -f docker/docker-compose.yml up -d` (pass; web/api/qdrant healthy)
+- `pytest -q` (pass; added resource security regression tests)
 
 # Optional Refactors (not implemented)
 - Package backend tests into the docker api image and chown /app to the non-root user so pytest can run in CI; document as migration note once approved.

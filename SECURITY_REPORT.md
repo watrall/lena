@@ -27,6 +27,7 @@
 - **S5 (Med, A02/A06)**: Python 3.7 compatibility issues (`missing_ok`, union types) caused cleanup/export/test failures. *Remediation*: Backported Optional/List typing, safe file cleanup, and storage/test fixtures adjustments. Files: `backend/app/api/routes/{admin.py,instructors.py,courses.py,export.py,health.py}`, `tests/{conftest.py,test_api.py,test_escalation_security.py}`.
 - **S6 (Med, A02/A04)**: PII encryption optional; lack of validation could store plaintext. *Remediation*: Email validation, explicit warning path, and doc updates in `docs/security.md`.
 - **Deferred**: Containerized pytest still excludes tests (would require toolchain/image change). Supply-chain scans (`pip-audit`, `npm audit`) not runnable in current env; propose CI additions.
+- **S9 (High, A01/A10)**: Course resource deletion accepted unsanitized course IDs and recursive delete could target paths outside uploads root; fallback retrieval honored unvalidated course IDs. *Remediation*: Centralized course_id validator, enforced in resource services and instructor routes; delete guard ensures uploads_dir containment; fallback retrieval returns empty on invalid IDs. Files: `backend/app/services/resources.py`, `backend/app/api/routes/instructors.py`, `backend/app/rag/retrieve.py`, tests added.
 
 ## OWASP Top 10:2025 Matrix (Phase 4)
 | Item | Applicable | Status | Evidence | Findings | Remediation |
