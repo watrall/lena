@@ -244,12 +244,5 @@ Set `NEXT_PUBLIC_API_BASE=http://localhost:8000` (or your backend host) before s
 - Security and guardrails: `docs/SECURITY-NOTES.md`
 - Changelog: `CHANGELOG.md`
 
-
----
-
-## Provenance
-
-This pilot was created within an institution-wide initiative focused on applying AI responsibly across the curriculum to strengthen student learning and institutional outcomes. LENA launched within Department of Anthropology online courses in the summer of 2024. Faculty, students, and administrators were paired to ensure the guardrails matched the department's pedagogical goals. After two cycles of online classes, the codebase was migrated from MSU's internal GitLab instance to GitHub to share the work openly and invite collaboration from the broader community.
-
 [ci-badge]: https://github.com/watrall/lena/actions/workflows/ci.yml/badge.svg?branch=main
 [ci-workflow]: https://github.com/watrall/lena/actions/workflows/ci.yml
